@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 19729,
+  "stop_reason": "end_turn",
+  "session_id": "b2831242-2b65-4f2f-941a-69fe4194187f",
+  "total_cost_usd": 0.14639780000000002,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 12629,
+    "cache_read_input_tokens": 77669,
+    "output_tokens": 1490,
+    "output_tokens_details": {
+      "thinking_tokens": 137
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 12629,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1490,
+      "cacheReadInputTokens": 77669,
+      "cacheCreationInputTokens": 12629,
+      "webSearchRequests": 0,
+      "costUSD": 0.14639780000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 137,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Click decides this in `echo` itself, by calling `should_strip_ansi(file, resolve_color_default(color))`.\n\n- **Where it's decided:** `src/click/utils.py`, `echo`, lines 330\u2013331. If that call returns True, the text goes through `strip_ansi` (`_compat.py:491`, a regex substitution) before `file.write`. Bytes output returns early at line 326 and is never stripped.\n- **Input 1, the color flag:** `src/click/globals.py`, `resolve_color_default` (54\u201367). An explicit `color=` argument to `echo` wins. Otherwise it uses the current `Context.color`, which a child context inherits from its parent (`core.py:522\u2013526`). With no context, it's `None`.\n- **Input 2, the stream:** `src/click/_compat.py`, `should_strip_ansi` (502\u2013513), applies the rule:\n  - `color` is True: keep the codes. `color` is False: strip them.\n  - `color` is None: auto-detect from the stream. A missing stream is treated as `sys.stdin`. A stream with a `color` attribute (the pager writer, which strips on its own) is never stripped. Anything else is stripped unless it's a TTY or a Jupyter kernel stream.\n- **TTY check:** `_compat.py`, `isatty` (540\u2013544), calls `stream.isatty()` and treats any exception as \"not a TTY\".\n- **Jupyter check:** `_compat.py`, `_is_jupyter_kernel_output` (495\u2013499), unwraps `_FixupStream` and `_NonClosingTextIOWrapper`, then checks whether the stream's class module starts with `ipykernel.`.\n- **Test override:** `src/click/testing.py`, `CliRunner.isolation` (504\u2013523), temporarily swaps in its own `should_strip_ansi` on `utils` and `_compat`. When `color` is None it uses the runner's `color` setting (default False, so output is stripped), and restores the originals afterwards (591\u2013592).\n- **Same rule elsewhere:** `termui.py:99` uses the same check by looking up `_compat.should_strip_ansi` on the module, so the test override reaches it too.\n\nIn short, an explicit color setting (from the argument or the context chain) always wins. Otherwise codes are stripped unless the output is a terminal, a Jupyter kernel or click's pager.",
+  "ttft_ms": 3234,
+  "type": "result",
+  "duration_ms": 20314,
+  "uuid": "e55ee068-2eca-402b-bc0d-be8504de6956",
+  "ttft_stream_ms": 2131,
+  "time_to_request_ms": 79,
+  "first_content_frame_ms": 2131,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

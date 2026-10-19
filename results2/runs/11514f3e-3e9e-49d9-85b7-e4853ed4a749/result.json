@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 38786,
+  "stop_reason": "end_turn",
+  "session_id": "79cf4d9d-bb00-44d8-b6e8-acb13dd895ce",
+  "total_cost_usd": 0.2956942,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 23834,
+    "cache_read_input_tokens": 249351,
+    "output_tokens": 2754,
+    "output_tokens_details": {
+      "thinking_tokens": 626
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 23834,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 2754,
+      "cacheReadInputTokens": 249351,
+      "cacheCreationInputTokens": 23834,
+      "webSearchRequests": 0,
+      "costUSD": 0.2956942,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 626,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed it with a one-line change in the engine. The 1 ms window was never started on a reset, so clocks right after a reset got through. All the standalone tests now pass.\n\n**Blocked on me**\nNothing.\n\n**Changed**\n- `src/modules/Euclid/EuclidEngine.hpp`: `Sequencer::process` now starts the 1 ms window (`window.arm(window_samples)`) as the first thing it does on a reset.\n\n**Cause:** the reset branch moved the playhead to step 1 and played it, but never started the window. Only `load()` started it, which is why patch load behaved and resets didn't. After a reset the window was closed, so the clock check let through:\n- a same-sample clock, which played step 1 and then immediately moved to step 2;\n- any clock inside the 1 ms that followed.\n\nThe adapter in `Euclid.hpp` was already passing the right sample count every sample, so it needed no change.\n\nStarting the window in the reset branch fixes all three required behaviours:\n- **Same-sample reset and clock:** the clock check runs after the reset, sees the window open and drops the clock, so step 1 plays once.\n- **Clocks inside the window:** dropped.\n- **First clock after the window:** advances to step 2.\n\nA reset inside an already-open window restarts it at full length, because `arm` keeps whichever is longer.\n\n**Verified**\n- `bash scripts/vg_check.sh compile Euclid`: `ok Euclid.cpp`.\n- `bash scripts/vg_check.sh tests`: exit 0.\n  - Before the fix, 18 checks failed in `engine_test` and 10 in `seq3_parity_test`, including \"a clock 1 sample after the reset is dropped\" and \"a same-sample clock is swallowed\". The parity runs also fell out of step with the SEQ3 model at a reset.\n  - After the fix, `pattern_test` passes 63/63, `engine_test` 113/113 and `seq3_parity_test` 36/36, and all the timeline suites pass.\n\n**Found**\n- I didn't add a regression case because the existing tests already cover this failure: they failed on the unfixed code and pass now.\n- The full test output is saved in `.claude/tmp/tests.txt`.",
+  "ttft_ms": 2426,
+  "type": "result",
+  "duration_ms": 60369,
+  "uuid": "65b76d35-4298-464a-8583-8d6d92450f49",
+  "ttft_stream_ms": 2110,
+  "time_to_request_ms": 65,
+  "first_content_frame_ms": 2110,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

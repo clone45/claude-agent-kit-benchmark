@@ -1,0 +1,104 @@
+
+
+
+
+
+
+
+
+
+//
+//
+//
+//
+//
+// ===================
+// Clock and step features: every clock_division-th clock edge is a step,
+// If the user has pressed a memory slot button, switch memory slots and update the
+// Manage ratcheting
+// On incoming RESET, reset the sequencers
+// Process the knobs below the steps
+// Reset clock division counter
+// Step all of the tracks
+// Step the visual playback indicator (led) as well
+// This may or may not actually trigger based on the track button
+// Trigger the samples
+// knob positions for the selected function.
+// status and the probability parameter lock.
+// step button processing
+// the edges in between are ratchet ticks.
+// track_triggers are used to send values to the expander
+bool copyGate = copyPulse.process(sample_time);
+bool pasteGate = pastePulse.process(sample_time);
+clock_counter = 0;
+else
+fireStep();
+first_step = false;
+for (unsigned int i = 0; i < NUMBER_OF_TRACKS; i++)
+for (unsigned int i = 0; i < NUMBER_OF_TRACKS; i++)
+for (unsigned int i = 0; i < NUMBER_OF_TRACKS; i++)
+if (expander_connected)
+if (first_step == false) // If not the first step
+if (notMuted(i))
+lights[COPY_LIGHT].setSmoothBrightness(copyGate, sample_time);
+lights[PASTE_LIGHT].setSmoothBrightness(pasteGate, sample_time);
+playback_step = selected_memory_slot->tracks[track_index].getPosition();
+private:
+processClockInput();
+processCopyPasteButtons();
+processMemorySlotInputs();
+processOutputs();
+processParameterLockButtons();
+processRatchets();
+processResetInput();
+processStepButtons();
+processStepKnobs();
+public:
+selected_memory_slot->tracks[i].step();
+this->track_triggers[i] = selected_memory_slot->tracks[i].ratchety();
+this->track_triggers[i] = this->trigger(i);
+updateLights(args.sampleTime);
+void fireStep()
+void processClockInput()
+void processCopyPasteButtons()
+void processMemorySlotInputs()
+void processOutputs()
+void processParameterLockButtons()
+void processRatchets()
+void processResetInput()
+void processStepButtons()
+void processStepKnobs()
+void updateLights(float sample_time)
+writeToExpander();
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}

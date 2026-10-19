@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 104292,
+  "stop_reason": "end_turn",
+  "session_id": "38e21b67-d887-42c7-a8e9-e04b6c201850",
+  "total_cost_usd": 0.3943796,
+  "usage": {
+    "input_tokens": 30,
+    "cache_creation_input_tokens": 17660,
+    "cache_read_input_tokens": 472698,
+    "output_tokens": 7922,
+    "output_tokens_details": {
+      "thinking_tokens": 2111
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 17660,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 30,
+      "outputTokens": 7922,
+      "cacheReadInputTokens": 472698,
+      "cacheCreationInputTokens": 17660,
+      "webSearchRequests": 0,
+      "costUSD": 0.3943796,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2111,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 19,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The automatic `--help` option now stores its value under `_click_default_help`, so user parameters named `help` work. The full suite passes: 2260 passed, 24 skipped, 1 xfailed.\n\n**Blocked on me:** nothing.\n\n**Changed** (nothing committed; all changes are in the working tree):\n- **`src/click/core.py`:**\n  - Added the private module constant `_HELP_OPTION_STORAGE_NAME = \"_click_default_help\"`.\n  - `get_help_option` now passes that constant as an explicit name when it builds the automatic help option. Because the help option no longer stores anything under `help`, `click.Argument([\"help\"])` and `click.Option([\"--assist\", \"help\"])` get their values. The explicit name also means names that aren't valid Python identifiers, like `[\"/?\"]`, no longer produce the deprecation warning they used to trigger. The docstring mentions the reserved name and has a `versionchanged:: 8.6.0` note.\n  - `get_params` has two new `UserWarning` checks:\n    - An `Argument` whose storage name is also used by any other parameter: \"`'<name>' is used by an argument` \u2026 they will overwrite each other's value during parsing\".\n    - Any parameter other than the help option itself that uses the reserved name: \"reserved for the automatic help option\".\n  - Options that share a name with each other, like the `--upper`/`--lower` feature switches, don't warn.\n- **`tests/test_info_dict.py`:** the expected help option entry now has the name `_click_default_help`.\n- **`tests/test_commands.py`:** 8 new tests (9 cases):\n  - the reserved name on `get_help_option` and in `to_info_dict()`\n  - an argument named `help`, and the help flag still printing the help text\n  - an option named `help`\n  - custom help names `--man` and `/?`, with no warnings\n  - each of the two new warnings\n  - feature switches not warning\n  - `@click.option(\"--help\", default=\"default value\")`: `get_help_option` returns `None`, the option gets its default or the passed value, and no help text is printed. This already worked before the change, so this test documents existing behaviour.\n\n**Verified:**\n- I temporarily undid the one-line change in `get_help_option`, and 5 of the new tests failed. I then put it back.\n- `tests/test_commands.py` and `tests/test_info_dict.py`: 150 passed.\n- The full suite passes, with warnings treated as errors, so no existing test triggers the new warnings.\n- Lint, format check and type check (`ruff check`, `ruff format --check`, `mypy`) are all clean.\n\n**Found:**\n- One side effect: if `help_option_names` contains a bare identifier like `[\"help\"]`, building the help option now raises `TypeError: Name ... defined twice`. Before, it quietly made a help option with no flags, which couldn't be used anyway. I left it as is; if you'd rather it be ignored than raise, that entry would need to be filtered out.\n- The new warnings fire every time `get_params` runs, the same way the existing duplicate-option warning does. Python's default warning filter only shows each one once per location.",
+  "ttft_ms": 5600,
+  "type": "result",
+  "duration_ms": 119684,
+  "uuid": "8b1ffbb5-e660-4b3f-abbe-2a849d6fef6e",
+  "ttft_stream_ms": 4028,
+  "time_to_request_ms": 71,
+  "first_content_frame_ms": 4029,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

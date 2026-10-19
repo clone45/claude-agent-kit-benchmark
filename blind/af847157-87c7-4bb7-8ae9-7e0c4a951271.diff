@@ -1,0 +1,75 @@
+diff --git a/src/click/core.py b/src/click/core.py
+index 480a2ac..05223d1 100644
+--- a/src/click/core.py
++++ b/src/click/core.py
+@@ -1205,12 +1205,19 @@ class Command:
+         return rv
+ 
+     def get_help_option_names(self, ctx: Context) -> list[str]:
+-        """Returns the names for the help option."""
+-        all_names = set(ctx.help_option_names)
++        """Returns the names for the help option, in the order they are
++        declared in :attr:`Context.help_option_names`. Duplicates are
++        dropped, and names already used by another parameter are removed.
++        """
++        used_names: set[str] = set()
+         for param in self.params:
+-            all_names.difference_update(param.opts)
+-            all_names.difference_update(param.secondary_opts)
+-        return list(all_names)
++            used_names.update(param.opts)
++            used_names.update(param.secondary_opts)
++        return [
++            name
++            for name in dict.fromkeys(ctx.help_option_names)
++            if name not in used_names
++        ]
+ 
+     def get_help_option(self, ctx: Context) -> Option | None:
+         """Returns the help option object.
+diff --git a/tests/test_basic.py b/tests/test_basic.py
+index 9fbb624..ac71e00 100644
+--- a/tests/test_basic.py
++++ b/tests/test_basic.py
+@@ -70,6 +70,41 @@ def test_param_named_help(runner, help_names, params, args, expected_output):
+     assert result.exit_code == 0
+ 
+ 
++@pytest.mark.parametrize(
++    ("help_names", "params", "expected"),
++    [
++        (["-h", "--help"], [], ["-h", "--help"]),
++        (["--help", "-h", "-?"], [], ["--help", "-h", "-?"]),
++        (["-h", "--help", "-h"], [], ["-h", "--help"]),
++        (["-h", "--help"], [click.Option(["--help", "assist"])], ["-h"]),
++        (
++            ["--no-shout", "--help"],
++            [click.Option(["--shout/--no-shout"])],
++            ["--help"],
++        ),
++        (
++            ["--shout", "--help"],
++            [click.Option(["--shout/--no-shout"])],
++            ["--help"],
++        ),
++        (["-h", "--help"], [click.Option(["-h", "--help", "assist"])], []),
++    ],
++    ids=[
++        "declared-order",
++        "custom-order",
++        "duplicates",
++        "taken-by-option",
++        "taken-by-secondary-opt",
++        "taken-by-primary-opt",
++        "all-taken",
++    ],
++)
++def test_get_help_option_names(help_names, params, expected):
++    cli = click.Command("cli", params=params)
++    ctx = click.Context(cli, help_option_names=help_names)
++    assert cli.get_help_option_names(ctx) == expected
++
++
+ def test_param_squatting_help_option_name(runner):
+     """Claiming the reserved storage name of the automatic help option
+     triggers a warning.

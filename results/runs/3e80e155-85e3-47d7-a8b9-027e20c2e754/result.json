@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 69633,
+  "stop_reason": "end_turn",
+  "session_id": "2ba2be4b-918b-4dfd-b5c5-551bcf9be223",
+  "total_cost_usd": 0.3006474,
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 15916,
+    "cache_read_input_tokens": 242997,
+    "output_tokens": 6232,
+    "output_tokens_details": {
+      "thinking_tokens": 943
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 15916,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 20,
+      "outputTokens": 6232,
+      "cacheReadInputTokens": 242997,
+      "cacheCreationInputTokens": 15916,
+      "webSearchRequests": 0,
+      "costUSD": 0.3006474,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 943,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I added `click.Duration`, a parameter type that turns strings like `1h30m` into a `datetime.timedelta`. The full test suite passes (2302 passed, 24 skipped, 1 xfailed), and ruff lint, ruff format and strict mypy are all clean. Nothing is committed.\n\n**The type** (`src/click/types.py`, next to `DateTime`, exported from `src/click/__init__.py`):\n- **Accepts:** a `timedelta` is returned as-is, an `int` counts as seconds, and a string is either a bare whole number (seconds) or unit groups in `d`, `h`, `m`, `s` order, matched with a regular expression.\n- **Rejects:** everything else goes through `self.fail(...)` with the message `'<value>' is not a valid duration.`, so the offending value is always shown.\n- **Name and display:** `name = \"duration\"`, `repr` is `DURATION`, and `to_info_dict()` gives `{'param_type': 'Duration', 'name': 'duration'}`. The help metavar `DURATION` comes from click's normal default, so no override was needed.\n\n**Choices the spec didn't cover:**\n- **`True`/`False`** are rejected, even though Python treats `bool` as a kind of `int`. Otherwise `True` would quietly become one second.\n- **Negative ints** such as `-5` are rejected, to match the rule against negative strings.\n- **Whitespace** is allowed only between groups, so `5 m` is rejected.\n- **Digits** must be plain 0\u20139. A leading `+` and non-ASCII digits like `\u0663` are rejected.\n- **Huge values** like `99999999999d`, which are too big for a `timedelta`, are rejected through `fail` instead of raising an `OverflowError`.\n\n**Tests:**\n- `tests/test_types/test_Duration.py` covers every accepted and rejected example from your list, checks that the error message contains the value, and includes a command using `click.option(\"--timeout\", type=click.Duration())`. That test checks a good value, the error output for a bad one, and that `--timeout DURATION` appears in help. There's also a test for a string default.\n- `tests/test_info_dict.py` has a new `Duration` entry.\n- `tests/typing/typing_duration.py` checks that type checkers see `timedelta` as the result.\n\n**Docs:** `Duration` now appears next to `DateTime` in `docs/parameter-types.md` and `docs/api.md`. I didn't add a changelog entry because the `CHANGES.md` file that the docs point to isn't in this copy of the repo.",
+  "ttft_ms": 3983,
+  "type": "result",
+  "duration_ms": 77596,
+  "uuid": "8b31934e-94e8-4b62-ad2a-b70a617ef90e",
+  "ttft_stream_ms": 3842,
+  "time_to_request_ms": 76,
+  "first_content_frame_ms": 3843,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

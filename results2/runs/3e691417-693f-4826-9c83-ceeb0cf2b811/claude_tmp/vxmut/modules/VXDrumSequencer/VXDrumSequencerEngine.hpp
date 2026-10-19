@@ -1,0 +1,586 @@
+#pragma once
+//
+// VX Drum Sequencer — the sequencing engine, Rack-free.
+//
+// Everything the sequencer DOES between "a clock edge landed" and "these
+// are this sample's output voltages" lives here, in four objects with one
+// job each, composed by Sequencer:
+//
+//   ClockFollower  measures the clock period (the anchor rule, the rescale)
+//   Playhead       the position and the first-step convention
+//   Ratchets       the re-strikes in flight per voice lane
+//   TriggerShaper  strike bits -> pulses, with the gap rule and the ACC cut
+//
+// plus resolveStep(), a function of (memory, mute, position, a random source)
+// that says which lanes strike and which ratchets arm — random because a pad
+// can carry a CHANCE below 100 % (2026-09-07), rolled once per step reached. The module (VXDrumSequencer.hpp)
+// is the Rack adapter: it reads the jacks, resolves WHICH memory plays this
+// sample (a PlaySource), calls Sequencer::process, and writes the jacks.
+//
+// The engine never learns which module a PlaySource came from. That is what
+// lets one Sequencer drive a chain of adjacent modules (chain-foundations.md
+// §2-§3): the head passes whichever member's memory is active, and a hand-off
+// is Playhead::rewind() on the same engine. The ratchets armed on the last
+// step of one member finish while the next member's step 1 fires, because a
+// hand-off does not call Sequencer::rewind() (which cancels them).
+//
+// RESET (2026-09-16, the VCV standard; rack-port-design.md §4 and the header
+// comment of vgLib-2.0/sequencer/ResetClockWindow.hpp): a reset puts the
+// playhead ON step 1 and plays it at the reset instant; clock edges inside the
+// 1 ms window that follows are the reset's own clock and are swallowed; the
+// next clock after the window is step 2's. Patch load, becoming the head of a
+// chain, a member leaving from under the playhead and Rack's Initialize are
+// IMPLICIT resets: step 1 current, window armed, nothing fires. This replaced
+// the port's original "position = -1, the next clock plays step 1" rule, which
+// left the sequencer one step behind Fundamental SEQ3 and Impromptu Clocked
+// whenever a reset arrived without a coincident clock edge (a stopped Clocked
+// holds its outputs high, so run start produces no edge). The chain hand-off
+// keeps its -1-then-advance shape: the next member's step 1 is played by the
+// next clock, not by the hand-off.
+//
+// DIRECTION (Playhead::direction, set through Sequencer::setDirection):
+// FORWARD (the default, and the only direction before this), BACKWARD, or
+// PENDULUM (forward to the last step, back to step 1, the end steps not
+// repeated). Direction only changes which step an advance lands on; reset and
+// the hand-off still land on step 1 in every direction, and in PENDULUM the
+// move after either is forward.
+//
+// Timing rules carried over from the module unchanged (brief-clock-reset §5-§7
+// and rack-port-design.md): the period is measured only from a valid anchor
+// inside the (1 sample, 4 s) window and survives a reset, ratchets need a
+// known period.
+//
+// Compiled standalone by tests/vx_drum_sequencer/.
+//
+
+#include <algorithm>
+#include <cstdint>
+
+#include "VXDrumSequencerTypes.hpp"
+
+// Relative, not "vgLib-2.0/...": this header is compiled standalone by
+// tests/vx_drum_sequencer/ with only its own directory on the include path
+// (TempestVS1Widget.hpp:4 is the house precedent for the form).
+#include "../../vgLib-2.0/sequencer/ResetClockWindow.hpp"
+
+namespace vx_drum_sequencer
+{
+
+// ── ClockFollower ────────────────────────────────────────────────────────────
+//
+// Samples since the last detected edge, and the period that measurement
+// yields. The counter is int64_t, not the house `long`: `long` is 32-bit under
+// MinGW-w64 and, with no clock patched, nothing zeroes this counter — it would
+// overflow (UB) after 2^31 samples.
+//
+struct ClockFollower
+{
+    int64_t counter = 0;             // samples since the last DETECTED edge (accepted or not)
+    bool anchor_valid = false;       // false after load/reset/rewind: the next edge anchors, does not measure
+    float period_samples = 0.f;      // measured clock period, 0 = unknown (only at load). Survives reset.
+
+    void tick() { counter++; }
+
+    // An edge landed this sample. Measure only from a valid anchor, inside
+    // the sync-effects debounce window (> 1 sample, < 4 s). The partial
+    // interval after a reset is never taken as the period; period_samples
+    // keeps its last good value so ratchets on step 0 still subdivide
+    // sensibly (§6.d). ALWAYS zero the counter, measured or not
+    // (PianoRoll.hpp:646-652: an edge that does not zero it makes the next
+    // measured edge report two intervals).
+    void edge(float sample_rate)
+    {
+        if (anchor_valid && counter > 1 && counter < (int64_t)(sample_rate * 4.f))
+        {
+            period_samples = (float)counter;
+        }
+        counter = 0;
+        anchor_valid = true;
+    }
+
+    // Reset / rewind: the next edge anchors without measuring (ArpSeq.hpp:879-881,
+    // §6.d). The counter, NOT the period (PianoRoll.hpp:629-631).
+    void rearm()
+    {
+        anchor_valid = false;
+        counter = 0;
+    }
+
+    // The period is the one thing in the clock path stored as samples that
+    // outlives its measurement. Rescale it so ratchets stay right until the
+    // next edge re-measures, and re-anchor: the counter now straddles two
+    // rates and must not be read as a period.
+    void rescale(float old_rate, float new_rate)
+    {
+        if (old_rate > 0.f && new_rate > 0.f && new_rate != old_rate)
+        {
+            period_samples *= new_rate / old_rate;
+            rearm();
+        }
+    }
+};
+
+// ── Playhead ─────────────────────────────────────────────────────────────────
+//
+// FIRST-STEP CONVENTION (the VCV standard, rack-port-design.md §4.2; SEQ3's
+// `index = 0` on reset): step 1 (position 0) is CURRENT after load and after a
+// reset, and an explicit reset plays it. Every clock edge is advance-then-play,
+// so the first clock after a reset plays step 2. Position -1 survives for one
+// purpose, the chain hand-off (chain-foundations.md §2): rewind() to -1 and
+// the next clock's advance lands on the next member's step 1.
+//
+// DIRECTION: `direction` picks where advance() goes; a value that is not
+// BACKWARD or PENDULUM steps FORWARD. `descending` is the pendulum's heading.
+// FORWARD and BACKWARD keep it matching their own travel, so a switch to
+// PENDULUM carries on the way the playhead was already going.
+//
+enum Direction { FORWARD = 0, BACKWARD = 1, PENDULUM = 2 };
+
+struct Playhead
+{
+    int position = 0;                // the current step; -1 only between a hand-off and the next clock
+    int direction = FORWARD;         // a Direction
+    bool descending = false;         // PENDULUM: the next move is backward
+
+    // Advance one step (source: vxd_step + vxd_step_at, vxdrums.c:399-421,
+    // minus swing). From -1 (a hand-off) this lands on step 0 in every
+    // direction. A length that shrank below the position wraps to step 0
+    // going FORWARD and lands on the last step otherwise (PENDULUM then
+    // heads back).
+    int advance(int length)
+    {
+        length = std::max(1, std::min(length, STEPS));
+
+        if (position < 0)
+        {
+            descending = false;
+            position = 0;
+            return position;
+        }
+
+        int next;
+        if (direction == BACKWARD)
+        {
+            descending = true;
+            next = (position >= length || position == 0) ? length - 1 : position - 1;
+        }
+        else if (direction == PENDULUM)
+        {
+            if (position >= length)
+            {
+                descending = true;
+                next = length - 1;
+            }
+            else if (length == 1)
+            {
+                next = 0;
+            }
+            else
+            {
+                next = descending ? position - 1 : position + 1;
+                if (next < 0)       { descending = false; next = 1; }
+                if (next >= length) { descending = true;  next = length - 2; }
+            }
+        }
+        else
+        {
+            descending = false;
+            next = position + 1;
+            if (next >= length) next = 0;
+        }
+
+        position = next;
+        return position;
+    }
+
+    // Reset, implicit or explicit: step 1 is current, and a PENDULUM moves
+    // forward from it.
+    void reset() { position = 0; }
+
+    // Hand-off only: the next advance lands on step 0.
+    void rewind() { position = -1; }
+};
+
+// ── Rng ──────────────────────────────────────────────────────────────────────
+//
+// A xorshift32 for the chance rolls: Rack-free, allocation-free, seedable so
+// the tests are deterministic. The module seeds it from rack::random at
+// construction. Not persisted.
+//
+struct Rng
+{
+    uint32_t state = 0x9E3779B9u;
+
+    void seed(uint32_t s) { state = s ? s : 0x9E3779B9u; }
+
+    uint32_t next()
+    {
+        uint32_t x = state;
+        x ^= x << 13;
+        x ^= x >> 17;
+        x ^= x << 5;
+        return state = x;
+    }
+
+    // 0..99, uniform.
+    int percent() { return (int)(next() % 100u); }
+};
+
+// A pad with `chance` percent plays when a 0..99 roll lands below it: 100
+// always (no roll is taken), 0 never, 50 half the time.
+inline bool passes(uint8_t chance, Rng& rng)
+{
+    if (chance >= CHANCE_MAX) return true;
+    if (chance == 0) return false;
+    return rng.percent() < (int)chance;
+}
+
+// ── One step's decisions ─────────────────────────────────────────────────────
+//
+// What playing step `pos` of `m` under `mute` means: which lanes strike (bit 6
+// = the accent lane, set when the step is accented and the accent lane is not
+// muted) and how many EXTRA ratchet hits each voice lane arms. Each lit pad
+// is rolled once against its chance; a pad that fails the roll neither
+// strikes nor arms its ratchets, and does not light its lane's flash.
+//
+struct StepFire
+{
+    uint32_t struck = 0;             // lane bits; bit ACCENT_LANE = the step is accented
+    uint8_t extra[VOICES] = {};      // 0..3 extra hits per voice lane (0 for lanes not struck)
+    bool accented = false;
+};
+
+// Source: vxd_fire, vxdrums.c:369-396. A muted accent lane removes the boost
+// AND the accent lamp bit (:373-375); a muted voice lane neither strikes nor
+// pulses (:379).
+inline StepFire resolveStep(const Memory& m, uint8_t mute, int pos, Rng& rng)
+{
+    StepFire f;
+    if (pos < 0 || pos >= STEPS) return f;
+
+    const Step& acc = m.at(ACCENT_LANE, pos);
+    f.accented = !(mute & (1u << ACCENT_LANE)) && acc.on && passes(acc.chance, rng);
+    if (f.accented) f.struck |= (1u << ACCENT_LANE);
+
+    for (int l = 0; l < VOICES; l++)
+    {
+        if (mute & (1u << l)) continue;
+        const Step& st = m.at(l, pos);
+        if (!st.on) continue;
+        if (!passes(st.chance, rng)) continue;
+        f.struck |= (1u << l);
+        f.extra[l] = (uint8_t)std::min((int)st.ratchet, RATCHET_MAX);
+    }
+    return f;
+}
+
+// ── Ratchets ─────────────────────────────────────────────────────────────────
+//
+// Re-strikes in flight, per voice lane (source: ratLeft/ratInterval/ratCount).
+// Evenly subdivide the MEASURED clock period; without a known period (before
+// the second clock edge, §6.e) the extra hits are dropped rather than guessed
+// (:383-393). An accented step's re-strikes re-raise ACC (DESIGN §2).
+//
+struct Ratchets
+{
+    int left[VOICES] = {};
+    int64_t interval[VOICES] = {};
+    int64_t count[VOICES] = {};
+    bool accented[VOICES] = {};
+
+    void arm(const StepFire& f, float period_samples)
+    {
+        if (!(period_samples > 4.f)) return;
+        for (int l = 0; l < VOICES; l++)
+        {
+            if (!((f.struck >> l) & 1u) || f.extra[l] == 0) continue;
+            left[l] = f.extra[l];
+            interval[l] = std::max((int64_t)2, (int64_t)(period_samples / (float)(f.extra[l] + 1)));
+            count[l] = interval[l];
+            accented[l] = f.accented;
+        }
+    }
+
+    // Every sample (source :674-682). Returns the strike bits due NOW: the
+    // re-striking lanes, plus the ACC bit when any of them was accented. A
+    // lane muted mid-step still finishes its re-strikes (source parity).
+    uint32_t tick()
+    {
+        uint32_t strikes = 0;
+        for (int l = 0; l < VOICES; l++)
+        {
+            if (left[l] > 0 && --count[l] <= 0)
+            {
+                strikes |= (1u << l);
+                if (accented[l]) strikes |= (1u << ACCENT_LANE);
+                left[l]--;
+                count[l] = interval[l];
+            }
+        }
+        return strikes;
+    }
+
+    // Cut everything in flight (source: vxd_silence, vxdrums.c:424-430).
+    void cancel()
+    {
+        for (int l = 0; l < VOICES; l++) left[l] = 0;
+    }
+
+    bool any() const
+    {
+        for (int l = 0; l < VOICES; l++) if (left[l] > 0) return true;
+        return false;
+    }
+};
+
+// ── TriggerShaper ────────────────────────────────────────────────────────────
+//
+// 10 V pulses of `pulse_len` samples, as sample countdowns (Timeline.hpp:101-105
+// form, not dsp::PulseGenerator — whose trigger() only EXTENDS a pulse and can
+// never emit a second edge inside one, which is why GrooveBox ratchets merge
+// at the expander). Lane index ACCENT_LANE is the ACC gate.
+//
+// GAP RULE: a strike on a lane whose output was HIGH on the previous sample
+// forces exactly ONE sample at 0 V, then a fresh pulse (one sample is enough
+// for every Rack Schmitt and survives the >= 2-sample ratchet floor). It keys
+// on the previous sample's OUTPUT (was_high), not on the countdown: a pulse of
+// pulse_len samples has pulse_remaining == 0 on its last high sample, so a
+// strike landing exactly pulse_len after the previous one (100 ms triggers
+// with a clock whose period equals the pulse) would otherwise go 10 V -> 10 V
+// and merge every hit into one long pulse. The rule is applied to the
+// sample's whole strike SET at once: if any struck lane (ACC included) needs
+// the gap, every struck lane takes it, so the ACC gate and the trigger it
+// accents always rise on the SAME sample — the kit samples ACC at the trigger
+// instant (DESIGN §2, VXDrums.hpp:203). Per-lane gaps would let a still-high
+// ACC lag its trigger by a sample with a long pulse length and lose the accent.
+//
+// ACC CUT: an un-accented strike set ends any ACC gate still high from an
+// earlier accented strike on the sample its voice lanes RISE (this sample, or
+// the next one when the set takes the gap), so the kit reads 0 V at the
+// trigger edge. The source accents per step (vxdrums.c:373-374); with a pulse
+// longer than the clock period (200 ms above 75 BPM, 100 ms above 150 BPM at
+// one pulse per 16th) the gate would otherwise carry one step's accent onto
+// the next hit. Cutting at the rise rather than at the strike keeps an
+// accented set that took the gap on the previous sample rising with ACC high.
+// One case stays unresolvable: an accented lane and an un-accented lane rising
+// on the SAME sample (an accented re-strike landing on an un-accented step
+// fire, or one gap-delayed onto the other's fire). The mono ACC cable of
+// DESIGN §2 cannot serve both; the un-accented strike wins and ACC is low.
+//
+// Every claim above is a case in tests/vx_drum_sequencer/shaper_test.cpp.
+//
+struct TriggerShaper
+{
+    uint32_t strike_mask = 0;        // lanes struck THIS sample; resolved into pulses by tick()
+    int64_t pulse_remaining[LANES] = {};
+    bool gap_sample[LANES] = {};     // force 0 V this sample (the re-strike gap)
+    bool was_high[LANES] = {};       // output was > 0 V on the previous sample
+
+    void strike(uint32_t lanes) { strike_mask |= lanes; }
+
+    // One sample: resolve this sample's strike set, then write every lane's
+    // voltage into out[LANES].
+    void tick(int64_t pulse_len, float out[LANES])
+    {
+        if (pulse_len < 1) pulse_len = 1;
+
+        if (strike_mask)
+        {
+            bool need_gap = false;
+            for (int lane = 0; lane < LANES; lane++)
+            {
+                if ((strike_mask & (1u << lane)) && was_high[lane]) need_gap = true;
+            }
+
+            // ACC CUT (see above): with the ACC bit clear, at least one voice
+            // lane is striking un-accented, so the gate must be low on the
+            // sample those lanes RISE: now, or after the gap. With a gap the
+            // gate keeps this one sample, so an accented set that took the gap
+            // on the previous sample still rises with ACC high.
+            if (!(strike_mask & (1u << ACCENT_LANE)) && pulse_remaining[ACCENT_LANE] > 0)
+            {
+                pulse_remaining[ACCENT_LANE] = need_gap ? 1 : 0;
+            }
+
+            for (int lane = 0; lane < LANES; lane++)
+            {
+                if (!(strike_mask & (1u << lane))) continue;
+                gap_sample[lane] = need_gap;
+                pulse_remaining[lane] = pulse_len + (need_gap ? 1 : 0);
+            }
+
+            strike_mask = 0;
+        }
+
+        for (int lane = 0; lane < LANES; lane++)
+        {
+            float v;
+            if (gap_sample[lane])
+            {
+                v = 0.f;
+                gap_sample[lane] = false;
+            }
+            else
+            {
+                v = (pulse_remaining[lane] > 0) ? 10.f : 0.f;
+            }
+            was_high[lane] = v > 0.f;
+            if (pulse_remaining[lane] > 0) pulse_remaining[lane]--;
+            out[lane] = v;
+        }
+    }
+
+    void reset()
+    {
+        strike_mask = 0;
+        for (int lane = 0; lane < LANES; lane++)
+        {
+            pulse_remaining[lane] = 0;
+            gap_sample[lane] = false;
+            was_high[lane] = false;
+        }
+    }
+};
+
+// ── What the engine plays, and what it reports ───────────────────────────────
+
+// The memory and mute mask that apply THIS sample. Resolved by the owner (its
+// MEM CV, its buttons, its mute) — or, in a chain, by the head from whichever
+// member is active. The pointer must outlive the process() call it is passed
+// to and nothing more.
+struct PlaySource
+{
+    const Memory* memory = nullptr;
+    uint8_t mute = 0;
+};
+
+// What the UI needs, one struct (chain-foundations.md §4). The engine fills
+// position / fired_mask / fired_serial; `slot` is the owner's (the effective
+// memory shown and edited) and the engine never touches it.
+struct Report
+{
+    int position = -1;               // current step; -1 = no step to show (before the owner's first process() call, or a chain member that is not active)
+    uint32_t fired_mask = 0;         // lanes struck at the last step fire, bit ACCENT_LANE = accent lamp
+    uint32_t fired_serial = 0;       // incremented on every step fire; widgets flash lanes when it changes
+    int slot = 0;                    // owner's: the effective memory
+};
+
+// ── Sequencer ────────────────────────────────────────────────────────────────
+struct Sequencer
+{
+    ClockFollower clock;
+    Playhead head;
+    Ratchets ratchets;
+    TriggerShaper shaper;
+    Report report;
+    Rng rng;                         // the chance rolls
+    vgLib_v2::ResetClockWindow window;   // the standard's 1 ms clock-ignore window after a reset
+
+    // True after process() when a step fired on that sample: a clocked
+    // advance, or a reset() the caller made earlier on the same sample.
+    bool fired_this_sample = false;
+
+    // Set by reset() when it played step 1, consumed by the process() call
+    // that follows on the same sample so fired_this_sample reports that fire.
+    bool reset_fired = false;
+
+    // IMPLICIT reset (Impromptu: power-up is treated as a reset). Cancels the
+    // ratchets (silence, vxdrums.c:424-430) and the lamp bits, makes step 1
+    // current, arms the clock-ignore window and drops the measurement anchor
+    // (the period survives). Nothing fires; trigger pulses already high are
+    // left to finish (§6.k). Used at patch load, on becoming the head of a
+    // chain, when a member leaves from under the playhead, when a follower
+    // starts, and on Rack's Initialize. `window_samples` is
+    // vgLib_v2::ResetClockWindow::samplesFor(sample_rate), computed by the
+    // caller each time it arms, never cached.
+    void rewind(int window_samples)
+    {
+        ratchets.cancel();
+        report.fired_mask = 0;       // the serial is untouched: nothing fired
+        head.reset();
+        report.position = head.position;
+        window.arm(window_samples);
+        clock.rearm();
+    }
+
+    // EXPLICIT reset: an RST edge or the RWD button (SEQ3: `index = 0`, and
+    // its TRIG fires because the index moved). rewind(), then play step 1 NOW
+    // through fire(), so the report, the serial and fired_this_sample behave
+    // exactly as for a clocked fire and the ratchets arm from the surviving
+    // period. Call it BEFORE process() on the same sample: a clock edge on
+    // that sample is inside the window just armed and is swallowed, so a
+    // same-sample reset + clock plays step 1 once, at the reset.
+    void reset(const PlaySource& src, int window_samples)
+    {
+        rewind(window_samples);
+        if (src.memory)
+        {
+            fire(*src.memory, src.mute, 0);
+            reset_fired = true;
+        }
+    }
+
+    // Playback direction, a Direction; anything outside 0..2 is FORWARD.
+    void setDirection(int d)
+    {
+        head.direction = (d >= FORWARD && d <= PENDULUM) ? d : FORWARD;
+    }
+
+    int direction() const { return head.direction; }
+
+    // Hand-off to the next member of a chain: the playhead only. Ratchets
+    // armed on the step that just fired keep running, the period keeps its
+    // anchor.
+    void handOff()
+    {
+        head.rewind();
+        report.position = head.position;
+    }
+
+    // One sample, in the module's order (rack-port-design.md §4.2, the
+    // ResetClockWindow header): clock counter -> the clock edge, honoured only
+    // while the reset window is closed (measure, advance, fire) -> the window
+    // counts down -> ratchet re-strikes -> the pulses. A reset is the
+    // caller's, made BEFORE this call (reset() or rewind()). An edge the
+    // window swallows is dropped entirely, SEQ3's `clockTriggered &&
+    // !resetGate`: it neither steps nor touches the ClockFollower, whose
+    // anchor the reset already dropped, so the next honoured edge anchors
+    // without measuring and the one after re-measures, as before.
+    void process(bool clock_edge, const PlaySource& src, float sample_rate,
+                 int64_t pulse_len, float out[LANES])
+    {
+        fired_this_sample = reset_fired;   // a reset() on this sample already played step 1
+        reset_fired = false;
+        clock.tick();
+
+        if (clock_edge && !window.open())
+        {
+            clock.edge(sample_rate);
+            if (src.memory)
+            {
+                const int pos = head.advance(src.memory->length);
+                fire(*src.memory, src.mute, pos);
+            }
+        }
+        window.tick();
+
+        shaper.strike(ratchets.tick());
+        shaper.tick(pulse_len, out);
+    }
+
+    // Fire step `pos` NOW (source: vxd_fire). Strikes, arms the ratchets, and
+    // writes the report — step fires only, never re-strikes (source
+    // report.fired).
+    void fire(const Memory& m, uint8_t mute, int pos)
+    {
+        const StepFire f = resolveStep(m, mute, pos, rng);
+        shaper.strike(f.struck);
+        ratchets.arm(f, clock.period_samples);
+        report.position = head.position;
+        report.fired_mask = f.struck;
+        report.fired_serial++;
+        fired_this_sample = true;
+    }
+};
+
+} // namespace vx_drum_sequencer

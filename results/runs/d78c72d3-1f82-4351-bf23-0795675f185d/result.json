@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 44281,
+  "stop_reason": "end_turn",
+  "session_id": "24adb55c-6ef5-4479-867b-9c1bdc5a8b9e",
+  "total_cost_usd": 0.19644240000000004,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 7329,
+    "cache_read_input_tokens": 192032,
+    "output_tokens": 4967,
+    "output_tokens_details": {
+      "thinking_tokens": 1328
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 7329,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 4967,
+      "cacheReadInputTokens": 192032,
+      "cacheCreationInputTokens": 7329,
+      "webSearchRequests": 0,
+      "costUSD": 0.19644240000000004,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1328,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`copy.copy`, `copy.deepcopy` and a pickle round trip now all return the very same member for every `Sentinel` member. A copied, deep-copied or unpickled `click.Option([\"--name\"])` keeps `default is UNSET` and `name == \"name\"`.\n\n**Blocked on me**\nNothing.\n\n**Changed**\n- `src/click/_utils.py`: `Sentinel` now has three new methods:\n  - `__reduce_ex__` makes pickle look the member up by its name on the class (`getattr(Sentinel, \"UNSET\")`). Before, it looked the member up by its value, and that value is a bare `object()` that comes back as a new object after unpickling. That raised `ValueError: <object \u2026> is not a valid Sentinel`, which I reproduced before the fix.\n  - `__copy__` and `__deepcopy__` return the member itself. Copying already worked on 3.13, but the project still supports Python 3.10, and I don't think 3.10's `Enum` has these methods. Without them, `deepcopy` would copy the bare `object()` and fail the same way pickle did.\n- `tests/test_utils/test_sentinel.py`: added tests that run each check through `copy`, `deepcopy`, and pickle at every protocol from 0 to the highest. They check:\n  - every member comes back as the very same object;\n  - sentinels inside nested containers come back as the same objects;\n  - a copied or unpickled `click.Option([\"--name\"])` is a new object but keeps `default is UNSET` and `name == \"name\"`.\n- Nothing committed.\n\n**Verified**\n- The new sentinel tests: 33 passed.\n- Full suite: 2285 passed, 24 skipped, 1 xfailed.\n- `ruff check` and `ruff format --check` pass on both files. Ruff's config fixes import order automatically, and it reordered the new imports.\n- `mypy` passes. Its first run flagged the parameter type on `__reduce_ex__`, so it now takes `proto: object` to match what `Enum` declares.\n- Not verified: the Python 3.10 behaviour, because only 3.13 is in `.venv`.\n\n**Found**\n- Pickled data now refers to a sentinel by its member name, such as `UNSET`. Your rule is to identify things by UUID, not by name, but there's nothing else stable to use here: the values are fresh objects each run, and pickle refers to classes by name anyway. The catch is that renaming a member breaks any pickles already stored. No follow-up needed unless sentinels start being stored long-term.",
+  "ttft_ms": 1536,
+  "type": "result",
+  "duration_ms": 51928,
+  "uuid": "2998c944-1943-49b7-a6b9-94bf2ef2286e",
+  "ttft_stream_ms": 774,
+  "time_to_request_ms": 64,
+  "first_content_frame_ms": 774,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

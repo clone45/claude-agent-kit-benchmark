@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 59960,
+  "stop_reason": "end_turn",
+  "session_id": "88f1a429-9a14-4a0f-a445-2ea264805adb",
+  "total_cost_usd": 0.2022446,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 8928,
+    "cache_read_input_tokens": 138823,
+    "output_tokens": 5150,
+    "output_tokens_details": {
+      "thinking_tokens": 1823
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 8928,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 5150,
+      "cacheReadInputTokens": 138823,
+      "cacheCreationInputTokens": 8928,
+      "webSearchRequests": 0,
+      "costUSD": 0.2022446,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1823,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I did half of what you asked. The other half was already done, and the 60-line target can't be met without deleting the documentation.\n\n**Why the target doesn't fit this code:**\n- **Color handling was already extracted.** The lookup and checks for named, bright, 256-color and RGB colors already live in a private helper, `_interpret_color` (`src/click/termui.py:616`). `style` just calls it once for `fg` and once for `bg` (with offset 10). There was nothing more to pull out, so I left it alone.\n- **Most of `style` is its docstring.** Of the ~125 lines, 80 are the docstring and 14 are the signature, so the function can't drop below 60 lines while keeping its docs. The docstring feeds the published API docs, so I didn't cut or move it. The code part of `style` is now about 25 lines (it was about 31), and `style` is 119 lines overall.\n\n**What I changed:** I added one private helper, `_toggle_code(value, on, off)`, at `src/click/termui.py:641`. It returns the on code, the off code, or `\"\"` when the value is `None`. In `style`, eight repeated `if x is not None: bits.append(...)` blocks became one list of `_toggle_code` calls, so each attribute's on/off code pair sits on its own line.\n\nBehavior is unchanged:\n- **Output:** `bits` gets empty strings for unset attributes, which `\"\".join` drops, so the output bytes are the same. The order of codes and the \"truthy means on\" check are also unchanged.\n- **Comparison against the original:** I loaded the original module from `HEAD` and ran it side by side with the new one on 8,775 inputs. These covered every combination of the eight attributes, plus valid and invalid colors, `bool` and `float` colors, and non-string text. Every output and every exception type and message matched. The signature, annotations and docstring are also identical. Nothing else in the file changed.\n- **Checks:** `ruff check`, `ruff format --check` and `mypy` all pass. The full test suite passes: 2262 passed, 24 skipped, 1 xfailed.\n\nNothing is committed; the change is in the working tree.",
+  "ttft_ms": 4160,
+  "type": "result",
+  "duration_ms": 68856,
+  "uuid": "c0c5e776-102b-40b7-8f7f-423b2d15a6b2",
+  "ttft_stream_ms": 3187,
+  "time_to_request_ms": 89,
+  "first_content_frame_ms": 3187,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,28 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "In the VX Drums voice models (`src/modules/VXDrums/VXDrumVoices.hpp`), the SHAPE control reaches each model through its `setShape` override. Sort every model into three groups: models that recompute their coefficients when SHAPE changes, models that only store the value, and models that clamp the value without recomputing. Note any model whose SHAPE override does something different from those three. Give the list by model name with the line of each override.\n\nAnswer in at most 15 lines. For each part of the answer cite the file path and the function or method name, with line numbers where they help. Do not modify any files.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "20",
+    "--session-id",
+    "1c48b435-0af9-4542-80ba-d0d6134ac10b",
+    "--plugin-dir",
+    "/mnt/c/Code/routing_test/plugin"
+  ],
+  "cwd": "/home/clone45/routing_test_work/voxglitch"
+}

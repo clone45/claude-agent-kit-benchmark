@@ -1,0 +1,10 @@
+$ g++ -std=c++11 -O2 -I src/modules/VXDrumSequencer -o /tmp/vg_hidden_f2 tests/vx_drum_sequencer/direction_hidden_test.cpp && /tmp/vg_hidden_f2
+rc=0 timed_out=False
+--- stdout
+forward unchanged
+backward
+pendulum
+sequencer API
+direction_hidden_test: 17 checks, 0 failures
+
+--- stderr

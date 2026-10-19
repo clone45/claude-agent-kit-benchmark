@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 18165,
+  "stop_reason": "end_turn",
+  "session_id": "1c48b435-0af9-4542-80ba-d0d6134ac10b",
+  "total_cost_usd": 0.1607816,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 14396,
+    "cache_read_input_tokens": 79808,
+    "output_tokens": 1481,
+    "output_tokens_details": {
+      "thinking_tokens": 294
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 14396,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1481,
+      "cacheReadInputTokens": 79808,
+      "cacheCreationInputTokens": 14396,
+      "webSearchRequests": 0,
+      "costUSD": 0.1607816,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 294,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "All `setShape` overrides are in `src/modules/VXDrums/VXDrumVoices.hpp`. Each one that recomputes calls an `updateCoeffs()` that does read `shape`.\n\n- **Recompute coefficients:**\n  - Without clamping: `Clap::setShape` (L488).\n  - Clamp to 0..1, then recompute: `SnareSweep` (L1247), `SnareGate` (L1341), `Clap909` (L1454), `ClapLoFi` (L1656), `ClapGate` (L1756).\n- **Only store the value (`shape = v`):** `Ping808` (L346), `Snare909` (L417), `SineKick` (L653), `KickFm` (L732), `Snare808` (L922), `SnareLayered` (L1009), `SnareRing` (L1089).\n- **Clamp without recomputing (`shape = clampd(v, 0.0, 1.0)`):** `Hat` (L562), `Snare606` (L1168), `ClapTrap` (L1551).\n- **Different from all three:**\n  - `KickDist::setShape` (L826\u2013830) stores `shape` unclamped, then works out one value from it, `fold = fastMax(0.0, (shape - 0.6) / 0.4)`. It doesn't call `updateCoeffs()`.\n  - `SampleModel::setShape` (L1945) never writes `shape`. SHAPE becomes the sample start position, `start = clamp01(v)`, with no recompute.\n\nBoth callers convert the knob value with `knobNatural(...)` before calling `setShape`: `Voices::setShape` (L2149\u20132153) and the call at L2217.",
+  "ttft_ms": 2905,
+  "type": "result",
+  "duration_ms": 18769,
+  "uuid": "feca2890-db3a-4507-8a64-c65c9b9729e8",
+  "ttft_stream_ms": 2117,
+  "time_to_request_ms": 69,
+  "first_content_frame_ms": 2118,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

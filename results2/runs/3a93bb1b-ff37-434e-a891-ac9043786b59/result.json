@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 27734,
+  "stop_reason": "end_turn",
+  "session_id": "7e68b882-0a15-4ff6-b2bb-f2a357f68afc",
+  "total_cost_usd": 0.214364,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 18734,
+    "cache_read_input_tokens": 111860,
+    "output_tokens": 2104,
+    "output_tokens_details": {
+      "thinking_tokens": 310
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 18734,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2104,
+      "cacheReadInputTokens": 111860,
+      "cacheCreationInputTokens": 18734,
+      "webSearchRequests": 0,
+      "costUSD": 0.214364,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 310,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 6,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The decision is a fixed chain of checks, all in `src/modules/PianoRoll/PianoRollEditorWidget.hpp` unless noted:\n\n1. **`onButton`** (1624\u20131643): a left-button press calls `beginDrag(e.pos, e.mods)`.\n2. **`beginDrag`** (1889\u20131948): `zoneAt` (1387) picks the area under the pointer, and `ZONE_GRID` goes on to `beginGridDrag(position, shift)`.\n3. **`beginGridDrag`** (2032\u20132121) tries each case in turn, and the first match wins:\n   - **A. Shift held** (2047): toggles whether the note is selected, or starts a marquee.\n   - **B. Inside the selection box** (`selectionBounds`, 1455, only when two or more notes are selected): starts a move. Edges are never tested here, so a note in a group can't be resized.\n   - **C. `edgeGrabAt`** (1422\u20131451): if it hits, sets `DRAG_RESIZE` with `drag_left_edge = grab.left_edge` (2078\u20132091).\n   - **D. `noteIndexAt`** (1406): a hit on the note body calls `selectOnly` then `beginMove` (2095\u20132099).\n   - **E/F.** Empty grid: clears the selection if a box is up, otherwise paints a new note.\n4. **Grab zone**, in `edgeGrabAt`: notes are scanned from the top of the list down, on the pointer's pitch row. The zone is `min(EDGE_GRAB_W, max(1, width/3))` pixels on either side of an edge (1439). `EDGE_GRAB_W` is 4 px (`PianoRollGeometry.hpp:127`), so notes 12 px or wider get \u00b14 px, narrower ones get \u00b1width/3, with a 1 px floor. This shrinking keeps a narrow note from being all edge, so it can still be moved.\n5. **Right edge first**: for each note, the right edge `x1` is tested before the left edge `x0` (1441), so it wins any overlap.\n6. **Short-note left edge**: the left edge only counts when the note is wider than `EDGE_GRAB_MIN_NOTE_W`, which is 4 \u00d7 2.5 = 10 px (1445, `PianoRollGeometry.hpp:128`). The comment's reason is that on a note that narrow, grabbing the left edge could be confused with grabbing the right. A press near the left edge of such a note misses step C and moves the note instead (D).\n7. **Hover cursor**: `onHover` (1590\u20131601) runs the same order (box, then `edgeGrabAt`, then `noteIndexAt`, then empty). It ignores modifiers, so shift-click still shows the plain cursor.",
+  "ttft_ms": 2441,
+  "type": "result",
+  "duration_ms": 28354,
+  "uuid": "46c85b9a-77e6-472a-83a3-6f38a9ca2294",
+  "ttft_stream_ms": 2066,
+  "time_to_request_ms": 73,
+  "first_content_frame_ms": 2066,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

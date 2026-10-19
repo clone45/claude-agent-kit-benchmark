@@ -1,0 +1,703 @@
+diff --git a/docs/modules/euclid/user_manual.md b/docs/modules/euclid/user_manual.md
+index 4f37ca7..0f84414 100644
+--- a/docs/modules/euclid/user_manual.md
++++ b/docs/modules/euclid/user_manual.md
+@@ -6,7 +6,7 @@
+ 
+ Euclid generates Euclidean rhythms: patterns where a handful of hits are spread as evenly as possible across a number of steps. Those spacings underpin clave, bell and folk rhythms the world over, and a tiny change to any of three numbers can swing a groove from steady to wonderfully lopsided.
+ 
+-Set how many **HITS** you want and how many **STEPS** to spread them over, and Euclid distributes the hits as evenly as the maths allows. The ring on the panel shows the result as a circle of lit and dark slots with a playhead sweeping around it. Each clock pulse advances one step; landing on a lit slot fires the outputs. **ROT** turns the whole pattern under the playhead, sliding the accents to a different part of the bar without changing the rhythm's shape. All three have CV inputs with attenuverters, so the rhythm can morph while it runs. It is 8 HP, mono, and has no clock of its own.
++Set how many **HITS** you want and how many **STEPS** to spread them over, and Euclid distributes the hits as evenly as the maths allows. The ring on the panel shows the result as a circle of lit and dark slots with a playhead sweeping around it. Each clock pulse advances one step; landing on a lit slot fires the outputs. **ROT** turns the whole pattern under the playhead, sliding the accents to a different part of the bar without changing the rhythm's shape. All three have CV inputs with attenuverters, so the rhythm can morph while it runs. A second output, **ACCENT**, picks out every second, third or Nth hit, so one Euclid can drive both a drum and its accent. It is 9 HP, mono, and has no clock of its own.
+ 
+ ## Quick Start
+ 
+@@ -26,6 +26,7 @@ To take it further:
+ - **HITS** - How many of the steps are hits, 0 to 32. Raise it to fill the bar, drop it for sparse, syncopated grooves. Hits are clamped to the step count, so more hits than steps is simply every step. At 0 nothing plays.
+ - **STEPS** - The length of the cycle before it repeats, 1 to 32. If you shorten it below the step Euclid is standing on, the next clock wraps to step 1.
+ - **ROT** - Rotates the pattern, 0 to 31, one step per click. Every step of rotation moves the hits one slot earlier in the cycle, which is one slot counter-clockwise on the ring; the rhythm's shape never changes, only where it starts. Values past the step count are held at the last step, so on eight steps ROT 7 and everything above it give the same pattern; dragging the ring's rim wraps within the step count instead. The ring's rim is a second way to set it (see "The Ring").
++- **ACCENT** - The small knob at the bottom of the panel, next to the **ACC** label, 0 to 8. It sets which hits fire the ACCENT output: at 1 every hit is accented, at 2 every second hit, at 4 every fourth, and so on. At 0, where it starts, ACCENT stays silent. Euclid counts the hits that actually play, not the steps, so rests never throw the count off, and a reset starts it again: the step 1 that a reset plays is always hit number one. Turning the knob while the pattern runs keeps the count going rather than starting over.
+ - **HITS CV / STEPS CV / ROT CV attenuverters** - The three small knobs above the CV jacks, -100 % to +100 %. Each one scales its CV jack before the voltage reaches the knob. **They start at 0, and at 0 the jack is ignored: a patched CV cable does nothing until you turn its attenuverter up.** Turn right to add the CV, left to invert it. This is how you dial in exactly how far a modulation source bends each parameter.
+ 
+ ## The Ring
+@@ -47,7 +48,8 @@ The dark disc in the middle of the panel is the pattern Euclid is playing right
+ 
+ ## Outputs
+ 
+-- **TRIG** - A 10 V pulse each time the playhead lands on a hit. It is 1 ms long by default; **Trigger length** in the right-click menu goes up to 200 ms. Every hit gets its own rising edge: if a new hit lands while the previous pulse is still high, the output drops to 0 V for one sample first, so a fast clock never merges two hits into one long pulse. It is Euclid's only output: for a sustained gate, run TRIG into an envelope or a gate-length utility.
++- **TRIG** - A 10 V pulse each time the playhead lands on a hit. It is 1 ms long by default; **Trigger length** in the right-click menu goes up to 200 ms. Every hit gets its own rising edge: if a new hit lands while the previous pulse is still high, the output drops to 0 V for one sample first, so a fast clock never merges two hits into one long pulse. There is no gate output: for a sustained gate, run TRIG into an envelope or a gate-length utility.
++- **ACCENT** - A 10 V pulse on every Nth hit, where N is the **ACCENT** knob; at 0 the jack stays at 0 V. It fires together with TRIG on that hit and is exactly as long, set by the same **Trigger length**, and like TRIG it gives every accent its own rising edge. Patch it into a drum's accent input, or into a second voice to double every fourth hit with a crash.
+ 
+ ## Reset and the First Step
+ 
+@@ -63,11 +65,12 @@ Patch **CLK** and **RST** from the same clock master and every reset lands on th
+ 
+ ## Right-Click on the Panel
+ 
+-- **Trigger length** - The length of the pulse at TRIG: 1, 2, 5, 10, 20, 50, 100 or 200 ms. The default 1 ms is the standard for triggers and is all a drum module needs; pick a longer one for a module that wants a wider pulse. Whatever the length, every hit still gets its own rising edge. The setting is saved with the patch.
++- **Trigger length** - The length of the pulses at TRIG and ACCENT: 1, 2, 5, 10, 20, 50, 100 or 200 ms. The default 1 ms is the standard for triggers and is all a drum module needs; pick a longer one for a module that wants a wider pulse. Whatever the length, every hit still gets its own rising edge. The setting is saved with the patch.
+ 
+ ## Tips
+ 
+ - Coprime settings like 5 hits over 16 steps, or 3 over 8, give the richest, least repetitive patterns; even divisions feel four-on-the-floor.
+ - Modulate **ROT** with a slow LFO, patched into the ROT CV jack with its attenuverter turned up a little, to let the accents drift around the bar while the underlying rhythm holds steady. Watch the ring: it shows the pattern moving.
+ - For polyrhythms, run several Euclids from clock dividers, or give each a different **STEPS** on the same clock: 16 against 12 against 7. Feed every one of them **CLK** and **RST** from the same master and they stay locked, and every reset brings them all back to step 1 together.
++- With **ACCENT** at 4 on a 16-step bar of steady hits, ACCENT lands on every fourth hit: patch it into an accent input, or a VCA's CV, for a groove that leans on the beat. On an uneven pattern like 5 over 16 the accent wanders through the bar, because the count runs in hits rather than steps; press reset to bring it back to the downbeat.
+ - **TRIG** into a drum and, from the same jack, into an envelope on a pad gives you a kick and a chord stab that always agree. Set **Trigger length** longer if the envelope wants a gate rather than a tick.
+diff --git a/src/modules/Euclid/Euclid.hpp b/src/modules/Euclid/Euclid.hpp
+index b92c3b5..25607ac 100644
+--- a/src/modules/Euclid/Euclid.hpp
++++ b/src/modules/Euclid/Euclid.hpp
+@@ -2,8 +2,9 @@
+ //
+ // Euclid — a Euclidean rhythm sequencer: HITS hits spread as evenly as
+ // Bresenham allows over STEPS steps, shifted by ROT, stepped by an external
+-// clock. TRIG is one pulse per hit, and the ring on the panel shows the live
+-// pattern. (The source's GATE output was dropped on 2026-09-18, owner's call:
++// clock. TRIG is one pulse per hit, ACCENT one pulse on every Nth hit (the
++// ACCENT knob, 0 = off; the engine counts), and the ring on the panel shows
++// the live pattern. (The source's GATE output was dropped on 2026-09-18, owner's call:
+ // the engine still computes the level, the panel no longer carries the jack.)
+ //
+ // The Rack port of the vxsynth "Euclidean Sequencer" (euclid.c), itself a port
+@@ -34,7 +35,9 @@
+ // §4.2). A strike that lands while TRIG is still high forces exactly ONE
+ // sample at 0 V and starts the fresh pulse on the next sample: the VX Drum
+ // Sequencer gap rule (rack-port-design.md §5; TriggerShaper in
+-// VXDrumSequencerEngine.hpp), single lane.
++// VXDrumSequencerEngine.hpp), single lane. ACCENT is a second TriggerPulse
++// with the same length and the same gap rule, struck when the engine reports
++// `accent` (always on a sample TRIG is struck too).
+ //
+ // THREADS: `snapshot` is written on the audio thread, only when something
+ // changed, and read by the ring in draw(); `trigger_length_index` is written
+@@ -59,6 +62,7 @@ struct Euclid : VoxglitchModule
+         HITS_ATTEN_PARAM,
+         STEPS_ATTEN_PARAM,
+         ROT_ATTEN_PARAM,
++        ACCENT_PARAM,
+         NUM_PARAMS
+     };
+ 
+@@ -75,6 +79,7 @@ struct Euclid : VoxglitchModule
+     enum OutputIds
+     {
+         TRIG_OUTPUT,
++        ACCENT_OUTPUT,
+         NUM_OUTPUTS
+     };
+ 
+@@ -116,10 +121,54 @@ struct Euclid : VoxglitchModule
+ 
+     bool loaded = false;                 // the first process() call is the load's implicit reset
+ 
+-    // ── TRIG (design §4.2): the drum sequencer's TriggerShaper, one lane ─────
+-    int64_t trig_remaining = 0;          // samples of the current pulse still to emit
+-    bool trig_gap = false;               // force 0 V THIS sample; the pulse armed above it starts on the next (the gap rule)
+-    bool trig_was_high = false;          // TRIG was > 0 V on the previous sample
++    // ── TRIG and ACCENT (design §4.2): the drum sequencer's TriggerShaper, one lane each ──
++    //
++    // A strike arms a pulse of `pulse_len` samples. If the jack was high on
++    // the previous sample the pulse is armed one sample longer and the next
++    // tick() is forced to 0 V, so the fresh pulse rises on the sample after
++    // (TriggerShaper::tick, VXDrumSequencerEngine.hpp). Keyed on the previous
++    // sample's OUTPUT, not the countdown: a pulse has remaining == 0 on its
++    // last high sample.
++    struct TriggerPulse
++    {
++        int64_t remaining = 0;           // samples of the current pulse still to emit
++        bool gap = false;                // force 0 V THIS sample; the pulse armed above it starts on the next (the gap rule)
++        bool was_high = false;           // the jack was > 0 V on the previous sample
++
++        void strike(int64_t pulse_len)
++        {
++            gap = was_high;
++            remaining = pulse_len + (gap ? 1 : 0);
++        }
++
++        // This sample's voltage, then count down.
++        float tick()
++        {
++            float v;
++            if (gap)
++            {
++                v = 0.f;
++                gap = false;
++            }
++            else
++            {
++                v = (remaining > 0) ? 10.f : 0.f;
++            }
++            was_high = v > 0.f;
++            if (remaining > 0) remaining--;
++            return v;
++        }
++
++        void clear()
++        {
++            remaining = 0;
++            gap = false;
++            was_high = false;
++        }
++    };
++
++    TriggerPulse trig_pulse;
++    TriggerPulse accent_pulse;
+ 
+     int trigger_length_index = 0;        // index into triggerLengths() (ArpSeq's list), persisted
+ 
+@@ -150,12 +199,17 @@ struct Euclid : VoxglitchModule
+         configParam(STEPS_ATTEN_PARAM, -1.f, 1.f, 0.f, "Steps CV", "%", 0.f, 100.f);
+         configParam(ROT_ATTEN_PARAM, -1.f, 1.f, 0.f, "Rotation CV", "%", 0.f, 100.f);
+ 
++        // 0 = off; N accents every Nth hit since the last reset.
++        configParam(ACCENT_PARAM, 0.f, (float)euclid::Sequencer::MAX_ACCENT_EVERY, 0.f, "Accent every");
++        paramQuantities[ACCENT_PARAM]->snapEnabled = true;
++
+         configInput(CLOCK_INPUT, "Clock (one pulse per step)");
+         configInput(RESET_INPUT, "Reset (jumps to step 1 and plays it; the next clock is step 2)");
+         configInput(HITS_CV_INPUT, "Hits CV (5 V = 16 steps, through the Hits CV attenuverter)");
+         configInput(STEPS_CV_INPUT, "Steps CV (5 V = 16 steps, through the Steps CV attenuverter)");
+         configInput(ROT_CV_INPUT, "Rotation CV (5 V = 16 steps, through the Rotation CV attenuverter)");
+         configOutput(TRIG_OUTPUT, "Trigger (10 V pulse on every hit; length in the context menu)");
++        configOutput(ACCENT_OUTPUT, "Accent (10 V pulse on every Nth hit; 0 is off)");
+     }
+ 
+     // A snapping knob holds an integer, but a MIDI map or a CV-to-param
+@@ -205,40 +259,24 @@ struct Euclid : VoxglitchModule
+                                                       constants::gate_low_trigger, constants::gate_high_trigger);
+ 
+         // 4. The engine: the reset, the (possibly swallowed) clock, the window
+-        //    tick, the outputs, in that order.
++        //    tick, the outputs, in that order. ACCENT's N is read every
++        //    sample; the engine clamps it and keeps its hit count across a
++        //    change.
++        seq.accent_every = knob(ACCENT_PARAM);
+         const euclid::Sequencer::Out out = seq.process(reset_edge, clock_edge, window_samples, hits, steps, rot);
+ 
+-        // 5. TRIG: a strike arms a pulse of the menu length. If TRIG was high
+-        //    on the previous sample the pulse is armed one sample longer and
+-        //    THIS sample is forced to 0 V, so the fresh pulse rises on the
+-        //    next sample (TriggerShaper::tick, VXDrumSequencerEngine.hpp).
+-        //    Keyed on the previous sample's OUTPUT, not the countdown: a
+-        //    pulse has trig_remaining == 0 on its last high sample.
++        // 5. TRIG and ACCENT: a strike arms a pulse of the menu length, with
++        //    the gap rule (TriggerPulse above). ACCENT shares TRIG's length.
+         const int index = rack::math::clamp(trigger_length_index, 0, (int)triggerLengths().size() - 1);
+         const int64_t pulse_len = std::max((int64_t)1, (int64_t)(sample_rate * triggerLengths()[index]));
+ 
+-        if (out.struck)
+-        {
+-            trig_gap = trig_was_high;
+-            trig_remaining = pulse_len + (trig_gap ? 1 : 0);
+-        }
+-
+-        float trig_v;
+-        if (trig_gap)
+-        {
+-            trig_v = 0.f;
+-            trig_gap = false;
+-        }
+-        else
+-        {
+-            trig_v = (trig_remaining > 0) ? 10.f : 0.f;
+-        }
+-        trig_was_high = trig_v > 0.f;
+-        if (trig_remaining > 0) trig_remaining--;
++        if (out.struck) trig_pulse.strike(pulse_len);
++        if (out.accent) accent_pulse.strike(pulse_len);
+ 
+-        // 6. The jack. (out.gate / out.gate_gap are computed by the engine and
+-        //    pinned by its tests, but no longer reach a jack: 2026-09-18.)
+-        outputs[TRIG_OUTPUT].setVoltage(trig_v);
++        // 6. The jacks. (out.gate / out.gate_gap are computed by the engine
++        //    and pinned by its tests, but no longer reach a jack: 2026-09-18.)
++        outputs[TRIG_OUTPUT].setVoltage(trig_pulse.tick());
++        outputs[ACCENT_OUTPUT].setVoltage(accent_pulse.tick());
+ 
+         // 7. The ring's snapshot.
+         publishSnapshot(out.position);
+@@ -279,9 +317,8 @@ struct Euclid : VoxglitchModule
+     {
+         trigger_length_index = 0;
+         seq.load(vgLib_v2::ResetClockWindow::samplesFor(APP->engine->getSampleRate()));
+-        trig_remaining = 0;
+-        trig_gap = false;
+-        trig_was_high = false;
++        trig_pulse.clear();
++        accent_pulse.clear();
+         Module::onReset(e);
+     }
+ 
+diff --git a/src/modules/Euclid/EuclidEngine.hpp b/src/modules/Euclid/EuclidEngine.hpp
+index 3c4910b..cee744d 100644
+--- a/src/modules/Euclid/EuclidEngine.hpp
++++ b/src/modules/Euclid/EuclidEngine.hpp
+@@ -47,6 +47,15 @@
+ // The pattern table is never changed by a lost roll. The six-argument
+ // process() is chance 100 and never consumes the generator.
+ //
++// ACCENT. Every Nth hit is accented: `accent_every` (0..8, clamped where it
++// is read; 0 is off) against a count of the samples that reported `struck`
++// since the last load() or reset. On a struck sample the count goes up first
++// and `accent` is true when it is a multiple of `accent_every`, so 1 accents
++// every hit and 2 the second, fourth, sixth... A reset zeroes the count
++// before its own strike is counted, so a reset that plays step 1 makes that
++// hit number 1. A hit that lost its chance roll is not struck and is not
++// counted. Changing `accent_every` while running keeps the count.
++//
+ 
+ #include <stdint.h>
+ 
+@@ -220,6 +229,10 @@ struct Rng
+ //             (Impromptu's gate retrigger, at the VX Drum Sequencer's
+ //             one-sample width, §4.1 rule 1). `gate` is still the logical
+ //             level; the gap is the module's to apply
++//   accent    `struck`, and this strike's number since the last load or
++//             reset is a multiple of `accent_every` (1..8): the module
++//             starts an ACCENT pulse. False whenever `struck` is false, and on
++//             every sample while `accent_every` is 0
+ //   position  the step index after this sample
+ //
+ struct Sequencer
+@@ -230,16 +243,21 @@ struct Sequencer
+     bool gate_high;                  // `gate` as reported by the last process() call
+     bool step_lost;                  // the current step lost its chance roll; silent until the playhead moves
+     Rng rng;                         // consumed only by a landing on a hit at chance 1..99
++    int accent_every;                // accent every Nth hit, 0..8 (clamped when read); 0 = off
++    int64_t hits_struck;             // samples that reported `struck` since the last load() or reset
++
++    static const int MAX_ACCENT_EVERY = 8;
+ 
+     struct Out
+     {
+         bool gate;
+         bool struck;
+         bool gate_gap;
++        bool accent;
+         int position;
+     };
+ 
+-    Sequencer() : position(0), gate_high(false), step_lost(false) {}
++    Sequencer() : position(0), gate_high(false), step_lost(false), accent_every(0), hits_struck(0) {}
+ 
+     // The implicit reset at patch load (Impromptu: "the clock is also ignored
+     // during 1ms when the module is initialized or powered up"): step 1
+@@ -252,6 +270,7 @@ struct Sequencer
+         window.arm(window_samples);
+         gate_high = false;
+         step_lost = false;
++        hits_struck = 0;
+     }
+ 
+     // Chance 100: every hit plays and the generator is never consumed.
+@@ -286,6 +305,7 @@ struct Sequencer
+         Out out;
+         out.struck = false;
+         out.gate_gap = false;
++        out.accent = false;
+ 
+         if (chance < 0) chance = 0;
+         if (chance > 100) chance = 100;
+@@ -299,6 +319,7 @@ struct Sequencer
+             position = 0;
+             window.arm(window_samples);
+             out.gate_gap = gate_high;
++            hits_struck = 0;             // before this sample's own strike is counted
+             landed = true;
+         }
+ 
+@@ -322,6 +343,15 @@ struct Sequencer
+             out.struck = pattern.hit[position] && !step_lost;
+         }
+ 
++        if (out.struck)
++        {
++            hits_struck++;
++            int every = accent_every;
++            if (every < 0) every = 0;
++            if (every > MAX_ACCENT_EVERY) every = MAX_ACCENT_EVERY;
++            out.accent = every >= 1 && (hits_struck % every) == 0;
++        }
++
+         window.tick();
+ 
+         // A playhead left beyond a shrunken STEPS reads a cleared slot until
+diff --git a/src/modules/Euclid/EuclidWidget.hpp b/src/modules/Euclid/EuclidWidget.hpp
+index 0ce622c..12b192d 100644
+--- a/src/modules/Euclid/EuclidWidget.hpp
++++ b/src/modules/Euclid/EuclidWidget.hpp
+@@ -8,7 +8,10 @@
+ // writes the panel) and the control follows. The ids are the contract
+ // between the art and this file; they are mirrored in the tables below
+ // (Timeline's Anchor idiom, TimelineWidget.hpp:126-134) so a missing one is
+-// visible in one place.
++// visible in one place. The one exception is ACCENT (its knob, its jack
++// and a drawn label): the panel has no anchors for them, so they sit at the
++// explicit coordinates in ACCENT_ROW below, in the strip under the bottom
++// jack row.
+ //
+ // Panel: res/modules/euclid/euclid_panel.svg (+ -dark).
+ //
+@@ -28,6 +31,36 @@
+ #include <string>
+ #include <vector>
+ 
++// A one-word label drawn in the panel's label ink, for controls the panel
++// SVG does not carry (ACCENT). The ink follows the theme: COL_INK on the light
++// panel, the dark pass's mapping of it on the dark one
++// (scripts/panel_gen/constants.py, scripts/generate_dark_panel.py). The font
++// is loaded every draw, never cached across frames (EuclidRingWidget.hpp).
++struct EuclidPanelLabel : TransparentWidget
++{
++    std::string text;
++
++    EuclidPanelLabel(Vec centre, const std::string& t) : text(t)
++    {
++        box.size = Vec(24.f, 10.f);
++        box.pos = centre.minus(box.size.div(2.f));
++    }
++
++    void draw(const DrawArgs& args) override
++    {
++        std::shared_ptr<Font> font = APP->window->loadFont(
++            asset::plugin(pluginInstance, "res/fonts/ShareTechMono-Regular.ttf"));
++        if (!font) return;
++
++        nvgFontFaceId(args.vg, font->handle);
++        nvgFontSize(args.vg, 7.f);
++        nvgTextLetterSpacing(args.vg, 0.f);
++        nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
++        nvgFillColor(args.vg, settings::preferDarkPanels ? nvgRGB(0xf3, 0xee, 0xe8) : nvgRGB(0x0b, 0x11, 0x16));
++        nvgText(args.vg, box.size.x / 2.f, box.size.y / 2.f, text.c_str(), NULL);
++    }
++};
++
+ struct EuclidWidget : ModuleWidget
+ {
+     EuclidRingWidget* ring = NULL;
+@@ -86,6 +119,21 @@ struct EuclidWidget : ModuleWidget
+         // ── the one output, on the SVG's plate: TRIG (GATE was dropped 2026-09-18) ──
+         addOutput(createOutputCentered<VoxglitchOutputPort>(panelHelper.findNamed("trig_output"), module, Euclid::TRIG_OUTPUT));
+ 
++        // ── ACCENT: knob, label, jack, at explicit coordinates (the panel has
++        //    no anchors for them). Rack pixels on the 135 x 380 panel, in the
++        //    strip between the bottom jack row (jacks end y 339.76) and the
++        //    bottom edge, between the bottom screw squares (x 15..30 and
++        //    105..120, y 365..380):
++        //      knob  Trimpot r 8.95 at (43, 361): x 34.05..51.95, 4 px right of the left screw square
++        //      label "ACC" centred at (63.5, 361), between the two
++        //      jack  port r 11.764 at (84, 361): y 349.24..372.76, 9.5 px below the RST jack;
++        //            x 72.24..95.76, below the TRIG plate (y 295..352 from x 94; 2.8 px
++        //            clear at its left edge) and 9 px left of the right screw square ──
++        const float accent_y = 361.f;
++        addParam(createParamCentered<Trimpot>(Vec(43.f, accent_y), module, Euclid::ACCENT_PARAM));
++        addChild(new EuclidPanelLabel(Vec(63.5f, accent_y), "ACC"));
++        addOutput(createOutputCentered<VoxglitchOutputPort>(Vec(84.f, accent_y), module, Euclid::ACCENT_OUTPUT));
++
+         // ── the ring, sized from the panel's plate. A panel without the rect
+         //    still gets a ring, at the place scripts/generate_euclid_panel.py
+         //    writes the rect (x 9, y 30, 117 x 117: the SVG's ids are the
+diff --git a/tests/euclid/README.md b/tests/euclid/README.md
+index 6d15e37..d13b0d7 100644
+--- a/tests/euclid/README.md
++++ b/tests/euclid/README.md
+@@ -46,7 +46,18 @@ the engine directly. `-I ../../src` is what resolves the engine's include of
+   none for rests or idle samples; and a lost roll strikes nothing and holds
+   GATE low through 500 idle samples (no re-roll, a ROT move does not revive
+   it), reports no gap to a following reset, and the next clock's winning roll
+-  strikes and raises GATE; a reset is a landing too and can lose.
++  strikes and raises GATE; a reset is a landing too and can lose. Then
++  ACCENT (`accent_every`, `Out::accent`, the `hits_struck` counter): 0 is
++  off (never accented, the strikes still counted); 1 accents exactly the
++  struck samples; 2 the second, fourth, sixth hit, counted in hits across
++  E(5,8)'s rests, with 3 and 8 alongside; a change of N while running (and
++  off-then-on) keeps the count; a hit that lost its chance roll is neither
++  struck nor counted; a reset zeroes the count before its own strike (the
++  reset's strike is hit 1, accented under N 1, not under N 2; a same-sample
++  reset + clock counts once; a reset onto a rest or one that loses its roll
++  zeroes and counts nothing); `load()` zeroes it; values above 8 behave as
++  8 and negative values as 0, the stored value left as set; and the
++  six-argument form agrees with chance 100 on `accent`.
+ - **seq3_parity_test.cpp** — a float model of Fundamental SEQ3's reset/clock
+   logic (`dsp::SchmittTrigger`, `dsp::PulseGenerator`, `clock && !resetGate`)
+   and `euclid::Sequencer` behind the same Schmitts, driven by the same
+diff --git a/tests/euclid/engine_test.cpp b/tests/euclid/engine_test.cpp
+index 87077b0..a4da7c2 100644
+--- a/tests/euclid/engine_test.cpp
++++ b/tests/euclid/engine_test.cpp
+@@ -12,6 +12,7 @@
+ #include "check.hpp"
+ 
+ #include <cstdio>
++#include <string>
+ 
+ using namespace euclid;
+ 
+@@ -758,6 +759,256 @@ static void chanceLostRollTests()
+     check("and GATE stays low after it", !o.gate);
+ }
+ 
++// ── ACCENT ───────────────────────────────────────────────────────────────────
++
++// `n` accepted clocks one sample apart from a settled Rig, recording which
++// were struck and which accented as strings of 'x' / '.' (one char per clock).
++static void clockPattern(Rig& r, int n, std::string& struck, std::string& accent)
++{
++    struck.clear();
++    accent.clear();
++    for (int i = 0; i < n; i++)
++    {
++        Out o = r.clock();
++        struck += o.struck ? 'x' : '.';
++        accent += o.accent ? 'x' : '.';
++    }
++}
++
++static void checkStr(const char* what, const std::string& got, const char* want)
++{
++    bool ok = got == want;
++    if (!ok) std::printf("  (%s: got %s, want %s)\n", what, got.c_str(), want);
++    check(what, ok);
++}
++
++static void accentOffTests()
++{
++    std::printf("accent: 0 is off\n");
++    Sequencer fresh;
++    checkEq("accent_every defaults to 0", fresh.accent_every, 0);
++    checkEq("the hit counter starts at 0", fresh.hits_struck, 0);
++
++    Rig r(16, 16, 0);
++    bool never = true;
++    int strikes = 0;
++    Out o = r.reset();
++    if (o.accent) never = false;
++    if (o.struck) strikes++;
++    for (int i = 0; i < 2000; i++)
++    {
++        o = (i % 7 == 0) ? r.clock() : r.idle();
++        if (o.accent) never = false;
++        if (o.struck) strikes++;
++    }
++    check("accent_every 0: no sample is accented", never);
++    check("(hits were struck)", strikes > 100);
++    checkEq("the counter still counts every strike", r.seq.hits_struck, strikes);
++}
++
++static void accentEveryHitTests()
++{
++    std::printf("accent: 1 accents every hit\n");
++    Rig r(5, 8, 0);                          // x.x.xx.x
++    r.seq.accent_every = 1;
++    r.settle();
++    std::string struck, accent;
++    clockPattern(r, 16, struck, accent);     // steps 2..8, 1..8, 1
++    checkStr("the strikes follow E(5,8) from step 2", struck, ".x.xx.xx.x.xx.xx");
++    checkStr("every strike is accented", accent, struck.c_str());
++
++    bool only_on_struck = true;
++    for (int i = 0; i < 500; i++)
++    {
++        Out o = (i % 5 == 0) ? r.clock() : r.idle();
++        if (o.accent != o.struck) only_on_struck = false;
++    }
++    check("accent is true exactly on struck samples, never on idle ones", only_on_struck);
++}
++
++static void accentEverySecondTests()
++{
++    std::printf("accent: 2 accents the second, fourth, sixth hit\n");
++    Rig r(16, 16, 0);
++    r.seq.accent_every = 2;
++    r.settle();
++    std::string struck, accent;
++    clockPattern(r, 8, struck, accent);
++    checkStr("every clock strikes (16/16)", struck, "xxxxxxxx");
++    checkStr("hits 2, 4, 6, 8 are accented", accent, ".x.x.x.x");
++
++    // Counted in hits, not steps: rests in between do not count.
++    Rig e(5, 8, 0);                          // x.x.xx.x
++    e.seq.accent_every = 2;
++    e.settle();
++    clockPattern(e, 16, struck, accent);
++    checkStr("(E(5,8) from step 2)", struck, ".x.xx.xx.x.xx.xx");
++    checkStr("every second HIT, across the rests", accent, "...x..x..x..x..x");
++
++    // Every third, and the largest N.
++    Rig t(16, 16, 0);
++    t.seq.accent_every = 3;
++    t.settle();
++    clockPattern(t, 9, struck, accent);
++    checkStr("3: hits 3, 6, 9", accent, "..x..x..x");
++    Rig g(16, 16, 0);
++    g.seq.accent_every = 8;
++    g.settle();
++    clockPattern(g, 17, struck, accent);
++    checkStr("8: hits 8 and 16", accent, ".......x.......x.");
++
++    // Changing N while running keeps the count.
++    Rig c(16, 16, 0);
++    c.seq.accent_every = 2;
++    c.settle();
++    clockPattern(c, 3, struck, accent);      // hits 1..3
++    checkEq("(three hits counted)", c.seq.hits_struck, 3);
++    c.seq.accent_every = 4;
++    clockPattern(c, 5, struck, accent);      // hits 4..8
++    checkStr("a change of N keeps the count: hits 4 and 8 under N 4", accent, "x...x");
++    c.seq.accent_every = 0;
++    clockPattern(c, 2, struck, accent);      // hits 9, 10
++    c.seq.accent_every = 11;                 // clamps to 8
++    clockPattern(c, 6, struck, accent);      // hits 11..16
++    checkStr("turning it off and back on keeps the count too (16 is a multiple of 8)", accent, ".....x");
++
++    // A lost chance roll is not struck and is not counted.
++    const uint32_t seed = 0x2468ACE1u;
++    ChanceRig ch(16, 16, 0, 50);
++    ch.seq.rng.seed(seed);
++    ch.seq.accent_every = 2;
++    ch.settle();
++    int counted = 0;
++    bool every_second = true;
++    for (int i = 0; i < 200; i++)
++    {
++        Out o = ch.clock();
++        if (o.struck) counted++;
++        if (o.accent != (o.struck && counted % 2 == 0)) every_second = false;
++        if (!o.struck && o.accent) every_second = false;
++    }
++    check("with chance, only the hits that play are counted", every_second);
++    checkEq("the counter equals the strikes that played", ch.seq.hits_struck, counted);
++    check("(some rolls lost)", counted < 200 && counted > 0);
++}
++
++static void accentResetTests()
++{
++    std::printf("accent: load and reset zero the count\n");
++    Rig r(16, 16, 0);
++    r.seq.accent_every = 2;
++    r.settle();
++    std::string struck, accent;
++    clockPattern(r, 3, struck, accent);      // hits 1..3: the next would be accented
++    checkEq("(three hits counted)", r.seq.hits_struck, 3);
++
++    Out o = r.reset();
++    check("a reset that plays step 1 strikes", o.struck);
++    checkEq("and that strike is hit number 1", r.seq.hits_struck, 1);
++    check("so under N 2 it is not accented", !o.accent);
++    r.idleFor(W - 1);
++    clockPattern(r, 4, struck, accent);      // hits 2..5
++    checkStr("counting resumes from the reset: hits 2 and 4 accented", accent, "x.x.");
++
++    // Under N 1 the reset's strike is accented: it is hit 1.
++    Rig one(16, 16, 0);
++    one.seq.accent_every = 1;
++    one.settle();
++    one.clocks(5);
++    o = one.reset();
++    check("N 1: the reset's strike is accented", o.struck && o.accent);
++
++    // A same-sample reset and clock: one strike, hit number 1.
++    Rig b(16, 16, 0);
++    b.seq.accent_every = 2;
++    b.settle();
++    b.clocks(5);
++    o = b.both();
++    checkEq("same-sample reset + clock counts one hit", b.seq.hits_struck, 1);
++    check("(not accented under N 2)", !o.accent);
++
++    // A reset onto a rest zeroes the count and counts nothing.
++    Rig rest(1, 4, 1);                       // x... rotated by 1: ...x, step 1 a rest
++    rest.seq.accent_every = 1;
++    rest.settle();
++    rest.clocks(8);                          // two passes: two hits
++    checkEq("(two hits counted)", rest.seq.hits_struck, 2);
++    o = rest.reset();
++    check("a reset onto a rest strikes nothing", !o.struck && !o.accent);
++    checkEq("and zeroes the count", rest.seq.hits_struck, 0);
++
++    // A reset whose own chance roll loses zeroes the count, counts nothing.
++    ChanceRig z(16, 16, 0, 0);
++    z.seq.accent_every = 1;
++    z.settle();
++    z.clock();
++    o = z.reset();
++    check("a reset at chance 0 neither strikes nor accents", !o.struck && !o.accent);
++    checkEq("(nothing counted)", z.seq.hits_struck, 0);
++
++    // load() zeroes the count, and is not itself a strike.
++    Rig l(16, 16, 0);
++    l.seq.accent_every = 2;
++    l.settle();
++    l.clocks(3);
++    l.seq.load(W);
++    checkEq("load zeroes the count", l.seq.hits_struck, 0);
++    o = l.idle();
++    check("load strikes and accents nothing", !o.struck && !o.accent);
++    l.settle();
++    clockPattern(l, 2, struck, accent);
++    checkStr("after load, the second hit is the first accent", accent, ".x");
++}
++
++static void accentClampTests()
++{
++    std::printf("accent: accent_every is clamped to 0..8\n");
++    std::string struck, accent;
++
++    Rig hi(16, 16, 0);
++    hi.seq.accent_every = 100;
++    hi.settle();
++    clockPattern(hi, 16, struck, accent);
++    checkStr("100 behaves as 8", accent, ".......x.......x");
++    checkEq("and the stored value is left as set", hi.seq.accent_every, 100);
++
++    Rig nine(16, 16, 0);
++    nine.seq.accent_every = 9;
++    nine.settle();
++    clockPattern(nine, 9, struck, accent);
++    checkStr("9 behaves as 8", accent, ".......x.");
++
++    Rig neg(16, 16, 0);
++    neg.seq.accent_every = -3;
++    neg.settle();
++    clockPattern(neg, 16, struck, accent);
++    checkStr("a negative value behaves as 0 (off)", accent, "................");
++    checkEq("(and the hits are still counted)", neg.seq.hits_struck, 16);
++
++    // The six-argument form and chance 100 agree on accent too.
++    Sequencer six, seven;
++    six.load(W);
++    seven.load(W);
++    six.accent_every = 3;
++    seven.accent_every = 3;
++    Rng drive;
++    drive.seed(0xBADC0DEu);
++    bool agree = true;
++    int accents = 0;
++    for (int i = 0; i < 50000; i++)
++    {
++        uint32_t x = drive.next();
++        bool reset = (x % 991) == 0;
++        bool clock = (x % 11) == 0;
++        Out a = six.process(reset, clock, W, 7, 12, 1);
++        Out b = seven.process(reset, clock, W, 7, 12, 1, 100);
++        if (a.accent != b.accent || !sameOut(a, b)) agree = false;
++        if (a.accent) accents++;
++    }
++    check("six-argument and chance 100 agree on accent", agree);
++    check("(the run accented something)", accents > 50);
++}
++
+ int main()
+ {
+     loadTests();
+@@ -777,5 +1028,10 @@ int main()
+     chanceZeroTests();
+     chanceDeterminismTests();
+     chanceLostRollTests();
++    accentOffTests();
++    accentEveryHitTests();
++    accentEverySecondTests();
++    accentResetTests();
++    accentClampTests();
+     return finish("engine_test");
+ }

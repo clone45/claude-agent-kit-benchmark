@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 179728,
+  "stop_reason": "end_turn",
+  "session_id": "69451712-8634-407c-a026-4b1b3b4876d8",
+  "total_cost_usd": 1.4678305999999999,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 11382,
+    "cache_read_input_tokens": 532052,
+    "output_tokens": 3418,
+    "output_tokens_details": {
+      "thinking_tokens": 1136
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 11382,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 78,
+      "outputTokens": 18045,
+      "thinkingTokens": 6479,
+      "cacheReadInputTokens": 2232413,
+      "cacheCreationInputTokens": 82517,
+      "webSearchRequests": 0,
+      "costUSD": 1.4678305999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 6,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Per-step chance was already fully implemented in this tree, along with the tests you asked for. I checked it against your spec, found nothing missing, and changed no files.\n\n**What's there, in `src/modules/Euclid/EuclidEngine.hpp`:**\n- **`euclid::Rng`:** a xorshift32 that starts at `0x9E3779B9`, with `seed(0)` falling back to that value, the 13/17/5 shifts, and `percent()` returning `next() % 100`.\n- **`Sequencer`:** gains a public `Rng rng`, plus a `step_lost` flag that holds a lost roll's verdict until the playhead moves.\n- **Seven-argument `process`:**\n  - Clamps `chance` to 0..100 and decides once each time a clock edge or reset lands the playhead on a step.\n  - Rests roll nothing; chance 100 plays and chance 0 stays silent, both without rolling. Any other chance makes exactly one `rng.percent() < chance` call.\n  - A lost step reports `struck` false and `gate` low until the next landing.\n  - `gate_gap` still comes from the previous sample's `gate`, and the pattern table is never touched.\n- **Six-argument `process`:** passes chance 100 to the new form.\n- **`load()`:** resets `step_lost` without rolling, so step 1's gate follows the pattern.\n- **Header comment:** a CHANCE paragraph (lines 37\u201348) describes the rule.\n\n**Tests, in `tests/euclid/engine_test.cpp`:**\n- **`rngTests`:** pins the generator's values. I confirmed them independently in Python.\n- **`chanceSixArgTests`:** runs the six-argument form, chance 100 and chance 250 side by side over 100k random samples. They agree on every output and none of them moves the generator.\n- **`chanceZeroTests`:** chance 0, and negative chance clamped to 0.\n- **`chanceDeterminismTests`:** two sequencers with the same seed, checked against a reference generator. This also shows rests and idle samples never roll.\n- **`chanceLostRollTests`:** a lost roll holds the gate low through 500 idle samples and a ROT change, until the next clock wins its roll.\n\n**Verification:**\n- In a scratch copy under `/tmp`, I broke the rule five ways: rolling on rests, rolling at chance 100, re-rolling on idle samples, using `<=` instead of `<`, and letting a lost step's gate go high. `engine_test` fails for every one (1 to 38 failures each).\n- On the real tree, `vg_check.sh compile Euclid` passes and `vg_check.sh tests` is all green: pattern 63/63, engine 212/212, SEQ3 parity 36/36, and all timeline tests.\n\nOne case the spec doesn't settle: if a reset and an accepted clock land on the same sample, the engine rolls once, for the step it ends on. That can only happen with a 0-sample window, so I left it as is.",
+  "ttft_ms": 6938,
+  "type": "result",
+  "duration_ms": 49025,
+  "uuid": "4205a302-ec22-4659-b0e9-066d3ad7acdb",
+  "ttft_stream_ms": 782,
+  "time_to_request_ms": 89,
+  "first_content_frame_ms": 783,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

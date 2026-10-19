@@ -1,0 +1,193 @@
+{
+  "run_id": "97c1814c-52e8-4d98-96a0-a5807ad46f24",
+  "blind_id": "0498767b-d28c-49f1-b3ae-daf8cf37b0d9",
+  "session_id": "a4712155-83e5-4c07-862c-d2fc4bbf3045",
+  "task_id": "64305200-2e10-4028-a457-bf116432b4bb",
+  "task_label": "R1",
+  "task_type": "refactor",
+  "task_length": "short",
+  "condition_id": "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9",
+  "condition_label": "B",
+  "rep_index": 2,
+  "branch": "t-64305200-2e10-4028-a457-bf116432b4bb-b",
+  "base_commit": "d13900035d0a43dbb2dd5951ffb46db690f42bb4",
+  "status": "completed",
+  "process": {
+    "rc": 0,
+    "wall_s": 59.6,
+    "timed_out": false,
+    "started_at": "2026-10-19T04:26:24.465867+00:00",
+    "ended_at": "2026-10-19T04:27:24.038145+00:00"
+  },
+  "exit_code": 0,
+  "result_subtype": "success",
+  "is_error": false,
+  "num_turns": 8,
+  "duration_ms": 55120,
+  "duration_api_ms": 45243,
+  "claude_total_cost_usd": 0.20098860000000002,
+  "cost": {
+    "by_model": {
+      "claude-opus-5-5": {
+        "input_tokens": 14,
+        "cache_read_tokens": 170703,
+        "cache_create_tokens": 8259,
+        "output_tokens": 5036,
+        "thinking_tokens": 1368,
+        "cost_input_side_usd": 0.100269,
+        "cost_output_usd": 0.10072,
+        "cost_usd": 0.200989,
+        "claude_cost_usd": 0.20098860000000002,
+        "basis": "stream_per_call",
+        "context_window": 1000000
+      }
+    },
+    "total_usd": 0.200989,
+    "unpriced_models": []
+  },
+  "model_usage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 5036,
+      "cacheReadInputTokens": 170703,
+      "cacheCreationInputTokens": 8259,
+      "webSearchRequests": 0,
+      "costUSD": 0.20098860000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1368,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "stream": {
+    "per_model": {
+      "claude-opus-5-5": {
+        "calls": 7,
+        "input": 14,
+        "cache_read": 170703,
+        "cache_create": 8259,
+        "cache_create_5m": 0,
+        "cache_create_1h": 8259,
+        "main_calls": 7,
+        "sub_calls": 0
+      }
+    },
+    "main_api_calls": 7,
+    "sub_api_calls": 0,
+    "sub_calls_by_type": {},
+    "context_end_tokens": 29081,
+    "context_max_tokens": 29081,
+    "shunt_denials": 0,
+    "tool_errors": 0,
+    "permission_denied_events": 0,
+    "api_retries": 0,
+    "api_retry_errors": []
+  },
+  "context_window": 1000000,
+  "context_end_ratio": 0.029081,
+  "transcript": {
+    "records": 82,
+    "compactions": 0,
+    "compaction_meta": [],
+    "main_api_calls": 7,
+    "main_output_tokens": 5036,
+    "models": {
+      "claude-opus-5-5": 7
+    }
+  },
+  "transcripts_found": {
+    "main": true,
+    "subagents": 0
+  },
+  "subagents": [],
+  "rework": {
+    "refuter_runs": 0,
+    "refuter_fail": 0,
+    "builder_runs": 0,
+    "refuter_verdicts": []
+  },
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "init_plugins": [
+    "agent-kit",
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring"
+  ],
+  "init_agents": [
+    "agent-kit:builder",
+    "agent-kit:bulk-reader",
+    "agent-kit:code-writer",
+    "agent-kit:debugger",
+    "agent-kit:refuter",
+    "agent-kit:researcher",
+    "agent-kit:scout",
+    "claude",
+    "Explore",
+    "general-purpose",
+    "Plan",
+    "statusline-setup"
+  ],
+  "init_model": "claude-opus-5-5",
+  "init_permission_mode": "bypassPermissions",
+  "diff": {
+    "diff_bytes": 2926,
+    "files_changed": [
+      "src/click/termui.py"
+    ]
+  },
+  "checks": {
+    "function_lengths": {
+      "src/click/termui.py:style": 114
+    },
+    "full": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "2262 passed, 24 skipped, 31000 deselected, 1 xfailed in 5.32s"
+    },
+    "ruff": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "All checks passed!"
+    },
+    "format": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "76 files already formatted"
+    },
+    "mypy": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "Success: no issues found in 29 source files"
+    },
+    "all_pass": true
+  },
+  "final_text_chars": 2504
+}

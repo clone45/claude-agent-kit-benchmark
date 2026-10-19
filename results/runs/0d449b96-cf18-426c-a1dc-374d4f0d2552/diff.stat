@@ -1,0 +1,8 @@
+ src/click/types.py            | 38 ++++++++++++++++++++++++++++----------
+ tests/test_types/test_Path.py |  7 +++++++
+ tests/typing/typing_path.py   | 40 ++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 75 insertions(+), 10 deletions(-)
+
+M	src/click/types.py
+M	tests/test_types/test_Path.py
+A	tests/typing/typing_path.py

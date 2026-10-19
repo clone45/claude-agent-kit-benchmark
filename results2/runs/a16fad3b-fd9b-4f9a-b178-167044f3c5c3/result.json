@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 35907,
+  "stop_reason": "end_turn",
+  "session_id": "aeaefb46-efe2-40f2-8ec8-14b340fe4fd1",
+  "total_cost_usd": 0.23569079999999998,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 19423,
+    "cache_read_input_tokens": 142294,
+    "output_tokens": 2590,
+    "output_tokens_details": {
+      "thinking_tokens": 483
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 19423,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 2590,
+      "cacheReadInputTokens": 142294,
+      "cacheCreationInputTokens": 19423,
+      "webSearchRequests": 0,
+      "costUSD": 0.23569079999999998,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 483,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "1. **Press \u2192 dispatch.** `onButton` (`src/modules/PianoRoll/PianoRollEditorWidget.hpp:1624`) handles a left press by calling `beginDrag` (`:1889`). `beginDrag` routes grid-zone presses (decided by `zoneAt`, `:1387`) to `beginGridDrag` (`:2032`), which makes the decision.\n2. **Setup in `beginGridDrag`.** It first calls `noteIndexAt(step, pitch)` (`:1406`) to find the note body under the pointer. That test uses the half-open span `start <= step < end`, so a note's end step is not inside it. It then calls `selectionBounds` (`:1455`) to get the group box, which only exists when two or more notes are selected.\n3. **Order of checks, first match wins:**\n   - **A. Shift held** (`:2047`): toggles the note's selection, or starts a marquee.\n   - **B. Pointer inside the selection box** (`:2062`): always a move (`beginMove` / `beginMoveSelection`). Edges are never tested here, so a note inside a group can't be resized.\n   - **C. `edgeGrabAt(position, grab)`** (`:2078`): sets `DRAG_RESIZE`, and `drag_left_edge = grab.left_edge` picks which edge.\n   - **D. `index >= 0`** (`:2095`): `selectOnly` + `beginMove`, which sets `DRAG_MOVE`.\n   - E/F: a click on empty space clears the selection or paints a new note.\n4. **Grab zone, `edgeGrabAt`** (`:1422-1451`). For each note on the pointer's pitch, from topmost down, it computes pixel x0/x1 and `zone = min(EDGE_GRAB_W, max(1, (x1-x0)/3))` (`:1439`). `EDGE_GRAB_W` is 4 px (`PianoRollGeometry.hpp:127`).\n   - Notes 12 px wide or more get the full \u00b14 px.\n   - Notes 3\u201312 px wide get a third of their width.\n   - Notes under 3 px get \u00b11 px.\n   - The shrinking keeps a fixed zone from covering a narrow note completely, which would make it impossible to move.\n5. **Right edge before left.** The right edge is tested first and returns at once (`:1441`). The zone is measured in pixels around x1, so it reaches past the note's end. This is the only way to grab the right edge, since `noteIndexAt` never counts x1 as inside the note.\n6. **Why short notes have no left edge.** The left test (`:1445`) also requires `(x1-x0) > EDGE_GRAB_MIN_NOTE_W`, which is `EDGE_GRAB_W * 2.5`, or 10 px (`PianoRollGeometry.hpp:128`). On a note 10 px wide or less, the two edges are so close that a left grab could be mistaken for a right grab (comment at `:1443`). So a press near its left edge falls through to D and moves the note.\n7. `onHover` (`:1599`) calls the same `edgeGrabAt` to show the resize cursor, so the cursor matches what a press will do.",
+  "ttft_ms": 2334,
+  "type": "result",
+  "duration_ms": 36635,
+  "uuid": "0c26d01e-12fb-4c15-9f84-34a85d5acd4d",
+  "ttft_stream_ms": 2153,
+  "time_to_request_ms": 69,
+  "first_content_frame_ms": 2154,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 146072,
+  "stop_reason": "end_turn",
+  "session_id": "69451712-8634-407c-a026-4b1b3b4876d8",
+  "total_cost_usd": 1.2019562000000001,
+  "usage": {
+    "input_tokens": 40,
+    "cache_creation_input_tokens": 38342,
+    "cache_read_input_tokens": 1316679,
+    "output_tokens": 8425,
+    "output_tokens_details": {
+      "thinking_tokens": 3747
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 38342,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 66,
+      "outputTokens": 14627,
+      "thinkingTokens": 5343,
+      "cacheReadInputTokens": 1700361,
+      "cacheCreationInputTokens": 71135,
+      "webSearchRequests": 0,
+      "costUSD": 1.2019562000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 21,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I found the cause, but it is already fixed in the current tree, so I changed no files.\n\n**Cause:** in the original engine (commit `2fe66e0`), the reset branch of `euclid::Sequencer::process` (`src/modules/Euclid/EuclidEngine.hpp`) set the playhead to step 1 and played it, but never re-armed the 1 ms clock-ignore window. Only `Sequencer::load()` armed it, at patch load and Initialize. That matches the report exactly:\n- At patch load, clocks inside the window were dropped.\n- After a reset the window stayed closed, so a same-sample clock or one arriving within 1 ms was accepted. Euclid jumped straight to step 2 and stayed one step ahead of SEQ3 and Clocked.\n\n**Fix already in place:** commit `1eb9d3d` added `window.arm(window_samples)` to the reset branch (`EuclidEngine.hpp:317\u2013324`), before the separate clock check at 326. A same-sample reset and clock now plays step 1 once, clocks at +1 to +47 samples (48 kHz) are dropped, and +48 advances to step 2. The module adapter (`Euclid::process` in `src/modules/Euclid/Euclid.hpp:224`) passes the window length on every sample and needs no change.\n\n**Verification:**\n- A standalone repro against the current engine shows the correct behavior: one strike for a same-sample reset and clock, nothing at +1 or +47, step 2 at +48.\n- To confirm the tests guard this, I removed only that `window.arm` line in a scratch copy under `/tmp` and ran the current tests against it. `engine_test` had 18 failures and `seq3_parity_test` had 10, covering every symptom you described. Since that's already covered, I didn't add another regression case.\n- On the real tree: `bash scripts/vg_check.sh compile Euclid` passes, and `bash scripts/vg_check.sh tests` passes (pattern 63/63, engine 212/212, SEQ3 parity 36/36, timeline all pass).\n\nIf a Rack build still shows the step-ahead behavior, it was probably built from a tree older than `1eb9d3d`.",
+  "ttft_ms": 2228,
+  "type": "result",
+  "duration_ms": 236659,
+  "uuid": "b7ec19d7-4bf5-4e5f-9e93-87216f6bdfdf",
+  "ttft_stream_ms": 791,
+  "time_to_request_ms": 82,
+  "first_content_frame_ms": 791,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 92097,
+  "stop_reason": "end_turn",
+  "session_id": "4d0f3263-efd9-4cf1-a85a-419d775cf292",
+  "total_cost_usd": 0.3845934,
+  "usage": {
+    "input_tokens": 26,
+    "cache_creation_input_tokens": 22176,
+    "cache_read_input_tokens": 338907,
+    "output_tokens": 6965,
+    "output_tokens_details": {
+      "thinking_tokens": 2300
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 22176,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 26,
+      "outputTokens": 6965,
+      "cacheReadInputTokens": 338907,
+      "cacheCreationInputTokens": 22176,
+      "webSearchRequests": 0,
+      "costUSD": 0.3845934,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2300,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 16,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The usage line no longer doubles the brackets. An optional `Choice` argument now shows `[foo|bar|baz]`, or `[foo|bar|baz]...` with `nargs=-1`, and an optional `DateTime` argument shows `[%Y-%m-%d]`. The full test suite passes, and lint, format and mypy are clean.\n\n**Blocked on me:** nothing.\n\n**Changed** (not committed):\n- **`src/click/core.py`, `Argument.get_usage_pieces`:** for an optional argument with no explicit `metavar`, it checks whether the type's metavar is already wrapped in a single pair of brackets. If so, it uses that metavar as is, adding only `!` for deprecated and `...` when `nargs != 1`. Otherwise it falls back to `make_metavar()` as before.\n- **`src/click/core.py`, new helper `_is_bracketed`:** this does that check. It requires the first `[` to be closed by the last `]`, so a custom type returning something like `[a] [b]` is still wrapped in an outer pair (`[[a] [b]]`) rather than misread.\n- **`tests/test_arguments.py`:** a new parametrized test, `test_argument_bracketed_type_metavar_not_doubled`, checks the first usage line for:\n  - the three cases you listed;\n  - required `Choice` (`{foo|bar|baz}`, plain and with `...`);\n  - `nargs=2` optional;\n  - deprecated optional (`[foo|bar|baz]!`);\n  - an explicit `metavar`;\n  - a required `DateTime`;\n  - the `[a] [b]` custom type.\n\n**Verified:**\n- `pytest tests/test_arguments.py`: 216 passed.\n- Full suite: 2270 passed, 24 skipped, 1 xfailed.\n- `ruff check` and `ruff format --check` on both files: clean. `mypy`: no issues.\n\n**Found:**\n- **Required `Choice` arguments use braces:** they already render as `{foo|bar|baz}`, not brackets. That is current behavior, so I kept it; my first draft of the tests expected brackets and I corrected them.\n- **Help list and error messages still double:** these come from `make_metavar()` through `get_help_spec`, not `get_usage_pieces`. So the `--help` argument list and messages like `Invalid value for '[[foo|bar|baz]]...'` still show doubled brackets. I left them alone because the task was limited to the usage line. Fixing them means applying the same check in `make_metavar` and updating whichever existing tests expect the doubled form.",
+  "ttft_ms": 2207,
+  "type": "result",
+  "duration_ms": 102019,
+  "uuid": "75a5acc5-a2d6-42cb-98cf-5f93afe42a02",
+  "ttft_stream_ms": 1886,
+  "time_to_request_ms": 83,
+  "first_content_frame_ms": 1886,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

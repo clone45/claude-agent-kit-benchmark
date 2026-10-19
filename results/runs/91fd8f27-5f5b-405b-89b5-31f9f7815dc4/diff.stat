@@ -1,0 +1,6 @@
+ src/click/utils.py                               | 45 +++++++++++-------------
+ tests/test_utils/test_make_default_short_help.py | 21 +++++++++--
+ 2 files changed, 40 insertions(+), 26 deletions(-)
+
+M	src/click/utils.py
+M	tests/test_utils/test_make_default_short_help.py

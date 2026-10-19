@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 106399,
+  "stop_reason": "end_turn",
+  "session_id": "85522214-3e36-4f46-bbb2-4f4e8c3f8d08",
+  "total_cost_usd": 0.2968706,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 19238,
+    "cache_read_input_tokens": 210373,
+    "output_tokens": 5041,
+    "output_tokens_details": {
+      "thinking_tokens": 880
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 19238,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 5041,
+      "cacheReadInputTokens": 210373,
+      "cacheCreationInputTokens": 19238,
+      "webSearchRequests": 0,
+      "costUSD": 0.2968706,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 880,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`click.edit` now accepts `os.PathLike` values like `pathlib.Path` for `filename`, either on its own or inside an iterable mixed with strings. Passing a `Path` edits that file and returns `None`, the same as passing a string. The full test suite passes (2262 passed, 24 skipped, 1 xfailed), and `ruff check`, `ruff format --check` and strict `mypy` are all clean.\n\n**Changes:**\n- **`src/click/termui.py`:**\n  - `filename` is now typed `str | os.PathLike[str] | cabc.Iterable[str | os.PathLike[str]] | None`. That's on the `@overload` with `text: None` and on the implementation signature. The other two overloads don't take `filename`, so they're unchanged.\n  - The code now wraps a single `str` or `os.PathLike` value in a tuple before handing it to the editor. Before, only `str` was wrapped, so a lone `Path` would have been iterated over instead of treated as one file.\n  - The docstring describes the newly accepted values and has a `.. versionchanged:: 8.6.0` note (the project version is `8.6.0.dev`). I also fixed an existing typo there: it said \"Invoke `click.file` once per file\", which should be `click.edit`.\n- **`src/click/_termui_impl.py`:** `Editor.edit_files` now takes `cabc.Iterable[str | os.PathLike[str]]`. Its body needed no change, because `subprocess.Popen` already accepts path-like arguments.\n- **`tests/typing/typing_edit.py`** (new file): uses `assert_type` to pin a `None` return for a string, a `Path`, and a list mixing both. To check that it really guards the types, I temporarily put the old annotation back. `mypy` then reported 3 errors in this file, and I restored the change afterwards.\n- **`tests/test_termui.py`:** added `test_edit_pathlike`, which runs in two forms, a single `Path` and a list holding a string and a `Path`. It edits real files with a `sed` editor command and checks both the file contents and the `None` return. Like the existing `sed` tests, it's skipped on Windows.\n\nNothing is committed; the changes are in the working tree, including the new untracked typing file.",
+  "ttft_ms": 2509,
+  "type": "result",
+  "duration_ms": 113855,
+  "uuid": "6f81483d-c38c-4634-88ec-52f4cfafbf58",
+  "ttft_stream_ms": 1732,
+  "time_to_request_ms": 69,
+  "first_content_frame_ms": 1732,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

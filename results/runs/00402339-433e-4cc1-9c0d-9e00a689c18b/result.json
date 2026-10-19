@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 20858,
+  "stop_reason": "end_turn",
+  "session_id": "510f49ef-7dc2-4d75-a456-865ba498f516",
+  "total_cost_usd": 0.06947060000000001,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 2999,
+    "cache_read_input_tokens": 86133,
+    "output_tokens": 1411,
+    "output_tokens_details": {
+      "thinking_tokens": 115
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 2999,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1411,
+      "cacheReadInputTokens": 86133,
+      "cacheCreationInputTokens": 2999,
+      "webSearchRequests": 0,
+      "costUSD": 0.06947060000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 115,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "It's decided while the arguments are parsed, before the group's callback ever runs:\n\n1. **Default coupling:** in `src/click/core.py`, `Group.__init__` (lines 1785\u20131789) sets `no_args_is_help = not invoke_without_command` when you don't pass `no_args_is_help`. A plain group has `invoke_without_command=False`, so it gets `no_args_is_help=True`.\n2. **The decision:** `Group.parse_args` (line 2038, check at 2039\u20132040) raises `NoArgsIsHelpError(ctx)` when `not args and self.no_args_is_help and not ctx.resilient_parsing`. This runs from `Command.make_context` (line 1393), before `invoke`, so the callback never runs.\n3. **Printing:** in `src/click/exceptions.py`, `NoArgsIsHelpError.__init__` (lines 332\u2013339) uses `ctx.get_help()` as its message, and `show()` echoes it to stderr. `Command.main` catches it as a `ClickException` (core.py ~1629) and in standalone mode calls `e.show` and exits with the `UsageError` code (2).\n4. **How the two flags combine** (once parsing gets past the check), in `Group.invoke` (line 2052, branch at 2058\u20132063). With no subcommand (`not ctx._protected_args`):\n   - if `invoke_without_command` is set, the callback runs (`super().invoke`) and the result callback gets its return value, or `[]` for chained groups;\n   - otherwise it calls `ctx.fail(\"Missing command.\")`.\n5. **Result:**\n   - Defaults: help is shown.\n   - `invoke_without_command=True`: the callback runs.\n   - `invoke_without_command=True, no_args_is_help=True`: help still wins, because `parse_args` runs first.\n   - `no_args_is_help=False` without `invoke_without_command`: you get the \"Missing command.\" error instead of help.\n   - This only applies to a truly empty argv. Options with no subcommand skip the help check and reach step 4.\n6. **Plain commands:** `Command.parse_args` (lines 1396\u20131398) has the same check, but there `no_args_is_help` defaults to `False`.",
+  "ttft_ms": 5657,
+  "type": "result",
+  "duration_ms": 21444,
+  "uuid": "a5245b7a-2ac1-456a-b9fa-8cca475cb0d5",
+  "ttft_stream_ms": 4562,
+  "time_to_request_ms": 81,
+  "first_content_frame_ms": 4562,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

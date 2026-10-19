@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 39775,
+  "stop_reason": "end_turn",
+  "session_id": "4fdd9589-98d1-4c33-9fd9-dc7deec4ca79",
+  "total_cost_usd": 0.3209328,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 26857,
+    "cache_read_input_tokens": 193304,
+    "output_tokens": 3368,
+    "output_tokens_details": {
+      "thinking_tokens": 1080
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 26857,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 3368,
+      "cacheReadInputTokens": 193304,
+      "cacheCreationInputTokens": 26857,
+      "webSearchRequests": 0,
+      "costUSD": 0.3209328,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1080,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I didn't change anything, because the per-step chance was already in the tree when I started. Commit `08044fc` (\"harness checkpoint after F1\") had added it to `src/modules/Euclid/EuclidEngine.hpp`, along with tests in `tests/euclid/engine_test.cpp` and an updated `tests/euclid/README.md`. The working tree is clean, and the module and widget are untouched (the module still calls the six-argument `process`). I reviewed that commit against your spec, and it meets every point.\n\n**Engine:**\n- **`Rng`:** a xorshift32 in namespace `euclid`, starting at `0x9E3779B9`. `seed(0)` stores the default, `next()` uses 13/17/5, and `percent()` is `next() % 100`. `Sequencer` has a public `Rng rng;`.\n- **Seven-argument `process`:** the new overload clamps `chance` to 0..100. On a landing (clock edge or reset) it sets `muted = pattern.hit[position] && !roll(chance)`. `roll` returns true at 100 and false at 0 without touching the generator, and calls `rng.percent()` exactly once for 1..99. A rest never reaches `roll`.\n- **Holding a lost roll:** `gate = hit && !muted`, so a lost step reports no `struck` and keeps `gate` low until the playhead moves. Idle samples never re-roll. `gate_gap` still comes from the `gate` reported on the previous sample, and the pattern table is never modified.\n- **Six-argument form:** it passes chance 100. I compared it with the code before the commit: the old `struck` was `hit[0]` on a reset and `hit[position]` on a clock, which is the same as the new `landed && gate` when nothing is muted, so its behaviour is unchanged.\n- **`load()`:** it clears `muted` and doesn't roll.\n- **Header comment:** a CHANCE section describes the rule, and the `gate`/`struck` descriptions were updated to match.\n\n**Tests:**\n- **Six-argument form unchanged:** 200,000 random samples where the six-argument form, chance 100 and chance 250 (clamped) produce identical output, and none of them advances the generator.\n- **Chance 0:** nothing strikes and `gate` never goes high, on clocks or resets, and the generator isn't touched. A negative chance behaves the same, and `load` still shows step 1's gate.\n- **Determinism with a seed:** a second generator with the same seed predicts every roll (one per landing on a hit, none on rests or idle samples, one on a reset onto a hit). Equal seeds give equal runs; different seeds give different runs.\n- **Lost roll:** the gate stays low with no strike for 500 idle samples and through a ROT change, without re-rolling. The next clock strikes, and a reset from the lost step reports no `gate_gap`.\n\n**Checks:**\n- `bash scripts/vg_check.sh compile Euclid`: `ok Euclid.cpp`. Euclid is the only module that includes the engine.\n- `bash scripts/vg_check.sh tests`: all tests pass, exit code 0. In `tests/euclid`, `pattern_test` passes 63 checks, `engine_test` 161 and `seq3_parity_test` 36, all with 0 failures, and they compile cleanly with `-Wall -Wextra`.",
+  "ttft_ms": 2737,
+  "type": "result",
+  "duration_ms": 49935,
+  "uuid": "fff867b7-de44-4438-b91a-356a97b80218",
+  "ttft_stream_ms": 2069,
+  "time_to_request_ms": 78,
+  "first_content_frame_ms": 2069,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

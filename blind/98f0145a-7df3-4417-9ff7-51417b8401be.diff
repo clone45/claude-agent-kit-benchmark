@@ -1,0 +1,90 @@
+diff --git a/src/click/core.py b/src/click/core.py
+index 71839df..1e5c82f 100644
+--- a/src/click/core.py
++++ b/src/click/core.py
+@@ -3942,14 +3942,28 @@ class Argument(Parameter):
+         return self.name.upper()
+ 
+     def make_metavar(self, ctx: Context) -> str:
++        return self._format_metavar(ctx, reuse_type_brackets=False)
++
++    def _format_metavar(self, ctx: Context, reuse_type_brackets: bool) -> str:
++        """Build the metavar, wrapping it in square brackets if the argument
++        is optional.
++
++        :param reuse_type_brackets: If the type's metavar is already wrapped in
++            square brackets, as with :class:`Choice` and :class:`DateTime`,
++            let those brackets mark the argument as optional instead of
++            adding a second pair.
++        """
+         if self.metavar is not None:
+             return self.metavar
+         var = self.type.get_metavar(param=self, ctx=ctx)
+         if not var:
+             var = self.name.upper()
++        type_bracketed = (
++            reuse_type_brackets and var.startswith("[") and var.endswith("]")
++        )
+         if self.deprecated:
+             var += "!"
+-        if not self.required:
++        if not self.required and not type_bracketed:
+             var = f"[{var}]"
+         if self.nargs != 1:
+             var += "..."
+@@ -3977,7 +3991,7 @@ class Argument(Parameter):
+         return name, [arg], []
+ 
+     def get_usage_pieces(self, ctx: Context) -> list[str]:
+-        return [self.make_metavar(ctx)]
++        return [self._format_metavar(ctx, reuse_type_brackets=True)]
+ 
+     def get_help_spec(self, ctx: Context) -> str:
+         """Returns the left column of the argument's help record: its metavar,
+diff --git a/tests/test_arguments.py b/tests/test_arguments.py
+index 5921905..2733536 100644
+--- a/tests/test_arguments.py
++++ b/tests/test_arguments.py
+@@ -832,6 +832,42 @@ def test_argument_metavar_marks_optional(runner, kwargs, expected):
+     assert result.output.splitlines()[0] == f"Usage: cli [OPTIONS] {expected}"
+ 
+ 
++_CHOICE = click.Choice(["foo", "bar", "baz"])
++_DATETIME = click.DateTime(formats=["%Y-%m-%d"])
++
++
++@pytest.mark.parametrize(
++    ("kwargs", "expected"),
++    [
++        ({"type": _CHOICE, "nargs": -1}, "[foo|bar|baz]..."),
++        ({"type": _CHOICE, "required": False}, "[foo|bar|baz]"),
++        ({"type": _CHOICE, "default": "foo"}, "[foo|bar|baz]"),
++        ({"type": _CHOICE, "nargs": 2, "required": False}, "[foo|bar|baz]..."),
++        ({"type": _CHOICE, "required": False, "deprecated": True}, "[foo|bar|baz]!"),
++        ({"type": _CHOICE}, "{foo|bar|baz}"),
++        ({"type": _CHOICE, "nargs": -1, "required": True}, "{foo|bar|baz}..."),
++        ({"type": _DATETIME, "required": False}, "[%Y-%m-%d]"),
++        ({"type": _DATETIME, "nargs": -1}, "[%Y-%m-%d]..."),
++        ({"type": _DATETIME}, "[%Y-%m-%d]"),
++        ({"type": _CHOICE, "required": False, "metavar": "MODE"}, "MODE"),
++        ({"type": int, "required": False}, "[FOO]"),
++    ],
++)
++def test_argument_usage_reuses_type_brackets(runner, kwargs, expected):
++    """A type whose metavar is already bracketed is not bracketed again in
++    the usage line when the argument is optional.
++    """
++
++    @click.command()
++    @click.argument("foo", **kwargs)
++    def cli(foo):
++        pass
++
++    result = runner.invoke(cli, ["--help"])
++    assert result.exit_code == 0, result.output
++    assert result.output.splitlines()[0] == f"Usage: cli [OPTIONS] {expected}"
++
++
+ @pytest.mark.parametrize(
+     ("deprecated", "expected_label"),
+     [(True, "(DEPRECATED)"), ("use g instead", "(DEPRECATED: use g instead)")],

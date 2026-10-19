@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 78692,
+  "stop_reason": "end_turn",
+  "session_id": "e18e4c26-dd07-4d3f-8b38-01ab43dcfe38",
+  "total_cost_usd": 0.26217440000000003,
+  "usage": {
+    "input_tokens": 22,
+    "cache_creation_input_tokens": 10948,
+    "cache_read_input_tokens": 287212,
+    "output_tokens": 5853,
+    "output_tokens_details": {
+      "thinking_tokens": 1374
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 10948,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 22,
+      "outputTokens": 5853,
+      "cacheReadInputTokens": 287212,
+      "cacheCreationInputTokens": 10948,
+      "webSearchRequests": 0,
+      "costUSD": 0.26217440000000003,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1374,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 15,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Optional `Choice` and `DateTime` arguments now show single brackets in the usage line: `[foo|bar|baz]...`, `[foo|bar|baz]` and `[%Y-%m-%d]`. The full test suite passes.\n\n**Blocked on me:** nothing.\n\n**Changed** (nothing committed):\n- `src/click/core.py`: `Argument.get_usage_pieces` now checks whether the argument is optional, has no explicit `metavar`, and gets a metavar from its type that is already in brackets. In that case it uses the type's brackets as the optional marker and adds only `!` (if deprecated) and `...` (if `nargs != 1`). Everything else still goes through `make_metavar`, so required arguments (e.g. `{foo|bar|baz}`), user-set metavars and plain `[FOO]` render as before.\n- `src/click/core.py`: new helper `_is_bracketed`. It only accepts a metavar that is wrapped in one outer pair of brackets, so a custom type returning `[a]|[b]` still gets wrapped, as `[[a]|[b]]`.\n- `tests/test_arguments.py`, two new tests:\n  - `test_argument_type_brackets_mark_optional` covers `Choice` and `DateTime` as required, optional, `nargs=-1`, `nargs=2`, deprecated, and with an explicit metavar.\n  - `test_argument_type_metavar_partial_brackets` covers the `[a]|[b]`, `[a]` and `[[a]]` cases from a custom type.\n\n**Verified:**\n- `tests/test_arguments.py`: 220 passed.\n- Full suite: 2274 passed, 24 skipped, 1 xfailed, no failures.\n- `ruff check` and `ruff format --check` on both files are clean, and `mypy` reports no issues.\n- I didn't run the new tests against the old code to watch them fail. The old code wrapped the type's brackets again, so the optional cases would have come out as `[[foo|bar|baz]]`.\n\n**Found:**\n- **Help column:** `make_metavar` itself is unchanged, as the task scoped the fix to `get_usage_pieces`. The left column of `--help` (`get_help_spec`) and error messages like \"Invalid value for '\u2026'\" still show doubled brackets for optional `Choice`/`DateTime` arguments. If you want those to match the usage line, the same check would go into `make_metavar`; that would change error-message text, so it needs its own decision.\n- **Choice options:** the order of `!` and the type's brackets in the new output is `[foo|bar|baz]!`, which follows the existing order (type metavar, then `!`). `Choice` options are unaffected, because options don't go through `Argument.get_usage_pieces`.",
+  "ttft_ms": 3123,
+  "type": "result",
+  "duration_ms": 87259,
+  "uuid": "fd68dc35-5df3-4011-a31d-969f242e61d6",
+  "ttft_stream_ms": 2762,
+  "time_to_request_ms": 75,
+  "first_content_frame_ms": 2762,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,28 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "Add a playback direction to the VX Drum Sequencer engine in `src/modules/VXDrumSequencer/VXDrumSequencerEngine.hpp`, which is Rack-free and compiled with only its own directory on the include path. Only the engine is in scope: do not change the module or the widget, and keep every existing signature working.\n\nSpecification:\n\n- Add `enum Direction { FORWARD = 0, BACKWARD = 1, PENDULUM = 2 };` in namespace `vx_drum_sequencer`.\n- `Playhead` gains a public `int direction` that defaults to `FORWARD`, and `int advance(int length)` honours it. `length` is clamped to 1..STEPS as today.\n  - FORWARD: unchanged.\n  - BACKWARD: the next step is the previous one; from step 1 (position 0) it wraps to the last step (`length - 1`). A position at or beyond `length` (the length shrank) goes to the last step.\n  - PENDULUM: steps run forward to the last step, then backward to step 1, then forward again, and the end steps are not repeated. For a length of 4 starting at position 0, successive calls return 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, ... For a length of 1 every call returns 0. A position at or beyond `length` goes to the last step and the next move is backward.\n  - A hand-off (position -1) lands on step 1 (position 0) in every direction, and in PENDULUM the next move is forward.\n- `Playhead::reset()` keeps putting step 1 current and, in PENDULUM, makes the next move forward. `Playhead::rewind()` is unchanged.\n- `Sequencer` gains `void setDirection(int d)`, which stores `d` on its playhead and treats any value outside 0..2 as `FORWARD`, and `int direction() const` which returns it. Everything else about `Sequencer` is unchanged.\n\nAdd a standalone test directory `tests/vx_drum_sequencer` with a `check.hpp` in the style of `tests/euclid/check.hpp`, a README with the g++ line (`g++ -std=c++11 -O2 -I ../../src/modules/VXDrumSequencer -o direction_test direction_test.cpp && ./direction_test`), and a `direction_test.cpp` covering all three directions, the hand-off, the shrink cases, and the reset rule. Note the direction in the engine's header comment.\n\nNotes: CLAUDE.md lists the compile check and the standalone tests. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the compile check for every module you touched and the standalone tests, then end with a short summary of what you changed and why.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "20",
+    "--session-id",
+    "c1238765-b875-42d7-a0d9-2e4e04cc8146",
+    "--plugin-dir",
+    "/mnt/c/Code/routing_test/plugin"
+  ],
+  "cwd": "/home/clone45/routing_test_work/voxglitch"
+}

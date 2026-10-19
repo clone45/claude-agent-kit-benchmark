@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 61247,
+  "stop_reason": "end_turn",
+  "session_id": "715df9dd-eba4-47e9-a94c-16e84bacae3b",
+  "total_cost_usd": 0.2659582,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 13707,
+    "cache_read_input_tokens": 246551,
+    "output_tokens": 5346,
+    "output_tokens_details": {
+      "thinking_tokens": 1220
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 13707,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 5346,
+      "cacheReadInputTokens": 246551,
+      "cacheCreationInputTokens": 13707,
+      "webSearchRequests": 0,
+      "costUSD": 0.2659582,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1220,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`click.edit(filename=...)` now accepts `pathlib.Path` and other `os.PathLike` values, on their own or mixed with strings in an iterable. It edits the file(s) and returns `None`, same as the string form. The full test suite passes.\n\n**Blocked on me**\nNothing.\n\n**Changed**\n- `src/click/termui.py`:\n  - `filename` is now typed `str | os.PathLike[str] | Iterable[str | os.PathLike[str]] | None`. That type is on the `@overload` that has `filename` (the `text: None` one) and on the real function. The other two overloads have no `filename` parameter, so they didn't need changing.\n  - A single `str` or `os.PathLike` value is wrapped into a one-item tuple, the same way a single string already was.\n  - The docstring now says each file may be a `str` or a `pathlib.Path`, and has a new `.. versionchanged:: 8.6.0` note (the project version is `8.6.0.dev`).\n  - Added `import os`.\n- `src/click/_termui_impl.py`: `Editor.edit_files` takes `Iterable[str | os.PathLike[str]]` and turns each entry into a string with `os.fspath`. That way the editor command always gets plain strings.\n- `tests/typing/typing_edit.py` (new): uses `assert_type` to require a `None` return for a string, a single `Path`, `[\"f.txt\", Path(\"g.txt\")]`, and a tuple of `Path`s.\n- `tests/test_termui.py`:\n  - `test_edit_pathlike` and `test_edit_mixed_str_and_pathlike` edit real files with `sed`, then check the file contents and the `None` result.\n  - A new case in `test_editor_path_normalization` checks that a `Path` mixed with a string reaches the editor as plain strings.\n\n**Verified**\n- `ruff check` and `ruff format --check` are clean on all four files; `mypy` (strict) is clean on `src` and `tests/typing`.\n- To make sure the typing file really checks something, I ran mypy on a throwaway file containing `assert_type(click.edit(filename=Path(...)), str)` and `filename=[b\"x\"]`. Both were rejected, so the `None` return type is enforced and bytes still aren't allowed.\n- Test run: `tests/test_termui.py` had 260 passed and 23 skipped. The full suite had 2263 passed, 24 skipped, 1 xfailed and 31000 deselected (the deselection comes from the project's test settings, not from me).\n- The two `sed`-based tests are skipped on Windows, like the existing `test_edit`.\n\n**Found**\n- The `filename` docstring already said \"Invoke `click.file` once per file\" before this change; it probably means `click.edit`. I left it alone because it's outside this task, but it's a one-word fix.\n- There's no `CHANGES.md` in the tree (even though `docs/changes.md` includes it), so I added no changelog entry.",
+  "ttft_ms": 4855,
+  "type": "result",
+  "duration_ms": 71359,
+  "uuid": "be0ed58e-b0a3-4474-8c30-5810f4fbd321",
+  "ttft_stream_ms": 3426,
+  "time_to_request_ms": 72,
+  "first_content_frame_ms": 3426,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

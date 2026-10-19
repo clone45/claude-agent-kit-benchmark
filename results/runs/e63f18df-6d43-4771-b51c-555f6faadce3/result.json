@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 46707,
+  "stop_reason": "end_turn",
+  "session_id": "9b72a020-792c-4184-a062-09d7dc6e5d78",
+  "total_cost_usd": 0.1329316,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 4365,
+    "cache_read_input_tokens": 203398,
+    "output_tokens": 2863,
+    "output_tokens_details": {
+      "thinking_tokens": 364
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 4365,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 2863,
+      "cacheReadInputTokens": 203398,
+      "cacheCreationInputTokens": 4365,
+      "webSearchRequests": 0,
+      "costUSD": 0.1329316,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 364,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed the dash check in `click.Path.convert` so it never compares bytes with str. Converting `'-'`, `''`, `b'-'` and `b''` with `allow_dash=True` now runs without any `BytesWarning` under `python -bb`, and the full test suite passes.\n\n**Blocked on me:** nothing.\n\n**Changed** (nothing committed):\n- `src/click/types.py:1169`: the old check `rv in (b\"-\", \"-\")` compared the value against both a bytes and a str dash, so a bytes value always hit a bytes-vs-str comparison. It now picks the dash to match the value's type (`b\"-\"` for bytes, `\"-\"` otherwise) and does one `==` comparison. Path objects still go down the `\"-\"` side, which was already safe: `BytesWarning` is only raised when bytes are compared with str.\n- `tests/test_types/test_Path.py`: new test `test_path_allow_dash_no_bytes_warning`. It runs the four conversions in a child process started with `-bb -W error::BytesWarning` and checks that the process exits cleanly with no `BytesWarning` in its error output. I also added `subprocess` and `sys` to the imports.\n\n**Verified:**\n- Before the fix, running the four conversions under `-bb` failed at that line with `BytesWarning: Comparison between bytes and string`.\n- I put the original `types.py` back temporarily: the new test failed against it, then passed once the fix was restored.\n- `ruff check`, `ruff format --check` and `mypy` all report no issues.\n- Full suite: 2262 passed, 24 skipped, 1 xfailed.\n\n**Found:** nothing else needs follow-up.",
+  "ttft_ms": 2180,
+  "type": "result",
+  "duration_ms": 55857,
+  "uuid": "897a9498-e045-4d6d-ab60-04b7dd3689f3",
+  "ttft_stream_ms": 1889,
+  "time_to_request_ms": 81,
+  "first_content_frame_ms": 1889,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

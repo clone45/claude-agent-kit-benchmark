@@ -1,0 +1,202 @@
+{
+  "run_id": "686b620c-6f5e-4c98-b188-a18e6a082fa3",
+  "blind_id": "78e8c239-aa0f-44b8-b3b5-af65a4e6178b",
+  "session_id": "7e68b882-0a15-4ff6-b2bb-f2a357f68afc",
+  "task_id": "310f6386-d0f0-44e6-ac67-7c2f2f5fd147",
+  "task_label": "R1",
+  "task_type": "refactor",
+  "task_length": "short",
+  "condition_id": "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9",
+  "condition_label": "B",
+  "rep_index": 1,
+  "session_mode": "chain",
+  "session_mode_id": "ea3c2661-9782-4d30-a5e5-857746f50235",
+  "chain_id": "7ef3d3f2-3dc1-426f-bfcb-25de2b0a48a4",
+  "chain_step": 6,
+  "branch": null,
+  "base_commit": "404a6be873a60d2a95d92c17ed2d2be1ddbddc37",
+  "checkpoint_commit": "5c6699e0177625c5fb5bcb29d120e81d5298a364",
+  "status": "completed",
+  "process": {
+    "rc": 0,
+    "wall_s": 57.1,
+    "timed_out": false,
+    "started_at": "2026-10-19T04:47:33.621666+00:00",
+    "ended_at": "2026-10-19T04:48:30.718702+00:00"
+  },
+  "exit_code": 0,
+  "result_subtype": "success",
+  "is_error": false,
+  "num_turns": 7,
+  "duration_ms": 53518,
+  "duration_api_ms": 309305,
+  "claude_total_cost_usd": 1.9689633999999998,
+  "claude_cost_cumulative": true,
+  "usage_is_cumulative": true,
+  "cost": {
+    "by_model": {
+      "claude-opus-5-5": {
+        "input_tokens": 14,
+        "cache_read_tokens": 738253,
+        "cache_create_tokens": 19893,
+        "output_tokens": 3008,
+        "thinking_tokens": 786,
+        "cost_input_side_usd": 0.306851,
+        "cost_output_usd": 0.06016,
+        "cost_usd": 0.367011,
+        "claude_cost_usd": 0.36701059999999996,
+        "basis": "stream_per_call",
+        "context_window": 1000000
+      }
+    },
+    "total_usd": 0.367011,
+    "unpriced_models": []
+  },
+  "model_usage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 3008,
+      "thinkingTokens": 786,
+      "cacheReadInputTokens": 738253,
+      "cacheCreationInputTokens": 19893,
+      "webSearchRequests": 0,
+      "costUSD": 0.36701059999999996,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "model_usage_cumulative": {
+    "claude-opus-5-5": {
+      "inputTokens": 100,
+      "outputTokens": 24535,
+      "thinkingTokens": 7871,
+      "cacheReadInputTokens": 3227317,
+      "cacheCreationInputTokens": 104050,
+      "webSearchRequests": 0,
+      "costUSD": 1.9689633999999998,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "stream": {
+    "per_model": {
+      "claude-opus-5-5": {
+        "calls": 7,
+        "input": 14,
+        "cache_read": 738253,
+        "cache_create": 19893,
+        "cache_create_5m": 0,
+        "cache_create_1h": 19893,
+        "main_calls": 7,
+        "sub_calls": 0
+      }
+    },
+    "main_api_calls": 7,
+    "sub_api_calls": 0,
+    "sub_calls_by_type": {},
+    "context_end_tokens": 115506,
+    "context_max_tokens": 115506,
+    "shunt_denials": 0,
+    "tool_errors": 0,
+    "permission_denied_events": 0,
+    "api_retries": 0,
+    "api_retry_errors": []
+  },
+  "context_window": 1000000,
+  "context_end_ratio": 0.115506,
+  "transcript": {
+    "records": 464,
+    "compactions": 0,
+    "compaction_meta": [],
+    "main_api_calls": 50,
+    "main_output_tokens": 24535,
+    "models": {
+      "claude-opus-5-5": 50
+    }
+  },
+  "transcripts_found": {
+    "main": true,
+    "subagents": 0
+  },
+  "subagents": [],
+  "rework": {
+    "refuter_runs": 0,
+    "refuter_fail": 0,
+    "builder_runs": 0,
+    "refuter_verdicts": []
+  },
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "init_plugins": [
+    "agent-kit",
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring"
+  ],
+  "init_agents": [
+    "agent-kit:builder",
+    "agent-kit:bulk-reader",
+    "agent-kit:code-writer",
+    "agent-kit:debugger",
+    "agent-kit:refuter",
+    "agent-kit:researcher",
+    "agent-kit:scout",
+    "claude",
+    "Explore",
+    "general-purpose",
+    "Plan",
+    "statusline-setup"
+  ],
+  "init_model": "claude-opus-5-5",
+  "init_permission_mode": "bypassPermissions",
+  "diff": {
+    "diff_bytes": 0,
+    "files_changed": []
+  },
+  "checks": {
+    "tests": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "ALL PASS (0 failures)"
+    },
+    "compile_groovebox": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "ok   GrooveBoxExpander.cpp"
+    },
+    "function_lengths": {
+      "src/modules/GrooveBox/GrooveBox.hpp:process": 19
+    },
+    "all_pass": true
+  },
+  "final_text_chars": 2056
+}

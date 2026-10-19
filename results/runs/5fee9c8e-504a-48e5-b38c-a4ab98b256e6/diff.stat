@@ -1,0 +1,6 @@
+ src/click/core.py       | 34 ++++++++++++++++++++++
+ tests/test_arguments.py | 76 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 110 insertions(+)
+
+M	src/click/core.py
+M	tests/test_arguments.py

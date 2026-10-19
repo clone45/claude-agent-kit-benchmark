@@ -1,0 +1,10 @@
+ .../VXDrumSequencer/VXDrumSequencerEngine.hpp      |  81 ++++-
+ tests/vx_drum_sequencer/.gitignore                 |   1 +
+ tests/vx_drum_sequencer/README.md                  |  14 +
+ tests/vx_drum_sequencer/direction_test.cpp         | 402 +++++++++++++++++++++
+ 4 files changed, 493 insertions(+), 5 deletions(-)
+
+M	src/modules/VXDrumSequencer/VXDrumSequencerEngine.hpp
+M	tests/vx_drum_sequencer/.gitignore
+M	tests/vx_drum_sequencer/README.md
+A	tests/vx_drum_sequencer/direction_test.cpp

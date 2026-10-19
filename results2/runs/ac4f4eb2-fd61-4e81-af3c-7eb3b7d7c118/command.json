@@ -1,0 +1,26 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "This is the next task in the same working session. Changes from the earlier tasks have been checked in by the harness; continue from the current state of the tree.\n\nAdd a per-step chance to the Euclid sequencing engine in `src/modules/Euclid/EuclidEngine.hpp`, which is Rack-free and compiled standalone by `tests/euclid`. Only the engine is in scope: do not change the module or the widget.\n\nSpecification:\n\n- Add `struct Rng` in namespace `euclid`: a xorshift32 with `uint32_t state` that starts at `0x9E3779B9`, `void seed(uint32_t s)` which stores `s`, or `0x9E3779B9` when `s` is 0, `uint32_t next()` which applies `x ^= x << 13; x ^= x >> 17; x ^= x << 5;` and stores and returns the result, and `int percent()` which returns `next() % 100`.\n- `Sequencer` gains a public member `Rng rng;`.\n- Add an overload `Out process(bool reset_edge, bool clock_edge, int window_samples, int hits, int steps, int rot, int chance)`. The existing six-argument `process` must keep working and behave exactly as `chance` 100.\n- `chance` is a percentage clamped to 0..100. It applies when the playhead lands on a step through a clock edge or a reset. If that step is a rest, nothing is rolled. If it is a hit: with chance 100 the step plays and nothing is rolled; with chance 0 the step does not play and nothing is rolled; otherwise exactly one call to `rng.percent()` is made and the step plays when the result is below `chance`. No other code path may consume the generator.\n- A step that plays reports `struck` on the landing sample and `gate` high for as long as the playhead stays on it. A step that lost its roll behaves as a rest for the whole stay: `struck` false on the landing sample and `gate` low on every sample until the playhead moves. Idle samples never re-roll. `gate_gap` keeps its meaning (it depends on whether `gate` was high on the previous sample). The pattern table itself is never changed.\n- `load()` does not roll; after load, step 1's gate follows the pattern as it does today.\n\nUpdate the comments at the top of the engine to describe the chance rule, and add tests to `tests/euclid` covering: the six-argument form unchanged, chance 0, determinism with a seeded generator, and a lost roll holding the gate low until the next clock. All existing tests must keep passing.\n\nNotes: CLAUDE.md lists the compile check and the standalone tests. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the compile check for every module you touched and the standalone tests, then end with a short summary of what you changed and why.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "20",
+    "--resume",
+    "c047ad25-1a58-491b-b90f-f3fba967d0b3"
+  ],
+  "cwd": "/home/clone45/routing_test_work/voxglitch"
+}

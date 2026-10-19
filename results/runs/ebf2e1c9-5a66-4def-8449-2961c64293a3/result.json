@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 87030,
+  "stop_reason": "end_turn",
+  "session_id": "ff415539-7e42-4d4a-9dc6-447015974be8",
+  "total_cost_usd": 0.5346174,
+  "usage": {
+    "input_tokens": 28,
+    "cache_creation_input_tokens": 30873,
+    "cache_read_input_tokens": 457607,
+    "output_tokens": 9800,
+    "output_tokens_details": {
+      "thinking_tokens": 3376
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 30873,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 28,
+      "outputTokens": 9800,
+      "cacheReadInputTokens": 457607,
+      "cacheCreationInputTokens": 30873,
+      "webSearchRequests": 0,
+      "costUSD": 0.5346174,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3376,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 15,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`click.Path` is now generic over the type it converts to, and `path_type` sets that type for static type checkers. Runtime behavior is unchanged. The full test suite passes (2262 passed, 24 skipped, 1 xfailed), and `ruff check`, `ruff format --check` and strict `mypy` are all clean.\n\nI didn't look at the HEAD commit (\"task F2 condition A\"), even though it removes a version of this change, and wrote this independently.\n\n**`src/click/types.py`**\n- **New type variable `_PathT_co`:** it defaults to `str | bytes | os.PathLike[str]`. It follows the same pattern as the existing `_InputT_contra`: `typing_extensions` under `TYPE_CHECKING`, `typing.TypeVar(default=...)` on Python 3.13+, and no default on older versions.\n- **Class declaration:** `class Path(ParamType[_PathT_co], t.Generic[_PathT_co])`. This makes `Path[pathlib.Path]` work at runtime. I checked it on Python 3.13 and on the system Python 3.10 (`get_args` returns `(pathlib.Path,)`).\n- **`__init__` overloads**, so that `path_type` sets the type:\n  - no `path_type`, or `path_type=None` \u2192 `Path[str | bytes | os.PathLike[str]]`\n  - `path_type` passed positionally (8th argument) \u2192 `Path[T]`\n  - `path_type=` passed by keyword \u2192 `Path[T]`\n  - a fallback taking `type | None` \u2192 `Path[Any]`. Without it, code that passes `path_type` from a variable would stop type-checking.\n- **Return types:** `convert` and `coerce_path_result` now return `_PathT_co`, and `self.type` is typed `type[_PathT_co] | None`. The casts and one `# type: ignore[call-arg]` are type-checker-only; no runtime logic changed.\n- **Docstring:** added a `.. versionchanged:: 8.5.0` note, matching the version used for `ParamType`'s latest change.\n\nCalling the instance, `click.prompt(type=...)`, and assigning to `ParamType[...]` all narrow correctly with no extra code, because they already use `ParamType`'s value type.\n\n**Tests**\n- **`tests/typing/typing_path.py`:** `assert_type` checks for every case you listed, plus explicit annotation and positional `path_type`. I confirmed separately that wrong assertions do fail under mypy.\n- **`tests/test_types/test_Path.py`:** new `test_path_subscript_at_runtime`, which checks `get_args` and `get_origin` on `click.Path[pathlib.Path]`.\n\nI left `Path`'s input type as the inherited `Any`. Narrowing it to `str | os.PathLike[str]` would reject bytes, which work at runtime, and that wasn't part of the request.",
+  "ttft_ms": 2572,
+  "type": "result",
+  "duration_ms": 100436,
+  "uuid": "0739143d-f8a5-4971-bb61-2894f9d9fa24",
+  "ttft_stream_ms": 1070,
+  "time_to_request_ms": 62,
+  "first_content_frame_ms": 1070,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

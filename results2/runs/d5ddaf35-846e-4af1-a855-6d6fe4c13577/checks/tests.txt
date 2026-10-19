@@ -1,0 +1,359 @@
+$ bash scripts/vg_check.sh tests
+rc=0 timed_out=False
+--- stdout
+golden table
+rotation
+clamps
+exhaustive (h, s) in 0..32 x 1..32
+dirty cache
+CV law
+pattern_test: 63 checks, 0 failures
+patch load
+reset strikes step 1 and arms the window
+the 1 ms window
+same-sample reset and clock (Clocked restarting its cycle)
+clock direct, reset one sample later (the standard's known limitation)
+reset while GATE is high
+wrap at the effective length
+STEPS shrinks below the playhead
+ROT changed between clocks
+GATE across consecutive hit steps
+struck only on edge and reset samples
+the window length is the caller's
+engine_test: 113 checks, 0 failures
+window at 48 kHz: ResetClockWindow::samplesFor(48000) = 48 samples
+random edge streams (window 48 samples)
+  seed 12345678: 250000 samples, 653 resets, 996 clocks (599 accepted by SEQ3, 25 moved off the float band), scenarios 78/82/81/73/79/64/88/76/71/92, position == index on every sample
+  seed c0ffee42: 250000 samples, 742 resets, 1301 clocks (844 accepted by SEQ3, 27 moved off the float band), scenarios 88/77/104/81/90/91/85/96/90/103, position == index on every sample
+  seed 9e3779b9: 250000 samples, 633 resets, 1167 clocks (780 accepted by SEQ3, 17 moved off the float band), scenarios 78/81/76/82/85/94/89/77/78/77, position == index on every sample
+Clocked defaults: stopped reset with the clock line held high
+running reset inside the clock's high half
+the exact boundary, integer contract
+  SEQ3 float resetGate spans 44.1k 45 / 48k 48 / 96k 97 / 192k 193 / 384k 385 samples; samplesFor gives 45 / 48 / 96 / 192 / 384
+samples compared: 762000
+seq3_parity_test: 36 checks, 0 failures
+Lane evaluation
+  ok    empty lane reads 0 V
+  ok    midpoint of a ramp interpolates
+  ok    at the first node
+  ok    at the last node
+  ok    holds after the last node
+  ok    holds before the first node
+  ok    a null snapshot reads as an empty lane
+
+Segment bend (curves between nodes)
+  ok    bend +2 at the midpoint follows the exp family
+  ok    bend -2 mirrors it exactly (10 - the +2 value)
+  ok    bend 0 is exactly linear
+  ok    a bent segment still starts at v0
+  ok    a bent segment still ends at v1
+  ok    after a split the left keeps its bend, the new node is straight
+  ok    erase shifts bends with their nodes
+  ok    resort carries the bend with its node
+
+Cursor tracking (forward play and seek-back)
+  ok    one second at 120 BPM = 2 beats
+  ok    ramp at beat 2 after playing there
+  ok    seek back re-reads correctly
+
+Lane independence (the point of the restructure)
+  ok    a stopped lane holds its position
+  ok    the running lane advanced
+  ok    the stopped lane's value holds
+  ok    the running lane's value moved
+  ok    a seek on lane 5 does not bump lane 0's serial
+  ok    lane 5's own serial bumped
+  ok    two lanes hold separate positions (lane 0)
+  ok    two lanes hold separate positions (lane 5)
+
+Seek serial (user seek vs loop wrap, per lane)
+  ok    the loop wraps
+  ok    a loop wrap does NOT bump the serial
+  ok    the wrap lands on beat 0
+  ok    a lane that is not playing does not wrap
+
+Tempo changes keep musical position
+  ok    BPM change does not move the playhead
+  ok    BPM change does not move a node
+  ok    240 BPM doubles beats per sample
+  ok    BPM clamps high
+  ok    BPM clamps low
+
+Global gestures reach every lane
+  ok    setPlayingAll starts all 16
+  ok    anyPlaying sees it
+  ok    seekAll lands every lane on the beat
+  ok    setPlayingAll(0) stops all
+
+LaneData editing
+  ok    insert keeps ascending order
+  ok    insert count
+  ok    insert at an existing beat lands to its right
+  ok    erase removes the right node
+  ok    resort fixes a dragged node
+  ok    indexOf follows the node
+  ok    lastBeat finds the furthest node
+  ok    clear empties
+  ok    eraseRange removes (lo, hi]: 3,4,5
+  ok    eraseRange with incLo removes [lo, hi]
+  ok    an empty range removes nothing
+  ok    lastBeatOf scans every lane
+  ok    node ceiling holds
+  ok    insert refuses a full lane
+
+Guards
+  ok    seek clamps below zero
+  ok    seek clamps to the ceiling
+  ok    the runaway ceiling stops that lane
+
+ALL PASS (0 failures)
+PLAY switch drives all lanes, as an edge
+  ok    all 16 lanes travelled 4 beats
+  ok    CLK fired per beat incl. the beat-0 downbeat on lane 0
+  ok    and identically on lane 15
+  ok    a poly STOP on lane 1 sticks while the switch stays up
+
+Mono inputs broadcast
+  ok    one START channel starts every lane
+  ok    one RESET channel rewinds every lane
+  ok    RWND pulsed on every lane
+
+Poly inputs address lanes independently
+  ok    lane 2 runs
+  ok    lane 0 does not
+  ok    lanes beyond the channel count are untouched
+  ok    only lane 2's CLK fired (incl. its beat-0 downbeat)
+  ok    poly RESET rewinds only lane 2
+  ok    no RWND anywhere else
+
+Loop wraps per lane, at each lane's own arrival
+  ok    lane 0 wrapped
+  ok    lane 5 has not wrapped yet
+  ok    lane 0's wrap did not RWND anyone
+  ok    lane 5 wraps in its own time
+
+BPM snapping (HalfStepQuantity's rule, mirrored)
+  ok    137.3 snaps to 137.5
+  ok    137.24 snaps to 137.0
+
+Empty lanes output 0 V while running
+  ok    all 16 lanes read 0 V when empty
+
+ALL PASS (0 failures)
+Grid capture at 1/4
+  ok    arming while stopped starts no take
+  ok    the take started on PLAY
+  ok    disarming ends the take
+  ok    START + 4 grid lines + END = 6 captures
+  ok    one undo step for the take
+  ok    a constant input simplifies to the two protected endpoints
+  ok    first node at the take start
+  ok    last node at the take end
+  ok    recorded value is the input
+  ok    the undo record holds the empty lane before
+
+Grid capture at 1/32, on absolute grid positions
+  ok    START + 16 grid lines + END
+  ok    nothing captured on other lanes
+  ok    an unpatched REC IN records 0 V
+  ok    the take's first node sits at the off-grid start beat
+  ok    captures at 1.5 and 2.0 were the grid lines crossed
+
+Latch: passed-over nodes replaced, the rest untouched
+  ok    the node before the take (beat 0) survives
+  ok    nodes inside the sweep (2.0, 3.5) were replaced
+  ok    nodes after the take (6, 8) survive
+  ok    the recorded value sits between
+  ok    undo record's before == the pre-take lane
+
+Loop wrap replaces (prev, loopEnd] and [0, B]
+  ok    the lane wrapped during the take
+  ok    node at 3.5 (between prev and the loop end) was replaced
+  ok    node at 0.5 (in [0, B] after the wrap) was replaced
+  ok    node at 2.5 (never passed over) survives with its value
+  ok    ... and its 9 V value
+  ok    a static input writes no node at the wrap (beat 0)
+  ok    the take end pins the latch edge just past beat 1
+  ok    the take's start node at 3 is protected
+
+The simplifier
+  ok    collinear nodes within 0.02 V are removed
+  ok    the endpoints are kept
+  ok    the corner survives
+  ok    only the region is touched: nodes outside it stay
+  ok    the region's interior collapsed onto its protected ends
+  ok    a node carrying a bend is never removed
+  ok    two nodes are left alone
+  ok    a node the take did not insert is never removed
+
+Poly lane mapping
+  ok    mono -> the selected lane
+  ok    unpatched -> the selected lane
+  ok    4 channels -> lanes 0..3
+  ok    16 channels -> all 16 lanes
+  ok    selected lane clamps
+  ok    a stopped target lane is not bypassed during the take
+  ok    the playing lanes took part (START + 2 grid lines + END)
+  ok    the stopped lane recorded nothing
+  ok    the stopped lane's nodes are untouched
+  ok    the selected lane is NOT a target when poly
+  ok    each lane recorded its own channel
+  ok    one undo covering the two playing lanes
+
+Bypass and the take boundary
+  ok    before arming the lane plays its nodes
+  ok    during the take the output is the live input
+  ok    an untargeted lane keeps playing its nodes
+  ok    after the take the lane plays its nodes again (not the input)
+  ok    take running
+  ok    stopping the transport ends the take while still armed
+  ok    playing again while armed starts a new take
+
+Lane full
+  ok    a full lane stops capturing (only START and END)
+  ok    the lane-full flag is raised for the editor
+  ok    the cap was never exceeded
+
+Ring overflow drops the NEWEST and counts it (no torn records)
+  ok    10 drops counted
+  ok    the oldest entry survives intact
+  ok    every record reads back exactly as pushed
+  ok    and the ring drained exactly its capacity
+  ok    space frees as the consumer catches up
+
+Review regressions
+  ok    take 1 pushed its undo before take 2's START was applied
+  ok    take 2 is open on that lane
+  ok    take 2 pushed its own undo
+  ok    take 2's before is take 1's after
+  ok    untouched nodes at 1.5, 2.0, 2.5 survive the take-end simplifier
+  ok    the take's own collinear nodes were still simplified
+  ok    the parked lane still outputs its nodes mid-take
+  ok    no coincident START/END nodes on the parked lane
+  ok    nodes 10..19 survive a seek from 0.5 to 30
+  ok    the seek capture landed on the seek target (flagged), not the grid cell below
+  ok    the take end sits just past 30
+  ok    a backward seek leaves the nodes ahead of it alone
+
+Nodes only where the value changes
+  ok    static input: 10 captures but only START and END nodes
+  ok    both carry the input
+  ok    step change: START, hold at 3, change at 4, END = 4 nodes
+  ok    the hold node sits at grid 3 with the OLD value
+  ok    the change node sits at grid 4 with the new value
+  ok    no node at grids 1, 2, 5, 6, 7
+  ok    the END pins the latch edge at 5 V
+  ok    ramp: a node at every grid step with that step's value
+  ok    the last step is carried by the END pin
+  ok    hold pinned at grid 3, the last grid point before the loop end
+  ok    the wrap capture (beat 0) became the hold node before the change
+  ok    the change node at grid 1
+  ok    START(2), 3, 0, 1, END = 5 nodes
+
+ALL PASS (0 failures)
+Phase 1: the playhead crosses the view before anything scrolls
+  ok    no scrolling before the centre
+  ok    playhead starts at the left edge
+  ok    reaches the centre of the view
+
+Phase 2: past the centre the playhead is pinned
+  ok    stays centred within a pixel over 400 beats
+  ok    the scroll followed
+
+Zoom keeps it centred
+  ok    centred at every zoom level, or legitimately in phase 1
+
+Loop wrap and rewind
+  ok    scrolled out to the playhead
+  ok    a wrap returns the view to the start
+  ok    a wrap re-arms a broken chase
+
+Suspension
+  ok    a broken chase does not move the view
+  ok    a nudge with the playhead visible stays broken
+  ok    chase re-arms when the playhead enters the view
+  ok    and it centres again on the next frame
+  ok    a held chase does not move the view during a drag
+  ok    release resumes centring
+
+A seek re-arms too
+  ok    a seek clears the break
+
+Chase never drives the scroll negative
+  ok    scroll stays at or above zero
+
+Chase stays inside the elastic extent
+  ok    chase never exceeds maxScroll
+
+Disabled chase does nothing
+  ok    the view stays where the user left it
+
+ALL PASS (0 failures)
+Empty timeline: the future is still reachable
+  ok    scroll range exists even with no content
+  ok    scrolling to the end opens MORE range (no wall)
+  ok    thumb stays inside the track
+
+The wall is gone: repeated scrolling always advances
+  ok    40 jams right keep advancing
+  ok    reached far past any content
+
+Content longer than the view
+  ok    thumb shrinks in proportion
+  ok    content is reachable
+  ok    dragging past the start clamps at 0
+
+Drag latch keeps the thumb under the pointer
+  ok    extent stays latched through the drag
+  ok    thumb tracks the pointer 1:1
+  ok    after release the extent grows again
+
+Thumb never vanishes on a very long song
+  ok    thumb keeps its minimum
+  ok    still inside the track at the far end
+
+Paging
+  ok    a page forward moves ~90%% of a screen
+  ok    a page back returns to the start
+
+Zoom keeps scroll legal
+  ok    scroll stays within range after zooming out
+  ok    thumb stays inside the track
+
+ALL PASS (0 failures)
+Publish swaps the live pointer and retires the old one
+  ok    a fresh store holds an empty lane
+  ok    the audio thread sees the new snapshot
+  ok    the old snapshot is retired, not freed
+  ok    the retired snapshot is still valid memory
+  ok    other lanes are untouched
+
+Retire-by-generation: freed only once the audio thread has moved past
+  ok    no generation has passed: nothing freed
+  ok    generation == retire + LAG: still held
+  ok    and still readable during the lag
+  ok    generation > retire + LAG: freed
+
+Edits while the audio thread is idle pile up, then drain
+  ok    50 edits without a generation tick: 50 retired
+  ok    the live snapshot is the last published
+  ok    three generations later all 50 are freed
+
+Interleaved audio/UI simulation keeps the backlog bounded
+  ok    retired backlog never exceeds LAG + 1
+  ok    edits accumulated in the live snapshots
+  ok    the engine read the growing lanes without incident
+
+Ownership edge cases
+  ok    bad publishes retire nothing
+  ok    freeRetired(all) frees regardless of generation
+
+The soft cap
+  ok    add stops at TL_MAX_NODES
+  ok    insert refuses when full
+  ok    erasing one makes room for one
+  ok    a lane holds far more than the old 256
+
+ALL PASS (0 failures)
+
+--- stderr

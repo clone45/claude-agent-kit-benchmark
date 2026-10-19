@@ -1,0 +1,8 @@
+ src/modules/Euclid/EuclidEngine.hpp |  92 +++++++++++--
+ tests/euclid/README.md              |   8 +-
+ tests/euclid/engine_test.cpp        | 252 ++++++++++++++++++++++++++++++++++++
+ 3 files changed, 339 insertions(+), 13 deletions(-)
+
+M	src/modules/Euclid/EuclidEngine.hpp
+M	tests/euclid/README.md
+M	tests/euclid/engine_test.cpp

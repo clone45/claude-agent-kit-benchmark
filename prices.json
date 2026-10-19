@@ -1,0 +1,20 @@
+{
+  "checked_on": "2026-10-18",
+  "source": "https://platform.claude.com/docs/en/about-claude/pricing",
+  "notes": [
+    "USD per million tokens. Cache write multipliers: 5-minute = 1.25x base input, 1-hour = 2x base input.",
+    "Cache read is 0.05x base input on Opus 5.5 and Sonnet 5.5, 0.1x on other models, 0.025x on Fable 5.1.",
+    "Claude Haiku 5.5 has a higher tier for prompts over 100,000 tokens; all other current models bill the full 1M context at standard rates.",
+    "claude-haiku-4-5-20251001 is included because Claude Code's built-in helper calls use it even when no subagent runs."
+  ],
+  "usd_per_million_tokens": {
+    "claude-opus-5-5":   {"input": 4.00, "cache_write_5m": 5.00,  "cache_write_1h": 8.00, "cache_read": 0.20, "output": 20.00},
+    "claude-sonnet-5-5": {"input": 2.00, "cache_write_5m": 2.50,  "cache_write_1h": 4.00, "cache_read": 0.10, "output": 10.00},
+    "claude-haiku-5-5":  {"input": 0.10, "cache_write_5m": 0.125, "cache_write_1h": 0.20, "cache_read": 0.01, "output": 0.50,
+                          "over_100k_prompt": {"input": 0.50, "cache_write_5m": 0.625, "cache_write_1h": 1.00, "cache_read": 0.05, "output": 2.50}},
+    "claude-haiku-4-5-20251001": {"input": 1.00, "cache_write_5m": 1.25, "cache_write_1h": 2.00, "cache_read": 0.10, "output": 5.00},
+    "claude-opus-5":     {"input": 5.00, "cache_write_5m": 6.25,  "cache_write_1h": 10.00, "cache_read": 0.50, "output": 25.00},
+    "claude-sonnet-5":   {"input": 2.00, "cache_write_5m": 2.50,  "cache_write_1h": 4.00, "cache_read": 0.20, "output": 10.00},
+    "claude-fable-5-1":  {"input": 10.00, "cache_write_5m": 12.50, "cache_write_1h": 20.00, "cache_read": 0.25, "output": 50.00}
+  }
+}

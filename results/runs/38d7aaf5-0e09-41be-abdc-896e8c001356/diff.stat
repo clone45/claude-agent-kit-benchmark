@@ -1,0 +1,4 @@
+ src/click/testing.py | 352 +++++++++++++++++++++++++++++----------------------
+ 1 file changed, 198 insertions(+), 154 deletions(-)
+
+M	src/click/testing.py

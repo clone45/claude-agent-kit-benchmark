@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 76694,
+  "stop_reason": "end_turn",
+  "session_id": "c5fe7419-388c-4dc0-b887-c8af8b63886d",
+  "total_cost_usd": 0.49652920000000006,
+  "usage": {
+    "input_tokens": 26,
+    "cache_creation_input_tokens": 30101,
+    "cache_read_input_tokens": 418686,
+    "output_tokens": 8594,
+    "output_tokens_details": {
+      "thinking_tokens": 1986
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 30101,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 26,
+      "outputTokens": 8594,
+      "cacheReadInputTokens": 418686,
+      "cacheCreationInputTokens": 30101,
+      "webSearchRequests": 0,
+      "costUSD": 0.49652920000000006,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1986,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 15,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I added `click.Duration`, which turns strings like `1h30m` into a `datetime.timedelta`. The full test suite passes (2305 passed, 24 skipped, 1 xfailed), and lint, format check and mypy are clean.\n\n**Blocked on me:** nothing.\n\n**Changed**\n- **`src/click/types.py`:** new `Duration` class, placed right after `DateTime`.\n  - A `timedelta` is returned unchanged, and a non-negative int is that many seconds.\n  - A string is trimmed, then must be either a bare number (seconds) or match one pattern of optional `d`, `h`, `m`, `s` groups in that order, case-insensitive, with whitespace allowed between groups. At least one group is required.\n  - Every rejection goes through `self.fail`, so it raises `click.BadParameter` with a message like `'30m1h' is not a valid duration.`\n  - `name = \"duration\"` and `repr` is `DURATION`. Help shows `DURATION` through click's existing default, so I didn't need a custom metavar. `to_info_dict()` gives `{'param_type': 'Duration', 'name': 'duration'}` without any override.\n- **`src/click/__init__.py`:** exports `Duration`.\n- **Docs:** `Duration` added to the built-in types list in `docs/parameter-types.md` and to the API reference in `docs/api.md`. The class docstring is marked `versionadded:: 8.6`.\n- **Tests:** new `tests/test_types/test_Duration.py` covers every accepted and rejected example in the task. It also uses the `--timeout` command to check a valid value, a missing one, the error message for a bad value (exit code 2), and the `DURATION` metavar in `--help`. I also added a `Duration` case to `tests/test_info_dict.py`.\n\n**Verified**\n- `ruff check` and `ruff format --check` on the touched files, `mypy`, and the full pytest run all pass.\n- I didn't build the docs. Sphinx isn't part of the test commands, so the new docs entries are only checked by reading them.\n\n**Found**\nThese are decisions I made where the spec was silent:\n- **`True`/`False` are rejected.** In Python they count as ints, but treating `True` as one second would be surprising.\n- **Negative ints are rejected,** to match the rule that rejects `-5s`.\n- **No space between a number and its unit.** `1 h` is rejected; the spec only allows whitespace between groups.\n- **ASCII digits only.** Something like `\u0663s` (an Arabic-Indic digit) is rejected.\n- **Huge values fail cleanly.** Something like `99999999999d` would otherwise crash with Python's own overflow error, and a 5000-digit number hits Python's limit on how long a number string can be. Both now give a `BadParameter` error instead of a traceback.\n- **No changelog entry.** `docs/changes.md` includes `../CHANGES.md`, but that file doesn't exist in this tree, so there was nowhere to add one.",
+  "ttft_ms": 3248,
+  "type": "result",
+  "duration_ms": 84610,
+  "uuid": "79886627-75e2-45d3-8104-b680c9b75a0d",
+  "ttft_stream_ms": 693,
+  "time_to_request_ms": 71,
+  "first_content_frame_ms": 693,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

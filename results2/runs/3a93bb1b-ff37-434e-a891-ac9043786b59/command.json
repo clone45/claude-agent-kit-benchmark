@@ -1,0 +1,28 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "In the Piano Roll editor (`src/modules/PianoRoll/PianoRollEditorWidget.hpp`), when the pointer is over a note and the user presses the mouse button, how does the editor decide whether the drag will resize the note's right edge, resize its left edge, or move the note? Where is the grab zone computed, how does its size depend on the note's width, and why can the left edge of a short note not be grabbed at all? Name the methods involved and the order in which they are consulted.\n\nAnswer in at most 15 lines. For each part of the answer cite the file path and the function or method name, with line numbers where they help. Do not modify any files.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "20",
+    "--session-id",
+    "7e68b882-0a15-4ff6-b2bb-f2a357f68afc",
+    "--plugin-dir",
+    "/mnt/c/Code/routing_test/plugin"
+  ],
+  "cwd": "/home/clone45/routing_test_work/voxglitch"
+}

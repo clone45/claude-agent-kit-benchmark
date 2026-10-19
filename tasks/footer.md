@@ -1,0 +1,1 @@
+Notes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.

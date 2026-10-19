@@ -1,0 +1,26 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "A `click.Group` invoked with no arguments prints its help instead of running its callback. Where is that decided, and how do `invoke_without_command` and `no_args_is_help` interact to produce it?\n\nAnswer in at most 15 lines. For each part of the answer cite the file path and the function or method name, with line numbers where they help. Do not modify any files.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "15",
+    "--session-id",
+    "4052edd0-6a19-43d9-bfac-0dbe8e829169"
+  ],
+  "cwd": "/home/clone45/routing_test_work/click"
+}

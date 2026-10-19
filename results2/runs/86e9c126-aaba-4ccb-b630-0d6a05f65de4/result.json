@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 17929,
+  "stop_reason": "end_turn",
+  "session_id": "c047ad25-1a58-491b-b90f-f3fba967d0b3",
+  "total_cost_usd": 0.151204,
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 13435,
+    "cache_read_input_tokens": 47400,
+    "output_tokens": 1711,
+    "output_tokens_details": {
+      "thinking_tokens": 171
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 13435,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 6,
+      "outputTokens": 1711,
+      "cacheReadInputTokens": 47400,
+      "cacheCreationInputTokens": 13435,
+      "webSearchRequests": 0,
+      "costUSD": 0.151204,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 171,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "All in `src/modules/PianoRoll/PianoRollEditorWidget.hpp` unless noted.\n\n1. **Entry:** `onButton` (l.1624) handles a left-button press by calling `beginDrag(pos, mods)` (l.1889). Because `zoneAt` (l.1387) returns `ZONE_GRID`, `beginDrag` then calls `beginGridDrag(position, shift)` (l.2032).\n2. **The order `beginGridDrag` checks things in:** it first works out `index = noteIndexAt(step, pitch)` (l.1409), which looks for the topmost note on the active track that contains the step, using the half-open span `[start, end)`. Then:\n   - **(A)** If Shift is held, the click toggles that note in the selection, or starts a marquee if there is no note.\n   - **(B)** `selectionBounds` (l.1455): if 2 or more notes are selected and the press is inside their bounding box, the drag moves the whole selection. Edges are never tested here, so a note inside a group cannot be resized.\n   - **(C)** `edgeGrabAt(position, grab)` (l.1422): if it finds an edge, the drag is `DRAG_RESIZE`, and `drag_left_edge = grab.left_edge` chooses which edge.\n   - **(D)** If the press is on a note body (`index >= 0`), `selectOnly` then `beginMove`.\n   - **(E/F)** On empty space, the press clears the selection if there is one; otherwise it paints a new note.\n   - `onHover` (l.1590\u20131601) shows the cursor using the same order: box, then edge, then body, then empty.\n3. **Where the grab zone is computed:** in `edgeGrabAt`, l.1439: `zone = min(EDGE_GRAB_W, max(1, (x1-x0)/3))`. Here `x0`/`x1` are the note's left/right edges in pixels, from `xOfStep`. `EDGE_GRAB_W = 4` px is set in `PianoRollGeometry.hpp:127`. Notes 12 px or wider get the full \u00b14 px zone. Narrower notes get \u00b1width/3, never less than 1 px, so a fixed zone can't cover the whole note and make it impossible to move.\n4. **Right edge before left:** `edgeGrabAt` walks the notes topmost-first. For each note it tests the right edge first (l.1441, `|x - x1| <= zone`). Only after that does it test the left edge (l.1445).\n5. **Why a short note's left edge can't be grabbed:** the left-edge test has an extra condition, `(x1 - x0) > EDGE_GRAB_MIN_NOTE_W`. That constant is `EDGE_GRAB_W * 2.5` = 10 px (`PianoRollGeometry.hpp:128`). The comment says the point is to avoid confusing a left-edge grab with a right-edge grab. So for a note 10 px wide or narrower, the left edge never registers. A press there either moves the note (inside it, step D) or counts as empty space or another note (outside it). Only the right edge stays resizable.",
+  "ttft_ms": 2179,
+  "type": "result",
+  "duration_ms": 18404,
+  "uuid": "806e4eca-022f-4974-a035-9c5b4d911e10",
+  "ttft_stream_ms": 1291,
+  "time_to_request_ms": 69,
+  "first_content_frame_ms": 1291,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

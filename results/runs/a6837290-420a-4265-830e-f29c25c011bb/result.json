@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 40431,
+  "stop_reason": "end_turn",
+  "session_id": "346c0ec8-8091-4879-8230-f945b2aa0a54",
+  "total_cost_usd": 0.17523600000000003,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 6908,
+    "cache_read_input_tokens": 139420,
+    "output_tokens": 4602,
+    "output_tokens_details": {
+      "thinking_tokens": 1565
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 6908,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 4602,
+      "cacheReadInputTokens": 139420,
+      "cacheCreationInputTokens": 6908,
+      "webSearchRequests": 0,
+      "costUSD": 0.17523600000000003,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1565,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed both abbreviation problems in `_make_default_short_help` and added tests for the new cases. The full test suite passes.\n\n**Blocked on me:** nothing.\n\n**Changed**\n- `src/click/utils.py` (`_make_default_short_help`): the function now works in two steps.\n  1. **Sentence trim:** a word ending in `.` ends the sentence only if the next word doesn't start with a lowercase letter. So `vs. pears` keeps going, while `fruit. 3` and `fruit. Then` stop. A period on the last word ends the text as it already did.\n  2. **Length trim:** if the trimmed text fits in `max_length`, it comes back unchanged. Otherwise it keeps the most whole words that fit together with `...` inside `max_length` and adds `...`. If no word fits, or `max_length` is below 3 (including zero or negative), it returns just `...`. Words are split only on whitespace, so a hyphenated word counts as one. The old backtracking loop was what made shortening unreliable, and I replaced it.\n  - Unchanged: only the first paragraph is used, whitespace still collapses, and a leading `\\b` is still ignored. A help text that is only `\\b` now returns `\"\"` instead of an empty-word edge case.\n- `tests/test_utils/test_make_default_short_help.py`:\n  - The old `\"123 567 9. aaaa bbb\"` \u2192 `\"123 567 9.\"` case tested the old behaviour. It now expects `\"123 567...\"`.\n  - I added every example from your spec, plus a few edge cases: a sentence that exactly fills `max_length`, a ten-character text with `max_length` 0 and with -5, an exact fit, and a result where the `...` exactly fills `max_length`.\n  - The test's sanity check that the expected output fits in `max_length` now also accepts `...`. Without that, the `max_length` below 3 cases couldn't be written.\n\n**Verified**\n- `.venv/bin/python -m pytest -q`: 2268 passed, 24 skipped, 1 xfailed.\n- The short-help test file passes on its own, each case run both plain and with the `\\b` marker.\n- `ruff check src tests`, `ruff format --check` on both files, and `mypy` are all clean.\n\n**Found:** nothing left open. I did it myself without subagents because the change was smaller than writing a brief for it.",
+  "ttft_ms": 1458,
+  "type": "result",
+  "duration_ms": 47267,
+  "uuid": "c7e538d1-8b93-4928-8e7c-934a84b89aa8",
+  "ttft_stream_ms": 821,
+  "time_to_request_ms": 69,
+  "first_content_frame_ms": 822,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

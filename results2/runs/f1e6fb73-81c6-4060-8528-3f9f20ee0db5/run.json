@@ -1,0 +1,197 @@
+{
+  "run_id": "f1e6fb73-81c6-4060-8528-3f9f20ee0db5",
+  "blind_id": "89bd921e-4b8b-4f68-b737-685b134a710d",
+  "session_id": "69451712-8634-407c-a026-4b1b3b4876d8",
+  "task_id": "3d41b6f5-b40d-450f-bc20-8d14384aa2b0",
+  "task_label": "F2",
+  "task_type": "feature",
+  "task_length": "short",
+  "condition_id": "59b253d3-f1a3-4642-bcd3-6a2c9fae721e",
+  "condition_label": "A",
+  "rep_index": 1,
+  "session_mode": "chain",
+  "session_mode_id": "ea3c2661-9782-4d30-a5e5-857746f50235",
+  "chain_id": "35714cf8-9d3c-466f-bf07-8da01634277a",
+  "chain_step": 5,
+  "branch": null,
+  "base_commit": "469ea64505df9223b40a2176397af800ebc7f165",
+  "checkpoint_commit": "4b24eac3298ed23286e668b0747bb24c6a21ce81",
+  "status": "completed",
+  "process": {
+    "rc": 0,
+    "wall_s": 59.8,
+    "timed_out": false,
+    "started_at": "2026-10-19T04:57:03.138066+00:00",
+    "ended_at": "2026-10-19T04:58:02.985466+00:00"
+  },
+  "exit_code": 0,
+  "result_subtype": "success",
+  "is_error": false,
+  "num_turns": 6,
+  "duration_ms": 55578,
+  "duration_api_ms": 223621,
+  "claude_total_cost_usd": 1.7986395999999996,
+  "claude_cost_cumulative": true,
+  "usage_is_cumulative": true,
+  "cost": {
+    "by_model": {
+      "claude-opus-5-5": {
+        "input_tokens": 12,
+        "cache_read_tokens": 604845,
+        "cache_create_tokens": 13754,
+        "output_tokens": 4988,
+        "thinking_tokens": 1392,
+        "cost_input_side_usd": 0.231049,
+        "cost_output_usd": 0.09976,
+        "cost_usd": 0.330809,
+        "claude_cost_usd": 0.3308089999999997,
+        "basis": "stream_per_call",
+        "context_window": 1000000
+      }
+    },
+    "total_usd": 0.330809,
+    "unpriced_models": []
+  },
+  "model_usage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 4988,
+      "thinkingTokens": 1392,
+      "cacheReadInputTokens": 604845,
+      "cacheCreationInputTokens": 13754,
+      "webSearchRequests": 0,
+      "costUSD": 0.3308089999999997,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "model_usage_cumulative": {
+    "claude-opus-5-5": {
+      "inputTokens": 90,
+      "outputTokens": 23033,
+      "thinkingTokens": 7871,
+      "cacheReadInputTokens": 2837258,
+      "cacheCreationInputTokens": 96271,
+      "webSearchRequests": 0,
+      "costUSD": 1.7986395999999996,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "stream": {
+    "per_model": {
+      "claude-opus-5-5": {
+        "calls": 6,
+        "input": 12,
+        "cache_read": 604845,
+        "cache_create": 13754,
+        "cache_create_5m": 0,
+        "cache_create_1h": 13754,
+        "main_calls": 6,
+        "sub_calls": 0
+      }
+    },
+    "main_api_calls": 6,
+    "sub_api_calls": 0,
+    "sub_calls_by_type": {},
+    "context_end_tokens": 107727,
+    "context_max_tokens": 107727,
+    "shunt_denials": 0,
+    "tool_errors": 1,
+    "permission_denied_events": 0,
+    "api_retries": 0,
+    "api_retry_errors": []
+  },
+  "context_window": 1000000,
+  "context_end_ratio": 0.107727,
+  "transcript": {
+    "records": 427,
+    "compactions": 0,
+    "compaction_meta": [],
+    "main_api_calls": 45,
+    "main_output_tokens": 23033,
+    "models": {
+      "claude-opus-5-5": 45
+    }
+  },
+  "transcripts_found": {
+    "main": true,
+    "subagents": 0
+  },
+  "subagents": [],
+  "rework": {
+    "refuter_runs": 0,
+    "refuter_fail": 0,
+    "builder_runs": 0,
+    "refuter_verdicts": []
+  },
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "init_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring"
+  ],
+  "init_agents": [
+    "claude",
+    "Explore",
+    "general-purpose",
+    "Plan",
+    "statusline-setup"
+  ],
+  "init_model": "claude-opus-5-5",
+  "init_permission_mode": "bypassPermissions",
+  "diff": {
+    "diff_bytes": 0,
+    "files_changed": []
+  },
+  "checks": {
+    "hidden": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "direction_hidden_test: 17 checks, 0 failures"
+    },
+    "tests": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "ALL PASS (0 failures)"
+    },
+    "compile_vxds": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "ok   VXDrumSequencer.cpp"
+    },
+    "all_pass": true
+  },
+  "final_text_chars": 2472
+}

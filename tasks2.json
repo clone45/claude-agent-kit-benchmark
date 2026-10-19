@@ -1,0 +1,310 @@
+{
+  "base_commit": "d32b18f753f1e847644942881521c9916b40681e",
+  "plugin_commit": "c8dfca76f0085ea2406fd30db6ff33dc53923489",
+  "chain_order": [
+    "Q1",
+    "Q2",
+    "Q3",
+    "B1",
+    "F1",
+    "F2",
+    "R1",
+    "L1"
+  ],
+  "chain_branches": {
+    "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+      "branch": "chain-a",
+      "commit": "d35ab71ef7f7931266a28253ef31401b31086dfe"
+    },
+    "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+      "branch": "chain-b",
+      "commit": "45e0e0bd88f386eba8047a918239e9f5000909d7"
+    }
+  },
+  "tasks": [
+    {
+      "id": "fc39494d-56ef-4a44-ac66-610a77136d40",
+      "label": "Q1",
+      "type": "find",
+      "length": "short",
+      "seed": null,
+      "prompt": "In the Piano Roll editor (`src/modules/PianoRoll/PianoRollEditorWidget.hpp`), when the pointer is over a note and the user presses the mouse button, how does the editor decide whether the drag will resize the note's right edge, resize its left edge, or move the note? Where is the grab zone computed, how does its size depend on the note's width, and why can the left edge of a short note not be grabbed at all? Name the methods involved and the order in which they are consulted.\n\nAnswer in at most 15 lines. For each part of the answer cite the file path and the function or method name, with line numbers where they help. Do not modify any files.",
+      "prompt_body": "In the Piano Roll editor (`src/modules/PianoRoll/PianoRollEditorWidget.hpp`), when the pointer is over a note and the user presses the mouse button, how does the editor decide whether the drag will resize the note's right edge, resize its left edge, or move the note? Where is the grab zone computed, how does its size depend on the note's width, and why can the left edge of a short note not be grabbed at all? Name the methods involved and the order in which they are consulted.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-fc39494d-56ef-4a44-ac66-610a77136d40-a",
+          "commit": "4c9d9883197493471399c18d6baf86cef4d95102"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-fc39494d-56ef-4a44-ac66-610a77136d40-b",
+          "commit": "afcd08044b86bb3984c04d4db8d62990ab0c560d"
+        }
+      },
+      "hidden_tests": [],
+      "checks": [
+        {
+          "name": "no_changes",
+          "internal": true
+        }
+      ],
+      "function_metrics": [],
+      "answer_key": "private/answer_keys2/Q1.md"
+    },
+    {
+      "id": "04a61372-b465-4f77-bf12-5ec6f6c75956",
+      "label": "Q2",
+      "type": "find",
+      "length": "short",
+      "seed": null,
+      "prompt": "In GrooveBox (`src/modules/GrooveBox/GrooveBox.hpp` and `src/modules/GrooveBox/Track.hpp`), where is it decided on each clock step whether a track fires its sample, and where are ratchets, the extra re-triggers between clock steps, produced? Describe the two code paths, what distinguishes a step sample from a ratchet sample, and where mute and solo enter each path.\n\nAnswer in at most 15 lines. For each part of the answer cite the file path and the function or method name, with line numbers where they help. Do not modify any files.",
+      "prompt_body": "In GrooveBox (`src/modules/GrooveBox/GrooveBox.hpp` and `src/modules/GrooveBox/Track.hpp`), where is it decided on each clock step whether a track fires its sample, and where are ratchets, the extra re-triggers between clock steps, produced? Describe the two code paths, what distinguishes a step sample from a ratchet sample, and where mute and solo enter each path.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-04a61372-b465-4f77-bf12-5ec6f6c75956-a",
+          "commit": "db303489af0d0969259f4dced7e2ddd1151ad543"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-04a61372-b465-4f77-bf12-5ec6f6c75956-b",
+          "commit": "d4ffa3e170af80a554b41899349f31e828ae4b5b"
+        }
+      },
+      "hidden_tests": [],
+      "checks": [
+        {
+          "name": "no_changes",
+          "internal": true
+        }
+      ],
+      "function_metrics": [],
+      "answer_key": "private/answer_keys2/Q2.md"
+    },
+    {
+      "id": "0ce43ab2-930c-44ef-8b6f-7a82683bdb64",
+      "label": "Q3",
+      "type": "find",
+      "length": "short",
+      "seed": null,
+      "prompt": "In the VX Drums voice models (`src/modules/VXDrums/VXDrumVoices.hpp`), the SHAPE control reaches each model through its `setShape` override. Sort every model into three groups: models that recompute their coefficients when SHAPE changes, models that only store the value, and models that clamp the value without recomputing. Note any model whose SHAPE override does something different from those three. Give the list by model name with the line of each override.\n\nAnswer in at most 15 lines. For each part of the answer cite the file path and the function or method name, with line numbers where they help. Do not modify any files.",
+      "prompt_body": "In the VX Drums voice models (`src/modules/VXDrums/VXDrumVoices.hpp`), the SHAPE control reaches each model through its `setShape` override. Sort every model into three groups: models that recompute their coefficients when SHAPE changes, models that only store the value, and models that clamp the value without recomputing. Note any model whose SHAPE override does something different from those three. Give the list by model name with the line of each override.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-0ce43ab2-930c-44ef-8b6f-7a82683bdb64-a",
+          "commit": "5ce7ab689c765f736a101d1ee9259481a247d4ae"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-0ce43ab2-930c-44ef-8b6f-7a82683bdb64-b",
+          "commit": "a0a4849492d6373f28f50fab3d4afec8a3e1fbea"
+        }
+      },
+      "hidden_tests": [],
+      "checks": [
+        {
+          "name": "no_changes",
+          "internal": true
+        }
+      ],
+      "function_metrics": [],
+      "answer_key": "private/answer_keys2/Q3.md"
+    },
+    {
+      "id": "5391cc70-e2f5-4574-9845-96914d95eb34",
+      "label": "B1",
+      "type": "bugfix",
+      "length": "short",
+      "seed": "seed_euclid_window",
+      "prompt": "Euclid runs one step ahead of Fundamental SEQ3 and Impromptu Clocked after a reset. When a master sends its reset and its clock pulse together, or the clock arrives within a millisecond of the reset, Euclid plays step 1 at the reset and then immediately advances to step 2 on that clock, so the pattern lands one step early for the rest of the bar. The VCV reset standard that the engine documents says the opposite: a reset makes step 1 current and plays it, clock edges inside the 1 ms window that follows the reset are the reset's own clock and must be swallowed, and the next clock after the window is step 2's. At patch load the window behaves correctly; it is only after a reset that clocks inside the window get through.\n\nThe sequencing engine is Rack-free in `src/modules/Euclid/EuclidEngine.hpp`, and the module adapter is `src/modules/Euclid/Euclid.hpp`. Find the cause and fix it so that a clock edge within the window after a reset is dropped, a same-sample reset and clock plays step 1 once, and the first clock after the window advances to step 2. The standalone tests in `tests/euclid` describe the intended behavior; make sure they all pass, and add a regression case if none covers the failure you found.\n\nNotes: CLAUDE.md lists the compile check and the standalone tests. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the compile check for every module you touched and the standalone tests, then end with a short summary of what you changed and why.",
+      "prompt_body": "Euclid runs one step ahead of Fundamental SEQ3 and Impromptu Clocked after a reset. When a master sends its reset and its clock pulse together, or the clock arrives within a millisecond of the reset, Euclid plays step 1 at the reset and then immediately advances to step 2 on that clock, so the pattern lands one step early for the rest of the bar. The VCV reset standard that the engine documents says the opposite: a reset makes step 1 current and plays it, clock edges inside the 1 ms window that follows the reset are the reset's own clock and must be swallowed, and the next clock after the window is step 2's. At patch load the window behaves correctly; it is only after a reset that clocks inside the window get through.\n\nThe sequencing engine is Rack-free in `src/modules/Euclid/EuclidEngine.hpp`, and the module adapter is `src/modules/Euclid/Euclid.hpp`. Find the cause and fix it so that a clock edge within the window after a reset is dropped, a same-sample reset and clock plays step 1 once, and the first clock after the window advances to step 2. The standalone tests in `tests/euclid` describe the intended behavior; make sure they all pass, and add a regression case if none covers the failure you found.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-5391cc70-e2f5-4574-9845-96914d95eb34-a",
+          "commit": "feb56bd2241e9383a3faba4b2752f47487f54d28"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-5391cc70-e2f5-4574-9845-96914d95eb34-b",
+          "commit": "cb21aabf460b7da5f636b1d7df834b34dbca9b9c"
+        }
+      },
+      "hidden_tests": [
+        "tests/euclid/pattern_test.cpp",
+        "tests/euclid/engine_test.cpp",
+        "tests/euclid/seq3_parity_test.cpp",
+        "tests/euclid/check.hpp"
+      ],
+      "checks": [
+        {
+          "name": "hidden",
+          "cmd": "bash scripts/vg_check.sh tests"
+        },
+        {
+          "name": "tests",
+          "cmd": "bash scripts/vg_check.sh tests"
+        },
+        {
+          "name": "compile_euclid",
+          "cmd": "bash scripts/vg_check.sh compile Euclid"
+        }
+      ],
+      "function_metrics": [],
+      "answer_key": null
+    },
+    {
+      "id": "be62a537-364e-4d6c-bfdd-5fceef234c75",
+      "label": "F1",
+      "type": "feature",
+      "length": "short",
+      "seed": null,
+      "prompt": "Add a per-step chance to the Euclid sequencing engine in `src/modules/Euclid/EuclidEngine.hpp`, which is Rack-free and compiled standalone by `tests/euclid`. Only the engine is in scope: do not change the module or the widget.\n\nSpecification:\n\n- Add `struct Rng` in namespace `euclid`: a xorshift32 with `uint32_t state` that starts at `0x9E3779B9`, `void seed(uint32_t s)` which stores `s`, or `0x9E3779B9` when `s` is 0, `uint32_t next()` which applies `x ^= x << 13; x ^= x >> 17; x ^= x << 5;` and stores and returns the result, and `int percent()` which returns `next() % 100`.\n- `Sequencer` gains a public member `Rng rng;`.\n- Add an overload `Out process(bool reset_edge, bool clock_edge, int window_samples, int hits, int steps, int rot, int chance)`. The existing six-argument `process` must keep working and behave exactly as `chance` 100.\n- `chance` is a percentage clamped to 0..100. It applies when the playhead lands on a step through a clock edge or a reset. If that step is a rest, nothing is rolled. If it is a hit: with chance 100 the step plays and nothing is rolled; with chance 0 the step does not play and nothing is rolled; otherwise exactly one call to `rng.percent()` is made and the step plays when the result is below `chance`. No other code path may consume the generator.\n- A step that plays reports `struck` on the landing sample and `gate` high for as long as the playhead stays on it. A step that lost its roll behaves as a rest for the whole stay: `struck` false on the landing sample and `gate` low on every sample until the playhead moves. Idle samples never re-roll. `gate_gap` keeps its meaning (it depends on whether `gate` was high on the previous sample). The pattern table itself is never changed.\n- `load()` does not roll; after load, step 1's gate follows the pattern as it does today.\n\nUpdate the comments at the top of the engine to describe the chance rule, and add tests to `tests/euclid` covering: the six-argument form unchanged, chance 0, determinism with a seeded generator, and a lost roll holding the gate low until the next clock. All existing tests must keep passing.\n\nNotes: CLAUDE.md lists the compile check and the standalone tests. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the compile check for every module you touched and the standalone tests, then end with a short summary of what you changed and why.",
+      "prompt_body": "Add a per-step chance to the Euclid sequencing engine in `src/modules/Euclid/EuclidEngine.hpp`, which is Rack-free and compiled standalone by `tests/euclid`. Only the engine is in scope: do not change the module or the widget.\n\nSpecification:\n\n- Add `struct Rng` in namespace `euclid`: a xorshift32 with `uint32_t state` that starts at `0x9E3779B9`, `void seed(uint32_t s)` which stores `s`, or `0x9E3779B9` when `s` is 0, `uint32_t next()` which applies `x ^= x << 13; x ^= x >> 17; x ^= x << 5;` and stores and returns the result, and `int percent()` which returns `next() % 100`.\n- `Sequencer` gains a public member `Rng rng;`.\n- Add an overload `Out process(bool reset_edge, bool clock_edge, int window_samples, int hits, int steps, int rot, int chance)`. The existing six-argument `process` must keep working and behave exactly as `chance` 100.\n- `chance` is a percentage clamped to 0..100. It applies when the playhead lands on a step through a clock edge or a reset. If that step is a rest, nothing is rolled. If it is a hit: with chance 100 the step plays and nothing is rolled; with chance 0 the step does not play and nothing is rolled; otherwise exactly one call to `rng.percent()` is made and the step plays when the result is below `chance`. No other code path may consume the generator.\n- A step that plays reports `struck` on the landing sample and `gate` high for as long as the playhead stays on it. A step that lost its roll behaves as a rest for the whole stay: `struck` false on the landing sample and `gate` low on every sample until the playhead moves. Idle samples never re-roll. `gate_gap` keeps its meaning (it depends on whether `gate` was high on the previous sample). The pattern table itself is never changed.\n- `load()` does not roll; after load, step 1's gate follows the pattern as it does today.\n\nUpdate the comments at the top of the engine to describe the chance rule, and add tests to `tests/euclid` covering: the six-argument form unchanged, chance 0, determinism with a seeded generator, and a lost roll holding the gate low until the next clock. All existing tests must keep passing.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-be62a537-364e-4d6c-bfdd-5fceef234c75-a",
+          "commit": "b7cfece827860599f98b07b12ed8131477ba0881"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-be62a537-364e-4d6c-bfdd-5fceef234c75-b",
+          "commit": "fd1138678608f715d8fa2904da275cedb1638bca"
+        }
+      },
+      "hidden_tests": [
+        "tests/euclid/chance_hidden_test.cpp"
+      ],
+      "checks": [
+        {
+          "name": "hidden",
+          "cmd": "g++ -std=c++11 -O2 -I src -o /tmp/vg_hidden_f1 tests/euclid/chance_hidden_test.cpp && /tmp/vg_hidden_f1"
+        },
+        {
+          "name": "tests",
+          "cmd": "bash scripts/vg_check.sh tests"
+        },
+        {
+          "name": "compile_euclid",
+          "cmd": "bash scripts/vg_check.sh compile Euclid"
+        }
+      ],
+      "function_metrics": [],
+      "answer_key": null
+    },
+    {
+      "id": "3d41b6f5-b40d-450f-bc20-8d14384aa2b0",
+      "label": "F2",
+      "type": "feature",
+      "length": "short",
+      "seed": null,
+      "prompt": "Add a playback direction to the VX Drum Sequencer engine in `src/modules/VXDrumSequencer/VXDrumSequencerEngine.hpp`, which is Rack-free and compiled with only its own directory on the include path. Only the engine is in scope: do not change the module or the widget, and keep every existing signature working.\n\nSpecification:\n\n- Add `enum Direction { FORWARD = 0, BACKWARD = 1, PENDULUM = 2 };` in namespace `vx_drum_sequencer`.\n- `Playhead` gains a public `int direction` that defaults to `FORWARD`, and `int advance(int length)` honours it. `length` is clamped to 1..STEPS as today.\n  - FORWARD: unchanged.\n  - BACKWARD: the next step is the previous one; from step 1 (position 0) it wraps to the last step (`length - 1`). A position at or beyond `length` (the length shrank) goes to the last step.\n  - PENDULUM: steps run forward to the last step, then backward to step 1, then forward again, and the end steps are not repeated. For a length of 4 starting at position 0, successive calls return 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, ... For a length of 1 every call returns 0. A position at or beyond `length` goes to the last step and the next move is backward.\n  - A hand-off (position -1) lands on step 1 (position 0) in every direction, and in PENDULUM the next move is forward.\n- `Playhead::reset()` keeps putting step 1 current and, in PENDULUM, makes the next move forward. `Playhead::rewind()` is unchanged.\n- `Sequencer` gains `void setDirection(int d)`, which stores `d` on its playhead and treats any value outside 0..2 as `FORWARD`, and `int direction() const` which returns it. Everything else about `Sequencer` is unchanged.\n\nAdd a standalone test directory `tests/vx_drum_sequencer` with a `check.hpp` in the style of `tests/euclid/check.hpp`, a README with the g++ line (`g++ -std=c++11 -O2 -I ../../src/modules/VXDrumSequencer -o direction_test direction_test.cpp && ./direction_test`), and a `direction_test.cpp` covering all three directions, the hand-off, the shrink cases, and the reset rule. Note the direction in the engine's header comment.\n\nNotes: CLAUDE.md lists the compile check and the standalone tests. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the compile check for every module you touched and the standalone tests, then end with a short summary of what you changed and why.",
+      "prompt_body": "Add a playback direction to the VX Drum Sequencer engine in `src/modules/VXDrumSequencer/VXDrumSequencerEngine.hpp`, which is Rack-free and compiled with only its own directory on the include path. Only the engine is in scope: do not change the module or the widget, and keep every existing signature working.\n\nSpecification:\n\n- Add `enum Direction { FORWARD = 0, BACKWARD = 1, PENDULUM = 2 };` in namespace `vx_drum_sequencer`.\n- `Playhead` gains a public `int direction` that defaults to `FORWARD`, and `int advance(int length)` honours it. `length` is clamped to 1..STEPS as today.\n  - FORWARD: unchanged.\n  - BACKWARD: the next step is the previous one; from step 1 (position 0) it wraps to the last step (`length - 1`). A position at or beyond `length` (the length shrank) goes to the last step.\n  - PENDULUM: steps run forward to the last step, then backward to step 1, then forward again, and the end steps are not repeated. For a length of 4 starting at position 0, successive calls return 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, ... For a length of 1 every call returns 0. A position at or beyond `length` goes to the last step and the next move is backward.\n  - A hand-off (position -1) lands on step 1 (position 0) in every direction, and in PENDULUM the next move is forward.\n- `Playhead::reset()` keeps putting step 1 current and, in PENDULUM, makes the next move forward. `Playhead::rewind()` is unchanged.\n- `Sequencer` gains `void setDirection(int d)`, which stores `d` on its playhead and treats any value outside 0..2 as `FORWARD`, and `int direction() const` which returns it. Everything else about `Sequencer` is unchanged.\n\nAdd a standalone test directory `tests/vx_drum_sequencer` with a `check.hpp` in the style of `tests/euclid/check.hpp`, a README with the g++ line (`g++ -std=c++11 -O2 -I ../../src/modules/VXDrumSequencer -o direction_test direction_test.cpp && ./direction_test`), and a `direction_test.cpp` covering all three directions, the hand-off, the shrink cases, and the reset rule. Note the direction in the engine's header comment.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-3d41b6f5-b40d-450f-bc20-8d14384aa2b0-a",
+          "commit": "b94abcc9ae66982a93279172355e1f203fc9444b"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-3d41b6f5-b40d-450f-bc20-8d14384aa2b0-b",
+          "commit": "f2d0f641073436bd6007de9c116177cc3f42a021"
+        }
+      },
+      "hidden_tests": [
+        "tests/vx_drum_sequencer/direction_hidden_test.cpp"
+      ],
+      "checks": [
+        {
+          "name": "hidden",
+          "cmd": "g++ -std=c++11 -O2 -I src/modules/VXDrumSequencer -o /tmp/vg_hidden_f2 tests/vx_drum_sequencer/direction_hidden_test.cpp && /tmp/vg_hidden_f2"
+        },
+        {
+          "name": "tests",
+          "cmd": "bash scripts/vg_check.sh tests"
+        },
+        {
+          "name": "compile_vxds",
+          "cmd": "bash scripts/vg_check.sh compile VXDrumSequencer"
+        }
+      ],
+      "function_metrics": [],
+      "answer_key": null
+    },
+    {
+      "id": "310f6386-d0f0-44e6-ac67-7c2f2f5fd147",
+      "label": "R1",
+      "type": "refactor",
+      "length": "short",
+      "seed": null,
+      "prompt": "`GrooveBox::process` in `src/modules/GrooveBox/GrooveBox.hpp` starts at the line `void process(const ProcessArgs &args) override` and runs for several hundred lines to the end of the struct. It handles the clock, reset and memory-slot inputs, the copy and paste pulses, the step advance, the step triggers and the ratchet pass, per-track processing, and the output mix, all in one method.\n\nSplit it into private methods with descriptive names, at least one each for the clock and reset handling, the step fire, the ratchet pass, and the output stage, so that `process` itself is under 80 lines and reads as a sequence of named steps. Behavior must not change: the same per-sample order of operations, the same outputs, the same JSON, the same member state. Do not change any other module or the expander's interface.\n\nVerify with `bash scripts/vg_check.sh compile GrooveBox GrooveBoxExpander` and the standalone tests.\n\nNotes: CLAUDE.md lists the compile check and the standalone tests. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the compile check for every module you touched and the standalone tests, then end with a short summary of what you changed and why.",
+      "prompt_body": "`GrooveBox::process` in `src/modules/GrooveBox/GrooveBox.hpp` starts at the line `void process(const ProcessArgs &args) override` and runs for several hundred lines to the end of the struct. It handles the clock, reset and memory-slot inputs, the copy and paste pulses, the step advance, the step triggers and the ratchet pass, per-track processing, and the output mix, all in one method.\n\nSplit it into private methods with descriptive names, at least one each for the clock and reset handling, the step fire, the ratchet pass, and the output stage, so that `process` itself is under 80 lines and reads as a sequence of named steps. Behavior must not change: the same per-sample order of operations, the same outputs, the same JSON, the same member state. Do not change any other module or the expander's interface.\n\nVerify with `bash scripts/vg_check.sh compile GrooveBox GrooveBoxExpander` and the standalone tests.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-310f6386-d0f0-44e6-ac67-7c2f2f5fd147-a",
+          "commit": "cc53f36f830c686e7f3687ec6633ff9cd4620632"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-310f6386-d0f0-44e6-ac67-7c2f2f5fd147-b",
+          "commit": "421201e4b4870d4c3612f564c68207002a923ec4"
+        }
+      },
+      "hidden_tests": [],
+      "checks": [
+        {
+          "name": "tests",
+          "cmd": "bash scripts/vg_check.sh tests"
+        },
+        {
+          "name": "compile_groovebox",
+          "cmd": "bash scripts/vg_check.sh compile GrooveBox GrooveBoxExpander"
+        },
+        {
+          "name": "process_length",
+          "internal": true
+        }
+      ],
+      "function_metrics": [
+        [
+          "src/modules/GrooveBox/GrooveBox.hpp",
+          "process"
+        ]
+      ],
+      "answer_key": null
+    },
+    {
+      "id": "53e59ae9-d60b-4146-973b-b2ade24bb9a9",
+      "label": "L1",
+      "type": "long",
+      "length": "long",
+      "seed": null,
+      "prompt": "Give Euclid an ACCENT output: a second trigger that fires on every Nth hit. This touches the engine, the module, the panel widget, and the user manual.\n\nEngine (`src/modules/Euclid/EuclidEngine.hpp`, Rack-free, compiled standalone by `tests/euclid`):\n\n- `Sequencer` gains a public `int accent_every`, default 0, clamped to 0..8 wherever it is read; 0 means off. It also gains a hit counter that counts the samples on which `struck` was reported since the last load or reset.\n- `Sequencer::Out` gains `bool accent`. On a sample where `struck` is true the counter increments first; `accent` is then true when `accent_every` is at least 1 and the counter is a multiple of `accent_every`. On every other sample `accent` is false. So with `accent_every` 1 every hit is accented, and with 2 the second, fourth, sixth hit and so on.\n- `load()` zeroes the counter. A reset zeroes the counter before counting that sample's own strike, so a reset that plays step 1 makes that strike hit number 1.\n- Changing `accent_every` while running does not reset the counter. The existing six-argument `process` keeps its signature; nothing else in the engine changes.\n\nModule (`src/modules/Euclid/Euclid.hpp`):\n\n- Add `ACCENT_PARAM`, a snapping knob from 0 to 8 with default 0 labelled \"Accent every\", and `ACCENT_OUTPUT` labelled \"Accent (10 V pulse on every Nth hit; 0 is off)\".\n- Each sample, set the engine's `accent_every` from the knob, and when the engine reports `accent`, start a pulse on `ACCENT_OUTPUT` of the same length as the TRIG pulse, using the same pulse mechanism TRIG uses.\n\nWidget (`src/modules/Euclid/EuclidWidget.hpp`):\n\n- Add a `Trimpot` for `ACCENT_PARAM` and a `VoxglitchOutputPort` for `ACCENT_OUTPUT`. The panel SVG has no anchors for them, so place them with explicit coordinates in free space on the 8 HP panel that does not overlap the existing controls (read the panel SVG under `res/` to see where those are). A small text label next to the knob is welcome but not required.\n\nManual (`docs/modules/euclid/user_manual.md`): describe the new knob in the Controls section and the new output where the outputs are described, in the manual's existing voice.\n\nAdd engine tests to `tests/euclid` covering off, every hit, every second hit, the reset rule, and the clamp. All existing tests must keep passing, and `bash scripts/vg_check.sh compile Euclid` must be clean.\n\nNotes: CLAUDE.md lists the compile check and the standalone tests. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the compile check for every module you touched and the standalone tests, then end with a short summary of what you changed and why.",
+      "prompt_body": "Give Euclid an ACCENT output: a second trigger that fires on every Nth hit. This touches the engine, the module, the panel widget, and the user manual.\n\nEngine (`src/modules/Euclid/EuclidEngine.hpp`, Rack-free, compiled standalone by `tests/euclid`):\n\n- `Sequencer` gains a public `int accent_every`, default 0, clamped to 0..8 wherever it is read; 0 means off. It also gains a hit counter that counts the samples on which `struck` was reported since the last load or reset.\n- `Sequencer::Out` gains `bool accent`. On a sample where `struck` is true the counter increments first; `accent` is then true when `accent_every` is at least 1 and the counter is a multiple of `accent_every`. On every other sample `accent` is false. So with `accent_every` 1 every hit is accented, and with 2 the second, fourth, sixth hit and so on.\n- `load()` zeroes the counter. A reset zeroes the counter before counting that sample's own strike, so a reset that plays step 1 makes that strike hit number 1.\n- Changing `accent_every` while running does not reset the counter. The existing six-argument `process` keeps its signature; nothing else in the engine changes.\n\nModule (`src/modules/Euclid/Euclid.hpp`):\n\n- Add `ACCENT_PARAM`, a snapping knob from 0 to 8 with default 0 labelled \"Accent every\", and `ACCENT_OUTPUT` labelled \"Accent (10 V pulse on every Nth hit; 0 is off)\".\n- Each sample, set the engine's `accent_every` from the knob, and when the engine reports `accent`, start a pulse on `ACCENT_OUTPUT` of the same length as the TRIG pulse, using the same pulse mechanism TRIG uses.\n\nWidget (`src/modules/Euclid/EuclidWidget.hpp`):\n\n- Add a `Trimpot` for `ACCENT_PARAM` and a `VoxglitchOutputPort` for `ACCENT_OUTPUT`. The panel SVG has no anchors for them, so place them with explicit coordinates in free space on the 8 HP panel that does not overlap the existing controls (read the panel SVG under `res/` to see where those are). A small text label next to the knob is welcome but not required.\n\nManual (`docs/modules/euclid/user_manual.md`): describe the new knob in the Controls section and the new output where the outputs are described, in the manual's existing voice.\n\nAdd engine tests to `tests/euclid` covering off, every hit, every second hit, the reset rule, and the clamp. All existing tests must keep passing, and `bash scripts/vg_check.sh compile Euclid` must be clean.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-53e59ae9-d60b-4146-973b-b2ade24bb9a9-a",
+          "commit": "0c6d6405bc7542c6cf97f84b2d91eb282a4a0a07"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-53e59ae9-d60b-4146-973b-b2ade24bb9a9-b",
+          "commit": "6dcf1e44e9ff9eaabb38e622d7adc5efd43e179d"
+        }
+      },
+      "hidden_tests": [
+        "tests/euclid/accent_hidden_test.cpp"
+      ],
+      "checks": [
+        {
+          "name": "hidden",
+          "cmd": "g++ -std=c++11 -O2 -I src -o /tmp/vg_hidden_l1 tests/euclid/accent_hidden_test.cpp && /tmp/vg_hidden_l1"
+        },
+        {
+          "name": "tests",
+          "cmd": "bash scripts/vg_check.sh tests"
+        },
+        {
+          "name": "compile_euclid",
+          "cmd": "bash scripts/vg_check.sh compile Euclid"
+        },
+        {
+          "name": "manual",
+          "cmd": "test $(grep -ci accent docs/modules/euclid/user_manual.md) -ge 2"
+        }
+      ],
+      "function_metrics": [],
+      "answer_key": null
+    }
+  ]
+}

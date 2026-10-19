@@ -1,0 +1,197 @@
+{
+  "run_id": "91fd8f27-5f5b-405b-89b5-31f9f7815dc4",
+  "blind_id": "56064cc8-5247-47e7-a6e4-989a7adc3c97",
+  "session_id": "b04b4e6d-cbb5-412d-be8c-4125e84aa0b7",
+  "task_id": "5eff33e2-804a-4461-a028-9391efe47653",
+  "task_label": "B1",
+  "task_type": "bugfix",
+  "task_length": "short",
+  "condition_id": "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9",
+  "condition_label": "B",
+  "rep_index": 0,
+  "branch": "t-5eff33e2-804a-4461-a028-9391efe47653-b",
+  "base_commit": "942bed0c071223a03df6fa4af6efd1d0b9ea2fbc",
+  "status": "completed",
+  "process": {
+    "rc": 0,
+    "wall_s": 65.2,
+    "timed_out": false,
+    "started_at": "2026-10-19T00:45:58.943685+00:00",
+    "ended_at": "2026-10-19T00:47:04.099951+00:00"
+  },
+  "exit_code": 0,
+  "result_subtype": "success",
+  "is_error": false,
+  "num_turns": 10,
+  "duration_ms": 63291,
+  "duration_api_ms": 48745,
+  "claude_total_cost_usd": 0.3560162,
+  "cost": {
+    "by_model": {
+      "claude-opus-5-5": {
+        "input_tokens": 16,
+        "cache_read_tokens": 171421,
+        "cache_create_tokens": 28711,
+        "output_tokens": 4599,
+        "thinking_tokens": 1768,
+        "cost_input_side_usd": 0.264036,
+        "cost_output_usd": 0.09198,
+        "cost_usd": 0.356016,
+        "claude_cost_usd": 0.3560162,
+        "basis": "stream_per_call",
+        "context_window": 1000000
+      }
+    },
+    "total_usd": 0.356016,
+    "unpriced_models": []
+  },
+  "model_usage": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 4599,
+      "cacheReadInputTokens": 171421,
+      "cacheCreationInputTokens": 28711,
+      "webSearchRequests": 0,
+      "costUSD": 0.3560162,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1768,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "stream": {
+    "per_model": {
+      "claude-opus-5-5": {
+        "calls": 8,
+        "input": 16,
+        "cache_read": 171421,
+        "cache_create": 28711,
+        "cache_create_5m": 0,
+        "cache_create_1h": 28711,
+        "main_calls": 8,
+        "sub_calls": 0
+      }
+    },
+    "main_api_calls": 8,
+    "sub_api_calls": 0,
+    "sub_calls_by_type": {},
+    "context_end_tokens": 28713,
+    "context_max_tokens": 28713,
+    "shunt_denials": 0,
+    "tool_errors": 1,
+    "permission_denied_events": 0,
+    "api_retries": 0,
+    "api_retry_errors": []
+  },
+  "context_window": 1000000,
+  "context_end_ratio": 0.028713,
+  "transcript": {
+    "records": 91,
+    "compactions": 0,
+    "compaction_meta": [],
+    "main_api_calls": 8,
+    "main_output_tokens": 4599,
+    "models": {
+      "claude-opus-5-5": 8
+    }
+  },
+  "transcripts_found": {
+    "main": true,
+    "subagents": 0
+  },
+  "subagents": [],
+  "rework": {
+    "refuter_runs": 0,
+    "refuter_fail": 0,
+    "builder_runs": 0,
+    "refuter_verdicts": []
+  },
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "init_plugins": [
+    "agent-kit",
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring"
+  ],
+  "init_agents": [
+    "agent-kit:builder",
+    "agent-kit:bulk-reader",
+    "agent-kit:code-writer",
+    "agent-kit:debugger",
+    "agent-kit:refuter",
+    "agent-kit:researcher",
+    "agent-kit:scout",
+    "claude",
+    "Explore",
+    "general-purpose",
+    "Plan",
+    "statusline-setup"
+  ],
+  "init_model": "claude-opus-5-5",
+  "init_permission_mode": "bypassPermissions",
+  "diff": {
+    "diff_bytes": 4084,
+    "files_changed": [
+      "src/click/utils.py",
+      "tests/test_utils/test_make_default_short_help.py"
+    ]
+  },
+  "checks": {
+    "hidden": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "36 passed in 0.04s"
+    },
+    "full": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "2262 passed, 24 skipped, 31000 deselected, 1 xfailed in 4.91s"
+    },
+    "ruff": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "All checks passed!"
+    },
+    "format": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "76 files already formatted"
+    },
+    "mypy": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "Success: no issues found in 29 source files"
+    },
+    "all_pass": true
+  },
+  "final_text_chars": 2318
+}

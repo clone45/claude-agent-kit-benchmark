@@ -1,0 +1,28 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "`Command.get_help_option_names` in `src/click/core.py` builds a `set` from `Context.help_option_names`, so the list it returns comes back in arbitrary order.\n\nChange it to return the names in their declared order, with duplicates dropped (the first occurrence is kept), and with any name already used by another parameter's `opts` or `secondary_opts` removed, including both halves of a flag such as `--shout/--no-shout`. Examples: `['-h', '--help']` with no other parameters returns `['-h', '--help']`; `['--help', '-h', '-?']` returns `['--help', '-h', '-?']`; `['-h', '--help', '-h']` returns `['-h', '--help']`; `['-h', '--help']` when another option defines `--help` returns `['-h']`; `['--no-shout', '--help']` when an option `--shout/--no-shout` exists returns `['--help']`; when every name is filtered out the result is `[]`. Add tests covering these cases.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "15",
+    "--session-id",
+    "69f82d2c-6c0f-4a8d-97c0-aeb9ce447446",
+    "--plugin-dir",
+    "/mnt/c/Code/routing_test/plugin"
+  ],
+  "cwd": "/home/clone45/routing_test_work/click"
+}

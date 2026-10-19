@@ -1,0 +1,31 @@
+diff --git a/src/click/_termui_impl.py b/src/click/_termui_impl.py
+index fa26601..1a3f76a 100644
+--- a/src/click/_termui_impl.py
++++ b/src/click/_termui_impl.py
+@@ -123,6 +123,9 @@ class ProgressBar(t.Generic[V]):
+         exc_value: BaseException | None,
+         tb: TracebackType | None,
+     ) -> None:
++        if self._completed_intervals:
++            self._apply_pending_steps()
++            self.render_progress()
+         self.render_finish()
+ 
+     def __iter__(self) -> cabc.Iterator[V]:
+@@ -333,7 +336,16 @@ class ProgressBar(t.Generic[V]):
+             self.render_progress()
+             self._completed_intervals = 0
+ 
++    def _apply_pending_steps(self) -> None:
++        """Advance by any steps held back by ``update_min_steps`` so the
++        position reflects all completed work.
++        """
++        if self._completed_intervals:
++            self.make_step(self._completed_intervals)
++            self._completed_intervals = 0
++
+     def finish(self) -> None:
++        self._apply_pending_steps()
+         self.eta_known = False
+         self.current_item = None
+         self.finished = True

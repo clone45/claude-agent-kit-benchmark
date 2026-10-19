@@ -1,0 +1,8 @@
+ .../VXDrumSequencer/VXDrumSequencerEngine.hpp      |  76 ++++++-
+ tests/vx_drum_sequencer/README.md                  |  10 +
+ tests/vx_drum_sequencer/direction_test.cpp         | 243 +++++++++++++++++++++
+ 3 files changed, 323 insertions(+), 6 deletions(-)
+
+M	src/modules/VXDrumSequencer/VXDrumSequencerEngine.hpp
+M	tests/vx_drum_sequencer/README.md
+A	tests/vx_drum_sequencer/direction_test.cpp

@@ -1,0 +1,26 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "`GrooveBox::process` in `src/modules/GrooveBox/GrooveBox.hpp` starts at the line `void process(const ProcessArgs &args) override` and runs for several hundred lines to the end of the struct. It handles the clock, reset and memory-slot inputs, the copy and paste pulses, the step advance, the step triggers and the ratchet pass, per-track processing, and the output mix, all in one method.\n\nSplit it into private methods with descriptive names, at least one each for the clock and reset handling, the step fire, the ratchet pass, and the output stage, so that `process` itself is under 80 lines and reads as a sequence of named steps. Behavior must not change: the same per-sample order of operations, the same outputs, the same JSON, the same member state. Do not change any other module or the expander's interface.\n\nVerify with `bash scripts/vg_check.sh compile GrooveBox GrooveBoxExpander` and the standalone tests.\n\nNotes: CLAUDE.md lists the compile check and the standalone tests. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the compile check for every module you touched and the standalone tests, then end with a short summary of what you changed and why.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "20",
+    "--session-id",
+    "a918b79c-9301-4af0-bd1b-41f45e89af1c"
+  ],
+  "cwd": "/home/clone45/routing_test_work/voxglitch"
+}

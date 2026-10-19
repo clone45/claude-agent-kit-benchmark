@@ -1,0 +1,14 @@
+ docs/modules/euclid/user_manual.md  |   9 +-
+ src/modules/Euclid/Euclid.hpp       | 111 +++++++++++------
+ src/modules/Euclid/EuclidEngine.hpp |  34 +++++-
+ src/modules/Euclid/EuclidWidget.hpp |  41 +++++++
+ tests/euclid/README.md              |   9 +-
+ tests/euclid/engine_test.cpp        | 235 ++++++++++++++++++++++++++++++++++++
+ 6 files changed, 395 insertions(+), 44 deletions(-)
+
+M	docs/modules/euclid/user_manual.md
+M	src/modules/Euclid/Euclid.hpp
+M	src/modules/Euclid/EuclidEngine.hpp
+M	src/modules/Euclid/EuclidWidget.hpp
+M	tests/euclid/README.md
+M	tests/euclid/engine_test.cpp

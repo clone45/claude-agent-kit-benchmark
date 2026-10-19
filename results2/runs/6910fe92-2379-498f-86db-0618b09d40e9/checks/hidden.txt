@@ -1,0 +1,12 @@
+$ g++ -std=c++11 -O2 -I src -o /tmp/vg_hidden_f1 tests/euclid/chance_hidden_test.cpp && /tmp/vg_hidden_f1
+rc=0 timed_out=False
+--- stdout
+chance: six-argument form equals chance 100
+chance 0: never plays, still advances
+chance 100: plays every hit
+determinism and the one-roll rule
+a lost roll holds the gate low; a won roll holds it high
+reset rolls step 1; clamping
+chance_hidden_test: 13 checks, 0 failures
+
+--- stderr

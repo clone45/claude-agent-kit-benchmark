@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 56074,
+  "stop_reason": "end_turn",
+  "session_id": "4bf93ead-b062-4d2e-87c4-8a148bb25bf8",
+  "total_cost_usd": 0.3047206,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 18883,
+    "cache_read_input_tokens": 189663,
+    "output_tokens": 5783,
+    "output_tokens_details": {
+      "thinking_tokens": 2011
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 18883,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 5783,
+      "cacheReadInputTokens": 189663,
+      "cacheCreationInputTokens": 18883,
+      "webSearchRequests": 0,
+      "costUSD": 0.3047206,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2011,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I refactored `style` in `src/click/termui.py`. Its code is now about 20 lines, down from 31, and the output is unchanged. The function as a whole is still about 114 lines, because of a docstring I decided not to cut.\n\n**Blocked on me**\nNothing. One thing you may want to decide is below under **Found**.\n\n**Changed**\n- `src/click/termui.py` (not committed):\n  - **`_color_sequence(color, offset=0)`**: a new private helper. It returns `\"\"` for `None`, and otherwise the color's escape sequence via the existing `_interpret_color`.\n  - **`_attribute_sequence(value, on, off)`**: a new private helper. It returns `\"\"` for `None`, and otherwise the code that turns the attribute on or off.\n  - **`style`**: the ten repeated `if x is not None: bits.append(...)` blocks are now one `\"\".join(...)` over a list of helper calls. Each attribute's on/off codes sit on one line, which makes the list easy to check against the ANSI codes. fg is still evaluated before bg, so an invalid fg is still reported first.\n  - The signature, type annotations and docstring of `style` are unchanged, and no other public function was touched.\n\n**Verified**\n- **Same output:** I ran the old and new `style` side by side on 7,417 input combinations, and both gave identical strings and identical exception types and messages. The inputs covered named, bright, `reset`, 0/255/256/-1, `True`/`False`, floats, RGB tuples and lists (valid and invalid), every on/off/unset mix of the eight attributes, `reset` on and off, and non-string text.\n- **Full test suite:** 2262 passed, 24 skipped, 1 xfailed.\n- **Checks:** `ruff check` and `ruff format --check` on `termui.py` are clean, and `mypy` reports no issues in 29 files.\n\n**Found**\n- **Color handling was already extracted.** The lookup and validation of named, bright, 256-color and RGB values were already in a private helper, `_interpret_color`, before I started. I added only a thin wrapper around it rather than moving the logic again.\n- **The 60-line target can't be met without cutting the docstring.** The docstring is about 80 lines on its own: the color list, parameter docs and version history. The code below it is about 20 lines, but the function as a whole is about 114. Getting under 60 would mean deleting documentation users read; I judged that a regression, not what you meant. If you do want the whole function under 60, the color-name list and the `versionchanged` history are the parts to trim or move into the docs.",
+  "ttft_ms": 2850,
+  "type": "result",
+  "duration_ms": 62858,
+  "uuid": "57780757-6fc3-4ef8-82f7-8d7f31d13a73",
+  "ttft_stream_ms": 1436,
+  "time_to_request_ms": 66,
+  "first_content_frame_ms": 1436,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

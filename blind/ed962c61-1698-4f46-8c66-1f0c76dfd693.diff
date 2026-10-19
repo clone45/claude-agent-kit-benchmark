@@ -1,0 +1,162 @@
+diff --git a/src/click/_termui_impl.py b/src/click/_termui_impl.py
+index 9fcc7f6..94016e3 100644
+--- a/src/click/_termui_impl.py
++++ b/src/click/_termui_impl.py
+@@ -710,7 +710,7 @@ class Editor:
+                 return editor
+         return "vi"
+ 
+-    def edit_files(self, filenames: cabc.Iterable[str]) -> None:
++    def edit_files(self, filenames: cabc.Iterable[str | os.PathLike[str]]) -> None:
+         """Open files in the user's editor."""
+         import shlex
+         import subprocess
+@@ -727,7 +727,7 @@ class Editor:
+             # in pager(): strips quotes from tokens and preserves quoted
+             # Windows paths.
+             c = subprocess.Popen(
+-                args=shlex.split(editor) + list(filenames),
++                args=shlex.split(editor) + [os.fspath(f) for f in filenames],
+                 env=environ,
+             )
+             exit_code = c.wait()
+diff --git a/src/click/termui.py b/src/click/termui.py
+index 9b7e38a..8f904c3 100644
+--- a/src/click/termui.py
++++ b/src/click/termui.py
+@@ -4,6 +4,7 @@ import collections.abc as cabc
+ import inspect
+ import io
+ import itertools
++import os
+ import re
+ import sys
+ import typing as t
+@@ -837,7 +838,10 @@ def edit(
+     env: cabc.Mapping[str, str] | None = None,
+     require_save: bool = True,
+     extension: str = ".txt",
+-    filename: str | cabc.Iterable[str] | None = None,
++    filename: str
++    | os.PathLike[str]
++    | cabc.Iterable[str | os.PathLike[str]]
++    | None = None,
+ ) -> None: ...
+ 
+ 
+@@ -847,7 +851,10 @@ def edit(
+     env: cabc.Mapping[str, str] | None = None,
+     require_save: bool = True,
+     extension: str = ".txt",
+-    filename: str | cabc.Iterable[str] | None = None,
++    filename: str
++    | os.PathLike[str]
++    | cabc.Iterable[str | os.PathLike[str]]
++    | None = None,
+ ) -> str | bytes | bytearray | None:
+     r"""Edits the given text in the defined editor.  If an editor is given
+     (should be the full path to the executable but the regular operating
+@@ -884,16 +891,23 @@ def edit(
+                       highlighting.
+     :param filename: if provided it will edit this file instead of the
+                      provided text contents.  It will not use a temporary
+-                     file as an indirection in that case. If the editor supports
+-                     editing multiple files at once, a sequence of files may be
+-                     passed as well. Invoke `click.file` once per file instead
+-                     if multiple files cannot be managed at once or editing the
+-                     files serially is desired.
++                     file as an indirection in that case. It accepts a
++                     ``str`` or :class:`os.PathLike` path (such as a
++                     :class:`pathlib.Path`). If the editor supports editing
++                     multiple files at once, an iterable of such paths may be
++                     passed as well, mixing strings and path-like objects.
++                     Invoke `click.edit` once per file instead if multiple
++                     files cannot be managed at once or editing the files
++                     serially is desired.
+ 
+     .. versionchanged:: 8.2.0
+         ``filename`` now accepts any ``Iterable[str]`` in addition to a ``str``
+         if the ``editor`` supports editing multiple files at once.
+ 
++    .. versionchanged:: 8.6.0
++        ``filename`` accepts ``os.PathLike`` values, both as a single value
++        and inside an iterable, in addition to ``str``.
++
+     """
+     from ._termui_impl import Editor
+ 
+@@ -902,7 +916,7 @@ def edit(
+     if filename is None:
+         return ed.edit(text)
+ 
+-    if isinstance(filename, str):
++    if isinstance(filename, (str, os.PathLike)):
+         filename = (filename,)
+ 
+     ed.edit_files(filenames=filename)
+diff --git a/tests/test_termui.py b/tests/test_termui.py
+index 9da8ffb..d94b5fc 100644
+--- a/tests/test_termui.py
++++ b/tests/test_termui.py
+@@ -448,6 +448,32 @@ def test_edit(runner):
+             assert reopened_file.read() == "aTest\nbTest\n"
+ 
+ 
++@pytest.mark.skipif(platform.system() == "Windows", reason="No sed on Windows.")
++@pytest.mark.parametrize(
++    "make_filename",
++    [
++        pytest.param(lambda paths: paths[0], id="single"),
++        pytest.param(lambda paths: paths, id="iterable"),
++        pytest.param(lambda paths: [str(paths[0]), paths[1]], id="mixed"),
++    ],
++)
++def test_edit_pathlike(runner, tmp_path, make_filename):
++    """``filename`` accepts ``os.PathLike`` values, alone or in an iterable."""
++    paths = [tmp_path / "a.txt", tmp_path / "b.txt"]
++
++    for path in paths:
++        path.write_text("a\nb\n", encoding="UTF-8")
++
++    filename = make_filename(paths)
++    expected = {paths[0]} if isinstance(filename, pathlib.Path) else set(paths)
++    result = click.edit(filename=filename, editor="sed -i~ 's/$/Test/'")
++    assert result is None
++
++    for path in paths:
++        content = "aTest\nbTest\n" if path in expected else "a\nb\n"
++        assert path.read_text(encoding="UTF-8") == content
++
++
+ @pytest.mark.parametrize(
+     ("editor_cmd", "filenames", "expected_args"),
+     [
+@@ -528,6 +554,12 @@ def test_edit(runner):
+             ["vim", "-u", "NONE", "-N", "f.txt"],
+             id="multiple short flags",
+         ),
++        pytest.param(
++            "editor",
++            ["f.txt", pathlib.PurePosixPath("g.txt")],
++            ["editor", "f.txt", "g.txt"],
++            id="mixed str and path-like filenames",
++        ),
+         pytest.param(
+             "editor",
+             ['file"name.txt'],
+diff --git a/tests/typing/typing_edit.py b/tests/typing/typing_edit.py
+new file mode 100644
+index 0000000..cee619a
+--- /dev/null
++++ b/tests/typing/typing_edit.py
+@@ -0,0 +1,10 @@
++from pathlib import Path
++
++from typing_extensions import assert_type
++
++import click
++
++# ``filename`` accepts a path, a path-like object, or an iterable mixing both.
++assert_type(click.edit(filename="f.txt"), None)
++assert_type(click.edit(filename=Path("f.txt")), None)
++assert_type(click.edit(filename=["f.txt", Path("g.txt")]), None)

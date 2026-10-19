@@ -1,0 +1,191 @@
+
+=== Q1 / A / fresh / rep 0 -> a1b829a4-76b6-45ae-88bd-4996bc5064fd
+   status=completed subtype=success turns=5 wall=26.6s cost=$0.162 ctx_end=25230 checks=all_pass=True subagents=0 shunt=0
+
+=== Q1 / B / fresh / rep 0 -> a632a739-2c43-43a2-ba2f-c4dddf913768
+   status=completed subtype=success turns=4 wall=30.2s cost=$0.197 ctx_end=28571 checks=all_pass=True subagents=0 shunt=0
+
+=== Q2 / B / fresh / rep 0 -> 160849c6-3f48-421f-900b-6bb39bae5ae3
+   status=completed subtype=success turns=3 wall=28.7s cost=$0.178 ctx_end=26956 checks=all_pass=True subagents=0 shunt=0
+
+=== Q2 / A / fresh / rep 0 -> 7522cafe-d610-43d6-a378-bbe1624ad2b1
+   status=completed subtype=success turns=4 wall=19.3s cost=$0.151 ctx_end=23745 checks=all_pass=True subagents=0 shunt=0
+
+=== Q3 / A / fresh / rep 0 -> eafb08da-cc9e-4a58-b788-a03855fb621e
+   status=completed subtype=success turns=3 wall=19.6s cost=$0.116 ctx_end=21677 checks=all_pass=True subagents=0 shunt=0
+
+=== Q3 / B / fresh / rep 0 -> 3008bc5f-02fe-4ffb-a554-df452e67b378
+   status=completed subtype=success turns=4 wall=20.8s cost=$0.161 ctx_end=25852 checks=all_pass=True subagents=0 shunt=0
+
+=== B1 / B / fresh / rep 0 -> 11514f3e-3e9e-49d9-85b7-e4853ed4a749
+   status=completed subtype=success turns=10 wall=64.0s cost=$0.296 ctx_end=35290 checks=all_pass=True subagents=0 shunt=0
+
+=== B1 / A / fresh / rep 0 -> 3b64583e-6ae8-4eb6-aedf-0c596eeceff5
+   status=completed subtype=success turns=7 wall=62.2s cost=$0.275 ctx_end=37060 checks=all_pass=True subagents=0 shunt=0
+
+=== F1 / B / fresh / rep 0 -> baea4f48-9920-4f86-93cd-8835b6ff9a5b
+   status=completed subtype=success turns=10 wall=79.2s cost=$0.415 ctx_end=45251 checks=all_pass=True subagents=0 shunt=0
+
+=== F1 / A / fresh / rep 0 -> 750440be-bc3d-4726-b3f0-a14140432576
+   status=completed subtype=success turns=8 wall=53.4s cost=$0.321 ctx_end=38313 checks=all_pass=True subagents=0 shunt=0
+
+=== F2 / B / fresh / rep 0 -> 9057a654-8ac4-4b87-881d-97c324aa39e9
+   status=completed subtype=success turns=18 wall=194.2s cost=$0.675 ctx_end=49967 checks=all_pass=True subagents=0 shunt=0
+
+=== F2 / A / fresh / rep 0 -> 74cfb44c-8a66-4e3e-b015-58856324886d
+   status=completed subtype=success turns=11 wall=128.9s cost=$0.609 ctx_end=46626 checks=all_pass=True subagents=0 shunt=0
+
+=== R1 / A / fresh / rep 0 -> e3f5546d-b750-4922-8151-17d569861e12
+   status=completed subtype=success turns=11 wall=85.5s cost=$0.409 ctx_end=36324 checks=all_pass=True subagents=0 shunt=0
+
+=== R1 / B / fresh / rep 0 -> f647a1f5-803c-4b67-9138-7695d4dd21e7
+   status=completed subtype=success turns=12 wall=106.0s cost=$0.428 ctx_end=36659 checks=all_pass=True subagents=0 shunt=0
+
+=== L1 / B / fresh / rep 0 -> b8f5a18c-a31d-46bf-8a82-b559a6ad605f
+   status=completed subtype=success turns=6 wall=310.2s cost=$1.835 ctx_end=88740 checks=all_pass=True subagents=1 shunt=0
+
+=== L1 / A / fresh / rep 0 -> 530f0a9a-40b5-4090-9601-9c824e65873e
+   status=completed subtype=success turns=25 wall=296.4s cost=$1.405 ctx_end=84738 checks=all_pass=True subagents=0 shunt=0
+
+##### chain 6c030563 / B / rep 0: Q1 > Q2 > Q3 > B1 > F1 > F2 > R1 > L1
+
+=== Q1 / B / chain step 1 / rep 0 -> 7f2dc164-ee3d-4a75-bec0-d58599c75d55
+   status=completed subtype=success turns=6 wall=38.2s cost=$0.208 ctx_end=29190 checks=all_pass=True subagents=0 shunt=0
+
+=== Q2 / B / chain step 2 / rep 0 -> 5df627e6-34c7-4987-adc1-38ce190eea28
+   status=completed subtype=success turns=3 wall=27.7s cost=$0.113 ctx_end=36192 checks=all_pass=True subagents=0 shunt=0
+
+=== Q3 / B / chain step 3 / rep 0 -> 17fc8991-20b0-4a14-a506-31ff5a3aee92
+   status=completed subtype=success turns=3 wall=19.5s cost=$0.081 ctx_end=40529 checks=all_pass=True subagents=0 shunt=0
+
+=== B1 / B / chain step 4 / rep 0 -> 57dc1dec-2b3a-465e-b8c9-cbf73b9bfcdc
+   status=completed subtype=success turns=2 wall=538.5s cost=$0.752 ctx_end=75919 checks=all_pass=True subagents=0 shunt=0
+
+=== F1 / B / chain step 5 / rep 0 -> de3dd19f-77d8-48c6-a974-1055750a66ce
+   status=completed subtype=success turns=4 wall=44.6s cost=$0.165 ctx_end=81819 checks=all_pass=True subagents=0 shunt=0
+
+=== F2 / B / chain step 6 / rep 0 -> fd947e5d-687f-4a58-887a-444066b91009
+   status=completed subtype=success turns=17 wall=170.5s cost=$0.782 ctx_end=110389 checks=all_pass=True subagents=0 shunt=0
+
+=== R1 / B / chain step 7 / rep 0 -> 3e022adb-226b-4bbe-b8ce-fc4bb4affa9e
+   status=completed subtype=success turns=10 wall=116.6s cost=$0.611 ctx_end=133206 checks=all_pass=True subagents=0 shunt=0
+
+=== L1 / B / chain step 8 / rep 0 -> 3e691417-693f-4826-9c83-ceeb0cf2b811
+   status=completed subtype=success turns=11 wall=307.6s cost=$1.244 ctx_end=161458 checks=all_pass=True subagents=1 shunt=0
+
+##### chain 7757d4a8 / A / rep 0: Q1 > Q2 > Q3 > B1 > F1 > F2 > R1 > L1
+
+=== Q1 / A / chain step 1 / rep 0 -> 5c4b4e18-75bb-4a3f-9a47-38ed28c9e331
+   status=completed subtype=success turns=5 wall=37.0s cost=$0.183 ctx_end=26431 checks=all_pass=True subagents=0 shunt=0
+
+=== Q2 / A / chain step 2 / rep 0 -> af7a3707-85ef-433e-8457-5b6a8a2eb7ea
+   status=completed subtype=success turns=3 wall=31.2s cost=$0.129 ctx_end=34874 checks=all_pass=True subagents=0 shunt=0
+
+=== Q3 / A / chain step 3 / rep 0 -> 5e251699-dfda-4ab8-b39f-8145c1203df3
+   status=completed subtype=success turns=4 wall=27.2s cost=$0.132 ctx_end=43383 checks=all_pass=True subagents=0 shunt=0
+
+=== B1 / A / chain step 4 / rep 0 -> d5ddaf35-846e-4af1-a855-6d6fe4c13577
+   status=completed subtype=success turns=17 wall=121.6s cost=$0.614 ctx_end=79196 checks=all_pass=True subagents=0 shunt=0
+
+=== F1 / A / chain step 5 / rep 0 -> 466103ef-0000-4b4c-bb90-ef0a5940041f
+   status=completed subtype=success turns=5 wall=40.1s cost=$0.178 ctx_end=88015 checks=all_pass=True subagents=0 shunt=0
+
+=== F2 / A / chain step 6 / rep 0 -> 5c6e7f43-d0d7-48c7-b37c-de82016f07e5
+   status=completed subtype=success turns=10 wall=159.8s cost=$0.704 ctx_end=117319 checks=all_pass=True subagents=0 shunt=0
+
+=== R1 / A / chain step 7 / rep 0 -> 082aa895-323e-438c-8427-3b3c02142345
+   status=completed subtype=success turns=8 wall=119.6s cost=$0.486 ctx_end=134511 checks=all_pass=True subagents=0 shunt=0
+
+=== L1 / A / chain step 8 / rep 0 -> fca945ea-7ce6-42a3-b8f1-2534d3a399b4
+   status=completed subtype=success turns=19 wall=328.1s cost=$1.412 ctx_end=176483 checks=all_pass=True subagents=0 shunt=0
+
+=== Q2 / B / fresh / rep 1 -> 773e869a-f370-4cbe-b0bc-067b0972b87a
+   status=completed subtype=success turns=6 wall=28.4s cost=$0.202 ctx_end=29314 checks=all_pass=True subagents=0 shunt=0
+
+=== Q2 / A / fresh / rep 1 -> 02aa7444-3ebf-45bb-870b-ab9cf66446d2
+   status=completed subtype=success turns=4 wall=29.3s cost=$0.144 ctx_end=22826 checks=all_pass=True subagents=0 shunt=0
+
+=== Q3 / A / fresh / rep 1 -> 5498fb1e-ba22-4c31-9c07-3ccd26498d2a
+   status=completed subtype=success turns=3 wall=23.3s cost=$0.101 ctx_end=20163 checks=all_pass=True subagents=0 shunt=0
+
+=== Q3 / B / fresh / rep 1 -> 83c1b5af-d81b-49dd-a883-04ee1be176b3
+   status=completed subtype=success turns=3 wall=19.4s cost=$0.128 ctx_end=23315 checks=all_pass=True subagents=0 shunt=0
+
+=== B1 / A / fresh / rep 1 -> 00db071a-a54f-4cd3-a3e0-ce3478200677
+   status=completed subtype=success turns=3 wall=428.2s cost=$0.429 ctx_end=42677 checks=all_pass=True subagents=0 shunt=0
+
+=== B1 / B / fresh / rep 1 -> 159540a9-cf27-4ba4-b44c-76e58d172896
+   status=completed subtype=success turns=11 wall=93.3s cost=$0.408 ctx_end=43130 checks=all_pass=True subagents=0 shunt=0
+
+=== F2 / B / fresh / rep 1 -> 67c11fa8-abb9-4a17-ac38-ff50fed45d8e
+   status=completed subtype=success turns=9 wall=64.4s cost=$0.364 ctx_end=40486 checks=all_pass=True subagents=0 shunt=0
+
+=== F2 / A / fresh / rep 1 -> 1437f986-5431-4e55-a34a-68134fdd9855
+   status=completed subtype=success turns=10 wall=77.5s cost=$0.429 ctx_end=48535 checks=all_pass=True subagents=0 shunt=0
+
+=== R1 / B / fresh / rep 1 -> 4974f719-f8d6-4e5a-8f64-37b7eb2286f4
+   status=completed subtype=success turns=13 wall=97.9s cost=$0.393 ctx_end=40178 checks=all_pass=True subagents=0 shunt=1
+
+=== R1 / A / fresh / rep 1 -> 8c535342-669f-4675-ac05-9ad2f8abda2e
+   status=completed subtype=success turns=7 wall=61.2s cost=$0.266 ctx_end=34488 checks=all_pass=True subagents=0 shunt=0
+
+=== L1 / A / fresh / rep 1 -> df1c540c-2e2e-4666-bac6-5432c767d9b0
+   status=completed subtype=success turns=16 wall=111.4s cost=$0.688 ctx_end=68305 checks=all_pass=True subagents=0 shunt=0
+
+=== L1 / B / fresh / rep 1 -> 2b4b8a89-18c4-441a-8e2b-8616ae38b59c
+   status=completed subtype=success turns=16 wall=107.2s cost=$0.600 ctx_end=58148 checks=all_pass=True subagents=0 shunt=0
+
+##### chain 7ef3d3f2 / B / rep 1: Q1 > Q2 > Q3 > B1 > F1 > F2 > R1 > L1
+
+=== Q1 / B / chain step 1 / rep 1 -> 3a93bb1b-ff37-434e-a891-ac9043786b59
+   status=completed subtype=success turns=6 wall=29.1s cost=$0.214 ctx_end=30190 checks=all_pass=True subagents=0 shunt=0
+
+=== Q2 / B / chain step 2 / rep 1 -> 025c3f51-32a7-4468-8b68-841dbd2db5e2
+   status=completed subtype=success turns=4 wall=26.4s cost=$0.128 ctx_end=37677 checks=all_pass=True subagents=0 shunt=0
+
+=== Q3 / B / chain step 3 / rep 1 -> ad6a5de9-ceaf-4689-a90f-a089f09cf2c7
+   status=completed subtype=success turns=3 wall=17.2s cost=$0.081 ctx_end=42040 checks=all_pass=True subagents=0 shunt=0
+
+=== B1 / B / chain step 4 / rep 1 -> 18ea1c55-6af2-4e7c-b458-2a9c20a54ff2
+   status=completed subtype=success turns=23 wall=185.6s cost=$0.807 ctx_end=81129 checks=all_pass=True subagents=0 shunt=0
+
+=== F1 / B / chain step 5 / rep 1 -> 486f2c1c-a53f-435e-ad99-a0b5d6de0f1e
+   status=completed subtype=success turns=3 wall=41.6s cost=$0.154 ctx_end=87671 checks=all_pass=True subagents=0 shunt=0
+
+=== F2 / B / chain step 6 / rep 1 -> 99babcc6-c1bf-43e3-a805-3c13828b8ae5
+   status=completed subtype=success turns=5 wall=52.6s cost=$0.217 ctx_end=95613 checks=all_pass=True subagents=0 shunt=0
+
+=== R1 / B / chain step 7 / rep 1 -> 686b620c-6f5e-4c98-b188-a18e6a082fa3
+   status=completed subtype=success turns=7 wall=57.1s cost=$0.367 ctx_end=115506 checks=all_pass=True subagents=0 shunt=0
+
+=== L1 / B / chain step 8 / rep 1 -> a3019ba5-4175-42d9-bb5d-96eded2099e8
+   status=completed subtype=success turns=9 wall=72.3s cost=$0.418 ctx_end=131642 checks=all_pass=True subagents=0 shunt=0
+
+##### chain 35714cf8 / A / rep 1: Q1 > Q2 > Q3 > B1 > F1 > F2 > R1 > L1
+
+=== Q1 / A / chain step 1 / rep 1 -> 3da74611-466c-4800-be0a-4f1a2cc47198
+   status=completed subtype=success turns=5 wall=25.5s cost=$0.178 ctx_end=26288 checks=all_pass=True subagents=0 shunt=0
+
+=== Q2 / A / chain step 2 / rep 1 -> 8ddee1cc-eda8-4172-b9fd-5e26cc4a88b3
+   status=completed subtype=success turns=5 wall=22.8s cost=$0.160 ctx_end=36736 checks=all_pass=True subagents=0 shunt=0
+
+=== Q3 / A / chain step 3 / rep 1 -> 392110a7-50b6-4e8a-bb80-7e56489920e6
+   status=completed subtype=success turns=4 wall=16.4s cost=$0.125 ctx_end=44249 checks=all_pass=True subagents=0 shunt=0
+
+=== B1 / A / chain step 4 / rep 1 -> 5d63ef09-0770-4653-81ce-4d1b6b99a48e
+   status=completed subtype=success turns=21 wall=249.8s cost=$0.739 ctx_end=82591 checks=all_pass=True subagents=0 shunt=0
+
+=== F1 / A / chain step 5 / rep 1 -> 31b91afb-5599-4c60-bbc3-91c676f6a08d
+   status=completed subtype=success turns=6 wall=53.3s cost=$0.266 ctx_end=93973 checks=all_pass=True subagents=0 shunt=0
+
+=== F2 / A / chain step 6 / rep 1 -> f1e6fb73-81c6-4060-8528-3f9f20ee0db5
+   status=completed subtype=success turns=6 wall=59.8s cost=$0.331 ctx_end=107727 checks=all_pass=True subagents=0 shunt=0
+
+=== R1 / A / chain step 7 / rep 1 -> c57b78c9-0c19-48a0-85b4-125f7c8a58dd
+   status=completed subtype=success turns=5 wall=42.7s cost=$0.324 ctx_end=126717 checks=all_pass=True subagents=0 shunt=0
+
+=== L1 / A / chain step 8 / rep 1 -> 06277811-ce78-4989-9dd2-4a83b12f0498
+   status=completed subtype=success turns=7 wall=62.5s cost=$0.402 ctx_end=141775 checks=all_pass=True subagents=0 shunt=0
+
+done
+exit=0

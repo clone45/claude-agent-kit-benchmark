@@ -1,0 +1,84 @@
+diff --git a/src/click/_termui_impl.py b/src/click/_termui_impl.py
+index fa26601..faacd60 100644
+--- a/src/click/_termui_impl.py
++++ b/src/click/_termui_impl.py
+@@ -123,6 +123,11 @@ class ProgressBar(t.Generic[V]):
+         exc_value: BaseException | None,
+         tb: TracebackType | None,
+     ) -> None:
++        # Apply steps still held back by ``update_min_steps`` so the
++        # final position is shown.
++        if self._flush_pending_steps():
++            self.render_progress()
++
+         self.render_finish()
+ 
+     def __iter__(self) -> cabc.Iterator[V]:
+@@ -329,9 +334,19 @@ class ProgressBar(t.Generic[V]):
+         self._completed_intervals += n_steps
+ 
+         if self._completed_intervals >= self.update_min_steps:
+-            self.make_step(self._completed_intervals)
++            self._flush_pending_steps()
+             self.render_progress()
+-            self._completed_intervals = 0
++
++    def _flush_pending_steps(self) -> bool:
++        """Apply any steps held back by the ``update_min_steps``
++        threshold. Return whether there were any to apply.
++        """
++        if not self._completed_intervals:
++            return False
++
++        self.make_step(self._completed_intervals)
++        self._completed_intervals = 0
++        return True
+ 
+     def finish(self) -> None:
+         self.eta_known = False
+@@ -368,6 +383,7 @@ class ProgressBar(t.Generic[V]):
+                 yield rv
+                 self.update(1)
+ 
++            self._flush_pending_steps()
+             self.finish()
+             self.render_progress()
+ 
+diff --git a/tests/test_termui.py b/tests/test_termui.py
+index 627c2aa..481662d 100644
+--- a/tests/test_termui.py
++++ b/tests/test_termui.py
+@@ -353,6 +353,33 @@ def test_progress_bar_update_min_steps(runner):
+     assert bar.pos == 5
+ 
+ 
++@pytest.mark.parametrize("update_min_steps", [1, 3, 6, 7, 19, 20, 21, 100])
++@pytest.mark.parametrize("drive", ["iterate", "update"])
++def test_progress_bar_update_min_steps_final_position(
++    monkeypatch, update_min_steps, drive
++):
++    """Steps held back by ``update_min_steps`` are applied when the bar
++    finishes, so the final position is rendered.
++    """
++    monkeypatch.setattr(click._termui_impl, "isatty", lambda _: True)
++    out = io.StringIO()
++
++    with click.progressbar(
++        length=20, show_pos=True, update_min_steps=update_min_steps, file=out
++    ) as bar:
++        if drive == "iterate":
++            for _ in bar:
++                pass
++        else:
++            for _ in range(20):
++                bar.update(1)
++
++    assert bar.pos == 20
++    assert bar.finished
++    assert bar._completed_intervals == 0
++    assert "20/20" in out.getvalue()
++
++
+ @pytest.mark.parametrize("key_char", ("h", "H", "é", "À", " ", "字", "àH", "àR"))
+ @pytest.mark.parametrize("echo", [True, False])
+ @pytest.mark.skipif(not WIN, reason="Tests user-input using the msvcrt module.")

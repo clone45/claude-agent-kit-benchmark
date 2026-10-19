@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 56367,
+  "stop_reason": "end_turn",
+  "session_id": "f6d2e476-7603-4613-8502-4dd22e033a2d",
+  "total_cost_usd": 0.19091919999999998,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 7415,
+    "cache_read_input_tokens": 219036,
+    "output_tokens": 4386,
+    "output_tokens_details": {
+      "thinking_tokens": 1148
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 7415,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 4386,
+      "cacheReadInputTokens": 219036,
+      "cacheCreationInputTokens": 7415,
+      "webSearchRequests": 0,
+      "costUSD": 0.19091919999999998,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1148,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Copying, deep-copying or pickling any `Sentinel` member now gives back the exact same object, and a copied or pickled `click.Option([\"--name\"])` still has `default is UNSET` and `name == \"name\"`. The full test suite passes (2271 passed, 24 skipped, 1 xfailed), and ruff and mypy are clean.\n\n**Blocked on me:** nothing.\n\n**Changed**\n- `src/click/_utils.py`: `Sentinel` now overrides three methods.\n  - `__reduce_ex__` returns `(getattr, (self.__class__, self._name_))`, so pickle looks the member up on the class again instead of rebuilding it from its value. The value is a bare `object()`, which is why unpickling used to fail with `ValueError: ... is not a valid Sentinel`. Overriding `__reduce__` wouldn't be enough, because pickle calls `Enum.__reduce_ex__` first.\n  - `__copy__` and `__deepcopy__` return `self`. On Python 3.13, copying already worked through Enum's own methods; the explicit versions make sure it doesn't depend on what each Python version's Enum provides, since the project supports Python 3.10 and up.\n  - The parameter type on `__reduce_ex__` matches what mypy expects from Enum's version of the method.\n- `tests/test_utils/test_sentinel.py`: new tests, each run for every `Sentinel` member:\n  - `copy.copy` and `copy.deepcopy` return the same object;\n  - pickling returns the same object, checked at every pickle protocol from 0 up;\n  - sentinels inside nested dicts and lists survive a deep copy or pickle round trip;\n  - a `click.Option([\"--name\"])` keeps `default is UNSET` and `name == \"name\"` after a copy, deep copy, or pickle round trip.\n\n**Verified**\n- I ran `ruff check` and `ruff format --check` on both files, and `mypy` on the project.\n- The new test file passes on its own (19 tests), and so does the full suite.\n\n**Found**\n- On Python 3.13, copying already worked before this change; only pickling was broken.",
+  "ttft_ms": 2171,
+  "type": "result",
+  "duration_ms": 65479,
+  "uuid": "b98bcc25-a10b-44de-b15f-110c8ca63b0d",
+  "ttft_stream_ms": 1901,
+  "time_to_request_ms": 79,
+  "first_content_frame_ms": 1901,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

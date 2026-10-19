@@ -1,0 +1,69 @@
+{
+  "phase": 2,
+  "harness_dir": "/mnt/c/Code/routing_test",
+  "work_dir": "/home/clone45/routing_test_work",
+  "repo_dir": "/home/clone45/routing_test_work/voxglitch",
+  "upstream_dir": "/home/clone45/routing_test_work/voxglitch-upstream",
+  "upstream_url": "/mnt/c/Code/voxglitch",
+  "base_commit": "d32b18f",
+  "plugin_dir": "/mnt/c/Code/routing_test/plugin",
+  "claude_bin": "claude",
+  "model": "opus",
+  "effort": "high",
+  "permission_mode": "bypassPermissions",
+  "conditions": [
+    {
+      "id": "59b253d3-f1a3-4642-bcd3-6a2c9fae721e",
+      "label": "A",
+      "description": "plain Opus session",
+      "plugin": false,
+      "claude_md": "tasks2/CLAUDE_A2.md"
+    },
+    {
+      "id": "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9",
+      "label": "B",
+      "description": "Opus session with the agent-kit plugin and its Agent contract",
+      "plugin": true,
+      "claude_md": "tasks2/CLAUDE_B2.md"
+    }
+  ],
+  "session_modes": [
+    {
+      "id": "dc3d4fc2-05ef-4260-af89-c52ea56ecd02",
+      "label": "fresh"
+    },
+    {
+      "id": "ea3c2661-9782-4d30-a5e5-857746f50235",
+      "label": "chain"
+    }
+  ],
+  "tasks_file": "tasks2.json",
+  "task_specs_file": "task_specs2.json",
+  "hidden_root": "tasks2/hidden",
+  "results_dir": "results2/runs",
+  "blind_dir": "blind2",
+  "mapping_file": "private/mapping2.json",
+  "grading_sheet": "blind2/grading_sheet.csv",
+  "footer_file": "tasks2/footer2.md",
+  "footer_q_file": "tasks/footer_q.md",
+  "chain_footer_file": "tasks2/footer_chain.md",
+  "timeouts_s": {
+    "short": 2400,
+    "long": 4800,
+    "check": 900
+  },
+  "max_budget_usd": {
+    "short": 20,
+    "long": 40
+  },
+  "rate_limit_wait_s": 900,
+  "rate_limit_max_retries": 8,
+  "prices_file": "prices.json",
+  "clean_keep": [
+    ".claude"
+  ],
+  "report": {
+    "name": "Phase 2: voxglitch",
+    "subtitle": "8 tasks on the Voxglitch VCV Rack plugin, 73,000 lines of C++ with 54 files over the plugin's 350-line threshold, run both as fresh sessions and as one continued session."
+  }
+}

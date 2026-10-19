@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 89170,
+  "stop_reason": "end_turn",
+  "session_id": "1ad4d632-a72e-46bc-a6cd-5e56af16ae9b",
+  "total_cost_usd": 0.42090279999999997,
+  "usage": {
+    "input_tokens": 24,
+    "cache_creation_input_tokens": 21690,
+    "cache_read_input_tokens": 414334,
+    "output_tokens": 8221,
+    "output_tokens_details": {
+      "thinking_tokens": 2765
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 21690,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 24,
+      "outputTokens": 8221,
+      "cacheReadInputTokens": 414334,
+      "cacheCreationInputTokens": 21690,
+      "webSearchRequests": 0,
+      "costUSD": 0.42090279999999997,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2765,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 14,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`click.Path` is now generic over the type it converts to, so `path_type` sets the return type of `convert`, calling the instance directly, `coerce_path_result` and `click.prompt(type=...)`. Runtime behavior is unchanged, and the full test suite, mypy and ruff all pass. I made the change myself without subagents, since it was small and every part depended on the others.\n\n**Blocked on me**\nNothing.\n\n**Changed**\n- `src/click/types.py`\n  - **New type variable:** added `_PathT_co`, which is covariant and defaults to `str | bytes | os.PathLike[str]`. It follows the existing `_InputT_contra` pattern: type checkers get the default from `typing_extensions` under `TYPE_CHECKING`, Python 3.13+ uses `typing.TypeVar(default=...)`, and older Pythons get a plain TypeVar.\n  - **The class:** `class Path(ParamType[_PathT_co])`, and `path_type` is now typed `type[_PathT_co] | None`. That parameter alone sets the type: `Path(path_type=pathlib.Path)` is a `Path[pathlib.Path]`, and `Path()` falls back to the default.\n  - **Return types:** `coerce_path_result` and `convert` return `_PathT_co`. Each return value is wrapped in `t.cast`, so no logic changed.\n  - **Docstring:** added a `.. versionchanged:: 8.6.0` note to the class docstring. I used 8.6.0 because `pyproject.toml` says `8.6.0.dev`.\n- `tests/typing/typing_path.py` (new): `assert_type` checks for:\n  - `path_type` set to `pathlib.Path`, `str` and `bytes`, plus the default union;\n  - calling the instance with a `PurePosixPath` and with `None`;\n  - `coerce_path_result`;\n  - an explicit `click.Path[pathlib.Path]` annotation;\n  - assigning to `ParamType[...]`;\n  - `click.prompt`.\n- `tests/test_types/test_Path.py`: added `test_path_generic_at_runtime`, which checks that `get_args(click.Path[pathlib.Path]) == (pathlib.Path,)`.\n\n**Verified**\n- Full suite: 2262 passed, 24 skipped, 1 xfailed. `mypy` (strict) is clean, and `ruff check` and `ruff format --check` are clean.\n- I ran a throwaway file through mypy with deliberately wrong `assert_type`s (`str` where it should be `Path`, and `Path()` as `Path[pathlib.Path]`). mypy flagged both, so the new typing checks do catch regressions.\n- On the system Python 3.10, the runtime fallback works:\n  - `typing_extensions` is never imported at runtime;\n  - `get_args` on `Path[pathlib.Path]` and `ParamType[int]` gives the expected results;\n  - conversion and passing `None` through still behave as before.\n\n**Found**\n- I left the input type parameter at its existing `Any` default instead of narrowing it to `str | os.PathLike[str]`, so calling an instance still type-checks with any input, as it did before. Narrowing it would be stricter but could break existing code that type-checks today. That would be a separate decision if you want it.\n- The repo history has an earlier commit (`a8dfdc0`) that removed a similar implementation. I didn't consult it.",
+  "ttft_ms": 3187,
+  "type": "result",
+  "duration_ms": 99335,
+  "uuid": "2e292285-a22b-433c-99ee-2a26d49f5c18",
+  "ttft_stream_ms": 2713,
+  "time_to_request_ms": 84,
+  "first_content_frame_ms": 2714,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

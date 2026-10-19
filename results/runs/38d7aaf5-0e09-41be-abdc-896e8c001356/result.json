@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 159799,
+  "stop_reason": "end_turn",
+  "session_id": "d465310d-d0f9-47d6-b659-b7265a0e73b6",
+  "total_cost_usd": 0.7159399999999999,
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 37431,
+    "cache_read_input_tokens": 358760,
+    "output_tokens": 17233,
+    "output_tokens_details": {
+      "thinking_tokens": 9014
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 37431,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 20,
+      "outputTokens": 17233,
+      "cacheReadInputTokens": 358760,
+      "cacheCreationInputTokens": 37431,
+      "webSearchRequests": 0,
+      "costUSD": 0.7159399999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 9014,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 13,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I split `isolation` into helpers and it's now 59 lines, down from about 195. The full test suite, `ruff check`, `ruff format --check` and `mypy` all pass.\n\n**Blocked on me:** nothing.\n\n**Changed** (only `src/click/testing.py`, nothing committed):\n- **`_IsolatedStreams`**: a small helper class that builds the stdin, stdout and stderr streams (with the optional echoing stdin, its 1-character read size, the same encodings and `errors=\"backslashreplace\"` on stderr). It also holds the `visible_input`, `hidden_input`, `getchar` and `should_strip_ansi` replacements. They now use `with _pause_echo(...)` inside each method instead of the decorator, which works the same way. They still read and write through `sys.stdout`/`sys.stdin` when called, as before.\n- **`_SavedState`**: records the original globals, and its `restore(old_env)` method puts them back. It restores the environment first, then stdout, stderr, stdin, the three `termui` functions, `utils.should_strip_ansi`, `_compat.should_strip_ansi`, `FORCED_WIDTH` and finally `pdb.Pdb.__init__`. That is the same order as before.\n- **`_make_patched_pdb_init(old)`**: the pdb patch moved here unchanged, docstring included. It had to move out too to get `isolation` under 80 lines.\n- **`_set_environ(key, value)`**: the set-or-delete environment step that was written out twice before.\n- **`isolation`** now reads in order: build the input stream, save the old state, set the width to 80, build the env, install the streams and patches, apply the env, yield, restore. The signature, docstring and yielded tuple are unchanged, and no other public function or method was touched.\n\n**Verified:**\n- `.venv/bin/python -m pytest -q`: 2262 passed, 24 skipped, 1 xfailed.\n- `ruff check src tests` and `ruff format --check src tests` are clean.\n- `mypy` reports no issues.\n- I skipped a separate independent review because the change is small and I checked it line by line against the original.\n\n**Found:** two small differences you could only notice in unusual cases:\n- **When the originals are saved:** the old `termui`, `should_strip_ansi` and pdb functions are now saved at the start, together with the old streams. Before, they were saved just after `self.make_env(env)`. This only matters if a subclass's `make_env` itself replaces one of those functions.\n- **What the replacements are:** they are now methods on the helper object rather than nested functions. So `termui._getchar.__name__` is now `getchar` instead of `_getchar`. Nothing in the code base checks this.",
+  "ttft_ms": 8211,
+  "type": "result",
+  "duration_ms": 167118,
+  "uuid": "67095f5f-1119-43e8-895b-e87b7e605a09",
+  "ttft_stream_ms": 4836,
+  "time_to_request_ms": 63,
+  "first_content_frame_ms": 4837,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

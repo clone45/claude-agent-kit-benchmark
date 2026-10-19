@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 136308,
+  "stop_reason": "end_turn",
+  "session_id": "83c5ef60-b57d-48ee-b0eb-57672c8ce3af",
+  "total_cost_usd": 0.5600992,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 27622,
+    "cache_read_input_tokens": 192536,
+    "output_tokens": 15028,
+    "output_tokens_details": {
+      "thinking_tokens": 10884
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 27622,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 15028,
+      "cacheReadInputTokens": 192536,
+      "cacheCreationInputTokens": 27622,
+      "webSearchRequests": 0,
+      "costUSD": 0.5600992,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 10884,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I moved the package-name and version detection out of `version_option` into two private helpers. One caveat on the line target: the function's code is now 43 lines (was 86), but counting its 52-line docstring it is 95 lines, so it is not under 70 by that count. The full test suite, ruff and mypy all pass.\n\n**Blocked on me:** nothing.\n\n**Changed:** `src/click/decorators.py` only. Two private helpers sit just above `version_option`:\n- **`_detect_caller_package_name()`** does the stack inspection. Because it runs one call deeper than the old inline code, it steps back two frames to reach whoever called `version_option`. It still deletes the frame references afterwards, and handles `__main__`/`__package__` and the top-level name the same way as before.\n- **`_detect_package_version(package_name)`** does the `importlib.metadata` lookup, the fallback through `packages_distributions()`, and all three `RuntimeError`s with the same messages and the same exception chaining. It returns the package name (possibly replaced by the distribution's name, so `%(package)s` shows the same thing as before) and the version.\n- **`version_option`** now reads: set the default message, detect the package name, define the callback, set the option defaults. The callback is reduced to one line, `package_name, version = _detect_package_version(package_name)`, and still remembers the found values between calls as before. The signature, annotations, docstring and the other public functions are unchanged.\n\n**Verified:**\n- Full test suite: 2262 passed, 24 skipped, 1 xfailed.\n- `ruff check` and `ruff format --check` on the file are clean; `mypy` reports no issues in 29 files.\n- A quick manual check: a command defined in a module named `click.some.submodule` printed `cli, version 8.6.0.dev0`, which is click's installed version, so the frame walk finds the right caller. A `__main__` module with an uninstalled `__package__` raised the same \"is not installed. Try passing 'package_name' instead.\" error.\n\n**Found:**\n- **Line count:** getting the whole function under 70 lines would mean cutting the public docstring, or moving the callback and option setup out as well, which goes beyond the extraction you asked for. I left both alone.\n- **One tiny behavior difference:** a name maps to exactly one distribution, but looking up that distribution's version then fails anyway. Before, the callback had already switched to the distribution's name, so a second `--version` call on the same command would raise a different error. Now it keeps the original name and repeats the first error. This needs broken package metadata plus a second call after the error. Ruling it out completely would mean leaving part of the lookup inside the callback, so I accepted it.",
+  "ttft_ms": 2237,
+  "type": "result",
+  "duration_ms": 145033,
+  "uuid": "a92691c3-699b-4751-85c1-bb1ba8fe9038",
+  "ttft_stream_ms": 648,
+  "time_to_request_ms": 63,
+  "first_content_frame_ms": 648,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

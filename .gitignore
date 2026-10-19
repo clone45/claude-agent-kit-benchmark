@@ -1,0 +1,27 @@
+# Unblinding map, answer keys, and other grading material: kept out on purpose.
+private/
+
+# Generated from upstream commits and hidden_src by make_tasks*.py; rebuild with --verify.
+tasks/hidden/
+tasks2/hidden/
+
+# The plugin under test is not vendored: run get_plugin.sh (clones c8dfca7 and applies plugin.patch).
+plugin/
+
+# Full session streams and transcripts: 88 MB, and they contain every file the sessions read.
+# Available on request. Everything needed to recompute the tables is kept (run.json, result.json,
+# init.json, command.json, diff.patch, diff.stat, checks/).
+results/runs/*/stream.jsonl
+results/runs/*/transcript/
+results2/runs/*/stream.jsonl
+results2/runs/*/transcript/
+
+__pycache__/
+*.pyc
+.venv/
+
+# Build junk the plugin's agents left in their scratch folder (17 MB of preprocessor output).
+results*/runs/*/claude_tmp/*.i
+results*/runs/*/claude_tmp/*.o
+results*/runs/*/claude_tmp/*.repro*
+results*/runs/*/claude_tmp/*.orig

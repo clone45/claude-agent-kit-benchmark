@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 17034,
+  "stop_reason": "end_turn",
+  "session_id": "95e3f7c0-1577-498d-9d2c-0c97ef80a29e",
+  "total_cost_usd": 0.0725326,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 4102,
+    "cache_read_input_tokens": 70423,
+    "output_tokens": 1280,
+    "output_tokens_details": {
+      "thinking_tokens": 58
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 4102,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1280,
+      "cacheReadInputTokens": 70423,
+      "cacheCreationInputTokens": 4102,
+      "webSearchRequests": 0,
+      "costUSD": 0.0725326,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 58,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The decision is made in one place, `src/click/utils.py` `echo()` at line 330: `elif should_strip_ansi(file, resolve_color_default(color)): out = strip_ansi(out)`. It only applies to `str` output. Empty messages return before this check, and `bytes`/`bytearray` are written untouched to the binary stream when one is found.\n\n**What feeds it**\n1. **`color` argument to `echo()`** (`utils.py:245`), which is `True`, `False` or `None`.\n2. **`resolve_color_default(color)`** in `src/click/globals.py:54-67`: an explicit `color` is used as-is. If it's `None`, it uses `ctx.color` from the current Context, if there is one. Otherwise it stays `None`.\n3. **`Context.color`** (`src/click/core.py:523-527`): set by the `color=` constructor argument, and inherited from the parent context when not given.\n4. **The target stream `file`**: the `file=` argument, or `_default_text_stdout()`/`_default_text_stderr()` depending on `err` (`utils.py:288-291`).\n\n**The rule** is in `src/click/_compat.py` `should_strip_ansi(stream, color)` (lines 502-513):\n- If `color` is not `None`, strip exactly when `not color`, so an explicit choice always wins.\n- If `color` is `None` and the stream has a `color` attribute (the pager's `_PagerWriter`), don't strip, because the pager handles that itself.\n- Otherwise, strip when the stream is not a TTY **and** is not Jupyter kernel output. `isatty()` (`_compat.py:540`) calls `stream.isatty()` and treats any exception as False. `_is_jupyter_kernel_output()` (`_compat.py:495`) unwraps click's stream wrappers and checks whether the class's module starts with `ipykernel.`.\n- The stripping itself is `strip_ansi()` (`_compat.py:491`), which applies the regex `_ansi_re` (`_compat.py:19`).\n\n**Override in tests:** `CliRunner.isolation()` in `src/click/testing.py:506-523` swaps `should_strip_ansi` in both `utils` and `_compat` for a version that uses the runner's `color` flag (default `False`) instead of the TTY check.",
+  "ttft_ms": 3581,
+  "type": "result",
+  "duration_ms": 17256,
+  "uuid": "9026610b-ff99-44a2-b883-b7d6019a26ee",
+  "ttft_stream_ms": 2185,
+  "time_to_request_ms": 72,
+  "first_content_frame_ms": 2185,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

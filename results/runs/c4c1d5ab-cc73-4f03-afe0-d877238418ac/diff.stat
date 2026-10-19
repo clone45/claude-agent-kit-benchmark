@@ -1,0 +1,6 @@
+ src/click/_termui_impl.py | 14 ++++++++++++--
+ tests/test_termui.py      | 24 ++++++++++++++++++++++++
+ 2 files changed, 36 insertions(+), 2 deletions(-)
+
+M	src/click/_termui_impl.py
+M	tests/test_termui.py

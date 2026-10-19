@@ -1,0 +1,6 @@
+ src/click/_utils.py               | 14 +++++++++++++
+ tests/test_utils/test_sentinel.py | 42 +++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 56 insertions(+)
+
+M	src/click/_utils.py
+M	tests/test_utils/test_sentinel.py

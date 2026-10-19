@@ -1,0 +1,318 @@
+diff --git a/src/click/core.py b/src/click/core.py
+index 550ac60..2a57e75 100644
+--- a/src/click/core.py
++++ b/src/click/core.py
+@@ -56,6 +56,10 @@ if t.TYPE_CHECKING:
+ F = t.TypeVar("F", bound="t.Callable[..., t.Any]")
+ V = t.TypeVar("V")
+ 
++# Reserved storage name of the automatic help option, kept clear of the names
++# user parameters derive (like ``help``), so they never overwrite each other.
++_HELP_OPTION_STORAGE_NAME = "_click_default_help"
++
+ 
+ def _complete_visible_commands(
+     ctx: Context, incomplete: str
+@@ -1148,6 +1152,43 @@ class Command:
+                     stacklevel=3,
+                 )
+ 
++            # Options may deliberately share a storage name to compete for
++            # the same value (feature switches), but an argument sharing a
++            # name silently overwrites the other parameter's value.
++            if any(
++                param.name == _HELP_OPTION_STORAGE_NAME and param is not help_option
++                for param in params
++            ):
++                warnings.warn(
++                    (
++                        f"The name {_HELP_OPTION_STORAGE_NAME!r} is reserved for"
++                        " the automatic help option. Give the parameter a"
++                        " different name."
++                    ),
++                    stacklevel=3,
++                )
++
++            names_counter = Counter(param.name for param in params)
++
++            for name, count in names_counter.items():
++                if (
++                    count > 1
++                    and name != _HELP_OPTION_STORAGE_NAME
++                    and any(
++                        isinstance(param, Argument) and param.name == name
++                        for param in params
++                    )
++                ):
++                    warnings.warn(
++                        (
++                            f"The name {name!r} is used by an argument and"
++                            " another parameter. They will overwrite each"
++                            " other's value during parsing. Give each"
++                            " parameter a unique name."
++                        ),
++                        stacklevel=3,
++                    )
++
+         return params
+ 
+     def format_usage(self, ctx: Context, formatter: HelpFormatter) -> None:
+@@ -1189,6 +1230,11 @@ class Command:
+ 
+         Skipped if :attr:`add_help_option` is ``False``.
+ 
++        .. versionchanged:: 8.6.0
++            The help option stores its value under the reserved name
++            ``_click_default_help``, so a parameter named ``help`` no longer
++            collides with it.
++
+         .. versionchanged:: 8.1.8
+             The help option is now cached to avoid creating it multiple times.
+         """
+@@ -1205,8 +1251,10 @@ class Command:
+             # Avoid circular import.
+             from .decorators import help_option
+ 
+-            # Apply help_option decorator and pop resulting option
+-            help_option(*help_option_names)(self)
++            # Apply help_option decorator and pop resulting option. The
++            # explicit reserved name keeps its value clear of user parameters
++            # and avoids deriving a name from flags such as "/?".
++            help_option(*help_option_names, _HELP_OPTION_STORAGE_NAME)(self)
+             self._help_option = self.params.pop()  # type: ignore[assignment]
+ 
+         return self._help_option
+diff --git a/tests/test_arguments.py b/tests/test_arguments.py
+index b6765d0..7b6586e 100644
+--- a/tests/test_arguments.py
++++ b/tests/test_arguments.py
+@@ -372,6 +372,36 @@ def test_argument_name_keeps_its_normalization_form(runner):
+     assert result.output == f"['{decomposed}', '{composed}']\n"
+ 
+ 
++def test_argument_name_case_transform_can_collide(runner):
++    @click.command()
++    @click.argument("Foo-Bar")
++    @click.argument("foo_bar")
++    def cmd(**kwargs):
++        click.echo(repr(kwargs))
++
++    with pytest.warns(UserWarning, match="'foo_bar' is used by an argument"):
++        result = runner.invoke(cmd, ["one", "two"], catch_exceptions=False)
++
++    assert result.output == "{'foo_bar': 'two'}\n"
++
++
++def test_argument_name_can_collide_with_an_option(runner):
++    @click.command()
++    @click.option("--foo-bar")
++    @click.argument("Foo-Bar", required=False)
++    def cmd(**kwargs):
++        click.echo(repr(kwargs))
++
++    assert [p.name for p in cmd.params] == ["foo_bar", "foo_bar"]
++
++    with pytest.warns(UserWarning, match="'foo_bar' is used by an argument"):
++        result = runner.invoke(
++            cmd, ["--foo-bar", "from-option", "from-argument"], catch_exceptions=False
++        )
++
++    assert result.output == "{'foo_bar': 'from-argument'}\n"
++
++
+ def test_argument_has_no_auto_envvar(runner):
+     """An argument reads only the envvars it names, never a derived one."""
+ 
+diff --git a/tests/test_basic.py b/tests/test_basic.py
+index 2f0a93d..39f8af7 100644
+--- a/tests/test_basic.py
++++ b/tests/test_basic.py
+@@ -28,6 +28,89 @@ def test_basic_functionality(runner):
+     assert result.exit_code == 0
+ 
+ 
++@pytest.mark.parametrize(
++    ("help_names", "params", "args", "expected_output"),
++    [
++        (["--help"], [], [], "\n"),
++        (["--help"], [click.Argument(["help"])], ["value"], "value\n"),
++        (
++            ["--help"],
++            [click.Option(["--assist", "help"])],
++            ["--assist", "value"],
++            "value\n",
++        ),
++        (["--man"], [click.Option(["--foo", "man"])], ["--foo", "value"], "value\n"),
++        (["/?"], [click.Option(["--foo", "help"])], ["--foo", "value"], "value\n"),
++    ],
++    ids=["no-collision", "argument", "option", "custom-flags", "non-identifier"],
++)
++def test_param_named_help(runner, help_names, params, args, expected_output):
++    """User parameters never clash with the automatic help option, which
++    stores its value under the reserved ``_click_default_help`` name.
++
++    https://github.com/pallets/click/issues/2819
++    """
++    cli = click.Command(
++        "cli",
++        params=params,
++        callback=lambda **kwargs: click.echo(next(iter(kwargs.values()), None)),
++    )
++
++    ctx = click.Context(cli, help_option_names=help_names)
++    help_option = cli.get_help_option(ctx)
++    assert help_option is not None
++    assert help_option.name == "_click_default_help"
++    assert help_option.opts == help_names
++
++    result = runner.invoke(cli, args, help_option_names=help_names)
++    assert result.output == expected_output
++    assert result.exit_code == 0
++
++    result = runner.invoke(cli, [help_names[0]], help_option_names=help_names)
++    assert "Show this message and exit." in result.output
++    assert result.exit_code == 0
++
++
++def test_param_squatting_help_option_name(runner):
++    """Claiming the reserved storage name of the automatic help option
++    triggers a warning.
++    """
++
++    @click.command()
++    @click.argument("_click_default_help")
++    def cli(_click_default_help):
++        click.echo(_click_default_help)
++
++    with pytest.warns(UserWarning, match="reserved for the automatic help option"):
++        result = runner.invoke(cli, ["value"])
++
++    # The collision still breaks parsing, but no longer silently.
++    assert result.exit_code == 2
++
++
++def test_option_reusing_help_flag(runner):
++    """An option reusing the ``--help`` flag replaces the automatic help
++    option entirely.
++
++    https://github.com/pallets/click/issues/2819
++    """
++
++    @click.command()
++    @click.option("--help", default="default value")
++    def cli(help):
++        click.echo(help)
++
++    assert cli.get_help_option(click.Context(cli)) is None
++
++    result = runner.invoke(cli, [])
++    assert result.output == "default value\n"
++    assert result.exit_code == 0
++
++    result = runner.invoke(cli, ["--help", "custom"])
++    assert result.output == "custom\n"
++    assert result.exit_code == 0
++
++
+ def test_repr():
+     @click.command()
+     def command():
+diff --git a/tests/test_info_dict.py b/tests/test_info_dict.py
+index fbf85a1..ee94590 100644
+--- a/tests/test_info_dict.py
++++ b/tests/test_info_dict.py
+@@ -9,7 +9,7 @@ BOOL_PARAM_TYPE = (click.BOOL, {"param_type": "Bool", "name": "boolean"})
+ HELP_OPTION = (
+     None,
+     {
+-        "name": "help",
++        "name": "_click_default_help",
+         "param_type_name": "option",
+         "opts": ["--help"],
+         "secondary_opts": [],
+@@ -256,6 +256,14 @@ def test_command(obj, expect):
+     assert out == expect
+ 
+ 
++def test_help_option():
++    """The automatic help option reports its reserved storage name."""
++    cmd = HELLO_COMMAND[0]
++    help_option = cmd.get_help_option(click.Context(cmd))
++    assert help_option is not None
++    assert help_option.to_info_dict() == HELP_OPTION[1]
++
++
+ def test_context():
+     ctx = click.Context(HELLO_COMMAND[0])
+     out = ctx.to_info_dict()
+diff --git a/tests/test_options.py b/tests/test_options.py
+index 1b3276c..3434ce6 100644
+--- a/tests/test_options.py
++++ b/tests/test_options.py
+@@ -1066,6 +1066,23 @@ def test_callback_validates_prompt(runner, monkeypatch):
+     assert result.output == "A: -12\nError: should be positive\nA: 60\n60\n"
+ 
+ 
++def test_winstyle_options(runner):
++    @click.command()
++    @click.option("/debug;/no-debug", help="Enables or disables debug mode.")
++    def cmd(debug):
++        click.echo(debug)
++
++    result = runner.invoke(cmd, ["/debug"], help_option_names=["/?"])
++    assert result.output == "True\n"
++    result = runner.invoke(cmd, ["/no-debug"], help_option_names=["/?"])
++    assert result.output == "False\n"
++    result = runner.invoke(cmd, [], help_option_names=["/?"])
++    assert result.output == "False\n"
++    result = runner.invoke(cmd, ["/?"], help_option_names=["/?"])
++    assert "/debug; /no-debug  Enables or disables debug mode." in result.output
++    assert "/?                 Show this message and exit." in result.output
++
++
+ def test_legacy_options(runner):
+     @click.command()
+     @click.option("-whatever")
+@@ -3701,6 +3718,42 @@ def test_flag_group_competition_duplicate_option_name(runner):
+         runner.invoke(cli, [])
+ 
+ 
++def test_argument_sharing_param_name_warning(runner):
++    """An argument sharing its storage name with an option makes both
++    silently overwrite each other's value, which triggers a warning.
++    """
++
++    @click.command()
++    @click.option("--foo", "target")
++    @click.argument("target")
++    def cli(target):
++        click.echo(target, nl=False)
++
++    with pytest.warns(UserWarning, match="'target' is used by an argument"):
++        result = runner.invoke(cli, ["--foo", "from_option", "from_argument"])
++
++    # The value parsed by the option is lost to the argument's.
++    assert result.output == "from_argument"
++    assert result.exit_code == 0
++
++
++def test_options_sharing_name_no_warning(runner):
++    """Options deliberately sharing a storage name (feature switches) are
++    exempt from the duplicate-name warning. Warnings are errors in this
++    suite, so a clean run proves none fired.
++    """
++
++    @click.command()
++    @click.option("--upper", "transformation", flag_value="upper")
++    @click.option("--lower", "transformation", flag_value="lower")
++    def cli(transformation):
++        click.echo(transformation, nl=False)
++
++    result = runner.invoke(cli, ["--upper"])
++    assert result.output == "upper"
++    assert result.exit_code == 0
++
++
+ @pytest.mark.parametrize(
+     ("args", "expected"),
+     [

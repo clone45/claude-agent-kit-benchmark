@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 13312,
+  "stop_reason": "end_turn",
+  "session_id": "eb9765cd-1f84-446f-a5ab-8ecce97fd9a7",
+  "total_cost_usd": 0.067391,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 3410,
+    "cache_read_input_tokens": 69995,
+    "output_tokens": 1304,
+    "output_tokens_details": {
+      "thinking_tokens": 87
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 3410,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1304,
+      "cacheReadInputTokens": 69995,
+      "cacheCreationInputTokens": 3410,
+      "webSearchRequests": 0,
+      "costUSD": 0.067391,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 87,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "It's decided while the arguments are parsed, before the callback can run. All references are in `src/click/core.py` unless noted.\n\n1. **The default comes from the other flag.** In `Group.__init__` (lines 1785\u20131789), if `no_args_is_help` is left as `None` it is set to `not invoke_without_command`. A plain `@click.group()` has `invoke_without_command=False`, so it gets `no_args_is_help=True`.\n2. **The decision itself.** `Group.parse_args` (lines 2038\u20132040) checks `if not args and self.no_args_is_help and not ctx.resilient_parsing:` and raises `NoArgsIsHelpError(ctx)`. `Command.parse_args` (lines 1396\u20131398) has the same check, but the base `Command` defaults to `False`.\n3. **Why the callback never runs.** `Command.make_context` (line 1359) calls `self.parse_args(ctx, args)` at line 1393, so the exception is raised before `Group.invoke` is reached.\n4. **How the help gets printed.** `NoArgsIsHelpError.__init__` in `src/click/exceptions.py` (line 332) builds its message from `ctx.get_help()`, and its `show()` echoes that text to stderr with no \"Error:\" prefix. Because it's a `UsageError` (a `ClickException`), `Command.main` catches it at line 1629 and calls `e.show`, which exits with `UsageError`'s code, 2.\n5. **When `invoke_without_command=True`.** `no_args_is_help` then defaults to `False`, parsing goes through, and `Group.invoke` (lines 2058\u20132064) finds no subcommand and runs the group callback via `super().invoke(ctx)`. For a chained group the result callback gets `[]`.\n6. **When both are `False`.** If `no_args_is_help=False` is set explicitly and `invoke_without_command` stays `False`, `Group.invoke` reaches `ctx.fail(\"Missing command.\")` at line 2065 and prints a usage error instead of the help.\n7. **If both are `True`,** the help check in `parse_args` happens first. A bare invocation shows help, while options with no subcommand still run the callback.",
+  "ttft_ms": 2176,
+  "type": "result",
+  "duration_ms": 13523,
+  "uuid": "10abfc73-8f9d-4409-be3c-75261c088f22",
+  "ttft_stream_ms": 1024,
+  "time_to_request_ms": 71,
+  "first_content_frame_ms": 1024,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

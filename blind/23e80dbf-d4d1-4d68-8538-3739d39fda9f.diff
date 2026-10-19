@@ -1,0 +1,206 @@
+diff --git a/src/click/decorators.py b/src/click/decorators.py
+index cc42e5d..ceaa16a 100644
+--- a/src/click/decorators.py
++++ b/src/click/decorators.py
+@@ -15,6 +15,8 @@ from .globals import get_current_context
+ from .utils import echo
+ 
+ if t.TYPE_CHECKING:
++    from types import FrameType
++
+     import typing_extensions as te
+ 
+     P = te.ParamSpec("P")
+@@ -418,6 +420,104 @@ def password_option(*param_decls: str, **kwargs: t.Any) -> t.Callable[[FC], FC]:
+     return option(*param_decls, **kwargs)
+ 
+ 
++def _detect_package_name(frame: FrameType | None) -> str | None:
++    """Detect the top-level package name of the module that called
++    :func:`version_option`, given the frame of that ``version_option`` call.
++    """
++    f_back = frame.f_back if frame is not None else None
++    f_globals = f_back.f_globals if f_back is not None else None
++    # break reference cycle
++    # https://docs.python.org/3/library/inspect.html#the-interpreter-stack
++    del frame
++
++    if f_globals is None:
++        return None
++
++    package_name = f_globals.get("__name__")
++
++    if package_name == "__main__":
++        package_name = f_globals.get("__package__")
++
++    if package_name:
++        package_name = package_name.partition(".")[0]
++
++    return package_name
++
++
++def _resolve_version(package_name: str | None) -> tuple[str | None, str]:
++    """Look up the installed version for ``package_name`` with
++    :mod:`importlib.metadata`. Return the distribution name the version
++    was found under, and the version.
++
++    :raise RuntimeError: The version could not be determined.
++    """
++    if package_name is None:
++        raise RuntimeError(
++            f"Could not determine the version for {package_name!r} automatically."
++        )
++
++    import importlib.metadata
++
++    try:
++        return package_name, importlib.metadata.version(package_name)
++    except importlib.metadata.PackageNotFoundError:
++        # The given name didn't match an installed distribution. Try
++        # resolving it as an import (top-level module) name, e.g. ``PIL``
++        # is provided by the ``Pillow`` distribution.
++        distributions = importlib.metadata.packages_distributions().get(
++            package_name, []
++        )
++
++        if len(distributions) == 1:
++            return distributions[0], importlib.metadata.version(distributions[0])
++
++        if len(distributions) > 1:
++            raise RuntimeError(
++                f"{package_name!r} maps to multiple installed"
++                f" distributions ({', '.join(distributions)})."
++                " Pass 'package_name' to disambiguate."
++            ) from None
++
++        raise RuntimeError(
++            f"{package_name!r} is not installed. Try passing 'package_name' instead."
++        ) from None
++
++
++def _version_callback(
++    version: str | None,
++    package_name: str | None,
++    prog_name: str | None,
++    message: str | None,
++) -> t.Callable[[Context, Parameter, bool], None]:
++    """Create the callback for :func:`version_option`. The version is
++    detected the first time the option is used, then remembered.
++    """
++    if message is None:
++        message = _("%(prog)s, version %(version)s")
++
++    def callback(ctx: Context, param: Parameter, value: bool) -> None:
++        if not value or ctx.resilient_parsing:
++            return
++
++        nonlocal prog_name
++        nonlocal version
++        nonlocal package_name
++
++        if prog_name is None:
++            prog_name = ctx.find_root().info_name
++
++        if version is None:
++            package_name, version = _resolve_version(package_name)
++
++        echo(
++            message % {"prog": prog_name, "package": package_name, "version": version},
++            color=ctx.color,
++        )
++        ctx.exit()
++
++    return callback
++
++
+ def version_option(
+     version: str | None = None,
+     *param_decls: str,
+@@ -478,84 +578,15 @@ def version_option(
+         When ``package_name`` does not match an installed distribution,
+         Click now resolves it as an import (top-level module).
+     """
+-    if message is None:
+-        message = _("%(prog)s, version %(version)s")
+-
+     if version is None and package_name is None:
+-        frame = inspect.currentframe()
+-        f_back = frame.f_back if frame is not None else None
+-        f_globals = f_back.f_globals if f_back is not None else None
+-        # break reference cycle
+-        # https://docs.python.org/3/library/inspect.html#the-interpreter-stack
+-        del frame
+-
+-        if f_globals is not None:
+-            package_name = f_globals.get("__name__")
+-
+-            if package_name == "__main__":
+-                package_name = f_globals.get("__package__")
+-
+-            if package_name:
+-                package_name = package_name.partition(".")[0]
+-
+-    def callback(ctx: Context, param: Parameter, value: bool) -> None:
+-        if not value or ctx.resilient_parsing:
+-            return
+-
+-        nonlocal prog_name
+-        nonlocal version
+-        nonlocal package_name
+-
+-        if prog_name is None:
+-            prog_name = ctx.find_root().info_name
+-
+-        if version is None and package_name is not None:
+-            import importlib.metadata
+-
+-            try:
+-                version = importlib.metadata.version(package_name)
+-            except importlib.metadata.PackageNotFoundError:
+-                # The given name didn't match an installed distribution.
+-                # Try resolving it as an import (top-level module) name,
+-                # e.g. ``PIL`` is provided by the ``Pillow`` distribution.
+-                distributions = importlib.metadata.packages_distributions().get(
+-                    package_name, []
+-                )
+-                if len(distributions) == 1:
+-                    package_name = distributions[0]
+-                    version = importlib.metadata.version(package_name)
+-                elif len(distributions) > 1:
+-                    raise RuntimeError(
+-                        f"{package_name!r} maps to multiple installed"
+-                        f" distributions ({', '.join(distributions)})."
+-                        " Pass 'package_name' to disambiguate."
+-                    ) from None
+-                else:
+-                    raise RuntimeError(
+-                        f"{package_name!r} is not installed. Try passing"
+-                        " 'package_name' instead."
+-                    ) from None
+-
+-        if version is None:
+-            raise RuntimeError(
+-                f"Could not determine the version for {package_name!r} automatically."
+-            )
+-
+-        echo(
+-            message % {"prog": prog_name, "package": package_name, "version": version},
+-            color=ctx.color,
+-        )
+-        ctx.exit()
+-
+-    if not param_decls:
+-        param_decls = ("--version",)
++        package_name = _detect_package_name(inspect.currentframe())
+ 
+     kwargs.setdefault("is_flag", True)
+     kwargs.setdefault("expose_value", False)
+     kwargs.setdefault("is_eager", True)
+     kwargs.setdefault("help", _("Show the version and exit."))
+-    kwargs["callback"] = callback
+-    return option(*param_decls, **kwargs)
++    kwargs["callback"] = _version_callback(version, package_name, prog_name, message)
++    return option(*(param_decls or ("--version",)), **kwargs)
+ 
+ 
+ def custom_version_option(

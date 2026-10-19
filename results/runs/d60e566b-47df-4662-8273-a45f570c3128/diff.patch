@@ -1,0 +1,74 @@
+diff --git a/src/click/core.py b/src/click/core.py
+index 480a2ac..2285d67 100644
+--- a/src/click/core.py
++++ b/src/click/core.py
+@@ -1205,12 +1205,20 @@ class Command:
+         return rv
+ 
+     def get_help_option_names(self, ctx: Context) -> list[str]:
+-        """Returns the names for the help option."""
+-        all_names = set(ctx.help_option_names)
++        """Returns the names for the help option, in the order they were
++        declared in :attr:`Context.help_option_names`. Duplicates are
++        dropped, keeping the first occurrence, and names already used by
++        another parameter are removed.
++        """
++        used_names: set[str] = set()
+         for param in self.params:
+-            all_names.difference_update(param.opts)
+-            all_names.difference_update(param.secondary_opts)
+-        return list(all_names)
++            used_names.update(param.opts)
++            used_names.update(param.secondary_opts)
++        return [
++            name
++            for name in dict.fromkeys(ctx.help_option_names)
++            if name not in used_names
++        ]
+ 
+     def get_help_option(self, ctx: Context) -> Option | None:
+         """Returns the help option object.
+diff --git a/tests/test_commands.py b/tests/test_commands.py
+index 35ba65c..ab77961 100644
+--- a/tests/test_commands.py
++++ b/tests/test_commands.py
+@@ -488,6 +488,39 @@ def test_help_param_priority(runner):
+     assert result.exit_code == 0
+ 
+ 
++@pytest.mark.parametrize(
++    ("help_names", "params", "expected"),
++    [
++        (["-h", "--help"], [], ["-h", "--help"]),
++        (["--help", "-h", "-?"], [], ["--help", "-h", "-?"]),
++        (["-h", "--help", "-h"], [], ["-h", "--help"]),
++        (["-h", "--help"], [click.Option(["--help"])], ["-h"]),
++        (
++            ["--no-shout", "--help"],
++            [click.Option(["--shout/--no-shout"])],
++            ["--help"],
++        ),
++        (
++            ["-h", "--help"],
++            [click.Option(["-h"]), click.Option(["--help"])],
++            [],
++        ),
++    ],
++    ids=[
++        "declared-order",
++        "declared-order-unsorted",
++        "duplicates-dropped",
++        "used-by-option",
++        "used-by-secondary-opt",
++        "all-filtered",
++    ],
++)
++def test_get_help_option_names(help_names, params, expected):
++    cli = click.Command("cli", params=params)
++    ctx = click.Context(cli, help_option_names=help_names)
++    assert cli.get_help_option_names(ctx) == expected
++
++
+ def test_unprocessed_options(runner):
+     @click.command(context_settings=dict(ignore_unknown_options=True))
+     @click.argument("args", nargs=-1, type=click.UNPROCESSED)

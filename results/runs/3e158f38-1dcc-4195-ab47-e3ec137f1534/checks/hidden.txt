@@ -1,0 +1,6 @@
+rc=0 timed_out=False
+--- stdout
+..........                                                               [100%]
+10 passed in 0.02s
+
+--- stderr

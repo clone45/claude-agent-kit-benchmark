@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 66852,
+  "stop_reason": "end_turn",
+  "session_id": "7e68b882-0a15-4ff6-b2bb-f2a357f68afc",
+  "total_cost_usd": 0.42384240000000006,
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 4363,
+    "cache_read_input_tokens": 118285,
+    "output_tokens": 1128,
+    "output_tokens_details": {
+      "thinking_tokens": 162
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 4363,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 24,
+      "outputTokens": 5341,
+      "thinkingTokens": 952,
+      "cacheReadInputTokens": 361272,
+      "cacheCreationInputTokens": 30584,
+      "webSearchRequests": 0,
+      "costUSD": 0.42384240000000006,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 3,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "There are 20 voice models. All overrides are the `setShape` method in `src/modules/VXDrums/VXDrumVoices.hpp`; the pure-virtual base is `Model::setShape` at line 299.\n\n**Recompute coefficients (store, then call `updateCoeffs()`)**\n- Clap (488) stores the value as it arrives.\n- SnareSweep (1247), SnareGate (1341), Clap909 (1454), ClapLoFi (1656) and ClapGate (1756) clamp it to 0..1 with `clampd` first.\n\n**Only store (`shape = v;`)**\n- Ping808 (346), Snare909 (417), SineKick (653), KickFm (732), Snare808 (922), SnareLayered (1009), SnareRing (1089).\n\n**Clamp to 0..1 without recomputing**\n- Hat (562), Snare606 (1168), ClapTrap (1551).\n\n**Different from all three**\n- **KickDist** (826\u2013830) stores the value raw, then directly sets one derived field, `fold = fastMax(0, (shape \u2212 0.6) / 0.4)`. It doesn't call `updateCoeffs()`, which in this model runs only from `setDecay` (824) and the sample-rate setup (822).\n- **SampleModel** (1945) never writes a `shape` field. It reuses SHAPE as the sample start position: `start = clamp01(v)`, where `clamp01` (line 202) wraps `clampd(x, 0, 1)`.\n\n**Where SHAPE comes from:** `Voices::setShape(int column, double v)` (2149\u20132153), and the loop at 2217, convert the knob value with `knobNatural(modelSpec(...).shape, v)` and call the active model's override.\n\nI sorted these by reading each override line, plus the full KickDist method. I didn't check whether any store-only model also reads `shape` into cached state elsewhere, such as in `strike`.",
+  "ttft_ms": 2892,
+  "type": "result",
+  "duration_ms": 14644,
+  "uuid": "a7dcdc2e-30b0-49f8-9b69-49a709a0bf6c",
+  "ttft_stream_ms": 1977,
+  "time_to_request_ms": 101,
+  "first_content_frame_ms": 1978,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

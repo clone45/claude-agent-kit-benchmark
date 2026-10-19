@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 51700,
+  "stop_reason": "end_turn",
+  "session_id": "951d8a1b-5e21-4c37-9610-6ea617214dd9",
+  "total_cost_usd": 0.14879799999999999,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 5536,
+    "cache_read_input_tokens": 208490,
+    "output_tokens": 3137,
+    "output_tokens_details": {
+      "thinking_tokens": 547
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 5536,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 3137,
+      "cacheReadInputTokens": 208490,
+      "cacheCreationInputTokens": 5536,
+      "webSearchRequests": 0,
+      "costUSD": 0.14879799999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 547,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Blocked on me:** nothing.\n\n**Changed**\n- `src/click/types.py:1169`: `Path.convert` used `rv in (b\"-\", \"-\")` to detect the dash, and `in` compares the value against every item in the tuple. So under `-bb` even the str `'-'` raised, because it was compared with `b\"-\"` first. It now picks the matching literal by type: `rv == (b\"-\" if isinstance(rv, bytes) else \"-\")`. Bytes are only compared with bytes and str with str, and which values count as a dash is unchanged.\n- `tests/test_types/test_Path.py`: added `test_path_allow_dash_no_bytes_warning`. It starts `sys.executable -bb -W error::BytesWarning`, converts `'-'`, `''`, `b'-'` and `b''` with `click.Path(allow_dash=True)`, and asserts the exit code is 0 and that no `BytesWarning` appears in stderr.\n\n**Verified**\n- Before the fix, the `-bb` reproduction failed with `BytesWarning: Comparison between bytes and string`. After it, all four values convert cleanly and come back unchanged.\n- The new test fails with the fix reverted and passes with it in place.\n- `ruff check`, `ruff format --check` and `mypy` all pass.\n- Full test suite: 2262 passed, 24 skipped, 1 xfailed. The suite also deselected 31000 tests; my changes don't cause that, it comes from how the project's test run is set up.\n\n**Found:** nothing left open. There is a scratch patch at `.claude/tmp/fix.patch`, which is gitignored. Nothing was committed.",
+  "ttft_ms": 3331,
+  "type": "result",
+  "duration_ms": 59217,
+  "uuid": "db16d677-82ac-43ba-b90a-3b4fb98425c8",
+  "ttft_stream_ms": 3054,
+  "time_to_request_ms": 66,
+  "first_content_frame_ms": 3055,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

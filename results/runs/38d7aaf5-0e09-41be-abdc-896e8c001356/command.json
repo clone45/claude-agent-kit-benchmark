@@ -1,0 +1,28 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "Refactor `CliRunner.isolation` in `src/click/testing.py`, which is about 195 lines long. Split it so that the stream setup (building the input, output and error streams and the `_pause_echo`, `visible_input`, `hidden_input`, `_getchar` and `should_strip_ansi` replacements) and the restore logic at the end live in well-named private helpers or a small helper class, and `isolation` itself is under 80 lines.\n\nBehavior must not change: same public signature, same streams and encodings, same environment handling, same restoration order on exit, same type annotations on the public method. Do not change any other public function or method. The full test suite, `ruff check`, `ruff format --check`, and `mypy` must pass.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "15",
+    "--session-id",
+    "d465310d-d0f9-47d6-b659-b7265a0e73b6",
+    "--plugin-dir",
+    "/mnt/c/Code/routing_test/plugin"
+  ],
+  "cwd": "/home/clone45/routing_test_work/click"
+}

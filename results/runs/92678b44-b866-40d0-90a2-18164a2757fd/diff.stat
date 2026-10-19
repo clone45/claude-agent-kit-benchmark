@@ -1,0 +1,12 @@
+ src/click/core.py       | 52 +++++++++++++++++++++++++++++--
+ tests/test_arguments.py | 30 ++++++++++++++++++
+ tests/test_basic.py     | 83 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/test_info_dict.py | 10 +++++-
+ tests/test_options.py   | 53 +++++++++++++++++++++++++++++++
+ 5 files changed, 225 insertions(+), 3 deletions(-)
+
+M	src/click/core.py
+M	tests/test_arguments.py
+M	tests/test_basic.py
+M	tests/test_info_dict.py
+M	tests/test_options.py

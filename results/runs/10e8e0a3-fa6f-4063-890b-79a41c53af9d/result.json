@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 48908,
+  "stop_reason": "end_turn",
+  "session_id": "3f919c4b-b641-44dc-8bdd-3680a35bfee4",
+  "total_cost_usd": 0.21615,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 12282,
+    "cache_read_input_tokens": 151650,
+    "output_tokens": 4375,
+    "output_tokens_details": {
+      "thinking_tokens": 1329
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 12282,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 4375,
+      "cacheReadInputTokens": 151650,
+      "cacheCreationInputTokens": 12282,
+      "webSearchRequests": 0,
+      "costUSD": 0.21615,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1329,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed both problems in `_make_default_short_help` in `src/click/utils.py`. The full test suite passes (2268 passed, 24 skipped, 1 xfailed), and ruff check, ruff format and mypy are all clean.\n\n**1. Sentence ends.** A word ending in a period now ends the sentence only when it's the last word, or when the next word doesn't start with a lowercase letter. So `Weigh apples vs. pears.` stays whole and `Pick a fruit. 3 remain.` becomes `Pick a fruit.`. Before, any word ending in a period cut the text off there.\n\n**2. Shortening.** I replaced the old add-words-then-remove-words loop with a simpler rule:\n- If the sentence-trimmed text fits in `max_length`, it's returned unchanged. So `ab` with 2 still gives `ab`, even though 2 is shorter than `...`.\n- Otherwise it keeps as many whole leading words as fit in `max_length` minus the 3 characters of `...`, then adds `...`. Words are split on whitespace only, so hyphenated words stay whole and words are never cut.\n- If no word fits, including when `max_length` is under 3, zero or negative, the result is just `...`.\n\n**Unchanged behavior:** only the first paragraph is used, whitespace runs collapse to single spaces, and a leading `\\b` is ignored. One small edge case: I moved the `\\b` check before the empty-text check, so help that is only `\\b` returns `\"\"` instead of `...` when `max_length` is negative.\n\n**Tests** (`tests/test_utils/test_make_default_short_help.py`):\n- I added a case for every example in your request, plus a few more: an uppercase word after a period, an exact-length fit, and a hyphenated word that fits.\n- One existing case had to change: `123 567 9. aaaa bbb` with max 10 used to expect `123 567 9.`. Under the new rule it continues past `9.` and gives `123 567...`, as your request says it should.\n- The test's own check that the expected output fits in `max_length` now allows up to 3 characters, because `...` is legitimately longer than a `max_length` of 2 or less.\n- Every case also runs in the existing `\\b` no-rewrap variant.",
+  "ttft_ms": 2632,
+  "type": "result",
+  "duration_ms": 62618,
+  "uuid": "fb28bd41-9a0a-4cad-9e93-44d1e8184dea",
+  "ttft_stream_ms": 1874,
+  "time_to_request_ms": 75,
+  "first_content_frame_ms": 1875,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 38472,
+  "stop_reason": "end_turn",
+  "session_id": "6077f27f-211c-4555-ad7f-e2c023225cba",
+  "total_cost_usd": 0.1300018,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 5914,
+    "cache_read_input_tokens": 153729,
+    "output_tokens": 2594,
+    "output_tokens_details": {
+      "thinking_tokens": 312
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 5914,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 2594,
+      "cacheReadInputTokens": 153729,
+      "cacheCreationInputTokens": 5914,
+      "webSearchRequests": 0,
+      "costUSD": 0.1300018,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 312,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The dash check in `click.Path.convert` no longer compares bytes with str, so all four values now convert under `python -bb` without a `BytesWarning`. Before the fix, even the first value, `'-'`, raised the warning.\n\n**What changed**\n- **`src/click/types.py`:** the check `rv in (b\"-\", \"-\")` compared the value against both a bytes and a str dash. It now picks the dash that matches the value's type: `rv == (b\"-\" if isinstance(rv, bytes) else \"-\")`. Bytes values are compared with `b\"-\"` and everything else with `\"-\"`. I added a short comment explaining why.\n- **`tests/test_types/test_Path.py`:** new test `test_path_allow_dash_no_bytes_warning`. It starts a subprocess with `sys.executable -bb -W error::BytesWarning`, converts `'-'`, `''`, `b'-'` and `b''` with `click.Path(allow_dash=True)`, and asserts the subprocess exits with code 0 and prints no `BytesWarning`.\n\n**Checks**\n- With the source fix temporarily reverted, the new test fails; with the fix in place, it passes.\n- Full suite: 2262 passed, 24 skipped, 1 xfailed.\n- `ruff check`, `ruff format --check` and `mypy` all pass.\n\nNothing is committed; the changes are in the working tree.",
+  "ttft_ms": 4744,
+  "type": "result",
+  "duration_ms": 45659,
+  "uuid": "6e25285f-d77d-4b5d-a756-9d465eb0e546",
+  "ttft_stream_ms": 3018,
+  "time_to_request_ms": 61,
+  "first_content_frame_ms": 3018,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 19704,
+  "stop_reason": "end_turn",
+  "session_id": "358b014c-e10d-4956-ace9-51a2f86674d3",
+  "total_cost_usd": 0.11333460000000001,
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 10307,
+    "cache_read_input_tokens": 45873,
+    "output_tokens": 1084,
+    "output_tokens_details": {
+      "thinking_tokens": 17
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 10307,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 6,
+      "outputTokens": 1084,
+      "cacheReadInputTokens": 45873,
+      "cacheCreationInputTokens": 10307,
+      "webSearchRequests": 0,
+      "costUSD": 0.11333460000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 17,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 3,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "- **Env lookup:** `Option.resolve_envvar_value` in `src/click/core.py:3748`. It first calls `Parameter.resolve_envvar_value` (`core.py:2868`), which checks the explicit `envvar` (a string, or a list where the first non-empty value wins). Empty values count as unset.\n- **Auto prefix fallback:** if no explicit envvar is found, and `allow_from_autoenv` is true, `ctx.auto_envvar_prefix` is set, and the option has a `name`, it reads `os.environ[f\"{ctx.auto_envvar_prefix}_{self.name.upper()}\"]` (`core.py:3763-3764`).\n- **Prefix construction:** `Context.__init__` (`core.py:503-521`) builds the prefix. An explicit prefix is upper-cased. Otherwise it's inherited as `f\"{parent.auto_envvar_prefix}_{self.info_name.upper()}\"`. Either way, `-` becomes `_`. For example, prefix `MYAPP`, subcommand `sub-cmd` and option `name` give `MYAPP_SUB_CMD_NAME`.\n- **Raw value to parameter value:** `Option.value_from_envvar` (`core.py:3772`) converts the string. Non-bool flags become `flag_value` or `False`. Values for `nargs != 1` or `multiple` are split with `type.split_envvar_value`. The base version is `Parameter.value_from_envvar` (`core.py:2913`).\n- **Resolution order:** `Parameter.consume_value` (`core.py:2680-2726`) tries each source only while the value is still `UNSET`:\n  1. command line (the parser's `opts`) \u2192 `COMMANDLINE`\n  2. environment (`value_from_envvar`) \u2192 `ENVIRONMENT`\n  3. default map (`ctx.lookup_default`) \u2192 `DEFAULT_MAP`\n  4. `get_default` \u2192 `DEFAULT`\n- **Prompt:** `Option.consume_value` (`core.py:3820`) runs after that. If prompting is enabled, it prompts when the value is still unset or came from the default map or default (`source >= DEFAULT_MAP`). An environment value therefore stops the prompt.",
+  "ttft_ms": 3221,
+  "type": "result",
+  "duration_ms": 19860,
+  "uuid": "e672eb6b-f41f-4c09-ba2e-b60035d6c464",
+  "ttft_stream_ms": 2051,
+  "time_to_request_ms": 66,
+  "first_content_frame_ms": 2051,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

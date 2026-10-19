@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 83750,
+  "stop_reason": "end_turn",
+  "session_id": "e567bdba-7858-4e3c-89bd-b3b10bbe2924",
+  "total_cost_usd": 0.37041920000000006,
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 18199,
+    "cache_read_input_tokens": 275836,
+    "output_tokens": 8479,
+    "output_tokens_details": {
+      "thinking_tokens": 3044
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 18199,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 20,
+      "outputTokens": 8479,
+      "cacheReadInputTokens": 275836,
+      "cacheCreationInputTokens": 18199,
+      "webSearchRequests": 0,
+      "costUSD": 0.37041920000000006,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3044,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`click.Path` is now generic over the type it converts to, and `path_type` narrows that type for type checkers. Strict mypy passes, ruff check and format pass, and the full test suite passes (2262 passed, 24 skipped, 1 xfailed). Nothing is committed.\n\n**What changed in `src/click/types.py`:**\n- **New type variable.** `_PathT_co` defaults to `str | bytes | os.PathLike[str]`. Type checkers get it from `typing_extensions` under `TYPE_CHECKING`. On Python 3.13+ it's a normal `typing.TypeVar` with that default, and on older versions it's a plain `TypeVar` with no default. This is the same pattern the file already uses for `_InputT_contra`.\n- **Class base.** `class Path(ParamType[_PathT_co])`. The input type parameter keeps its `Any` default on purpose: an existing test passes `bytes` to `convert`, so restricting the input type would break current callers.\n- **`__init__` overloads.** These are type-only; the real `__init__` is unchanged.\n  - No `path_type` gives `Path[str | bytes | os.PathLike[str]]`.\n  - `path_type=X` as a keyword gives `Path[X]`.\n  - `path_type` passed by position (it's the 8th argument) also gives `Path[X]`.\n  - A catch-all for values typed `type | None` gives `Path[Any]`, so code that passes a variable still type-checks.\n- **Return types.** `coerce_path_result` and `convert` now return `_PathT_co`, using `t.cast`. The checker can't connect the runtime `self.type` checks to the type variable. The function bodies are unchanged, so runtime behaviour is the same.\n- **Docstring.** I added a `.. versionchanged:: 8.5.0` note describing the change. I picked 8.5.0 to match the latest version mentioned in the `ParamType` docstring; adjust it if this is going into a different release.\n\n**Tests:**\n- **`tests/typing/typing_path.py`** has `assert_type` checks for:\n  - what `convert` and `coerce_path_result` return with `pathlib.Path`, `str`, `bytes` and no `path_type`;\n  - `path_type` passed by position;\n  - an explicit `click.Path[pathlib.Path]` annotation;\n  - assigning to `ParamType[pathlib.Path]` and to `ParamType[str | bytes | os.PathLike[str]]`;\n  - calling the instance with a `PurePosixPath` and with `None`;\n  - `click.prompt(type=...)`.\n\n  To confirm mypy really enforces these, I added a deliberately wrong assertion and saw it fail, then removed it.\n- **`tests/test_types/test_Path.py`** has a runtime test that `typing.get_args(click.Path[pathlib.Path]) == (pathlib.Path,)`.\n\nI also ran a quick check with the system Python 3.10 to cover the version without TypeVar defaults: `click.Path[pathlib.Path]`, calling an instance with a path, and calling it with `None` all work there.",
+  "ttft_ms": 2807,
+  "type": "result",
+  "duration_ms": 93235,
+  "uuid": "f31a0e3d-805a-43c1-8af4-5759eaf24151",
+  "ttft_stream_ms": 1714,
+  "time_to_request_ms": 77,
+  "first_content_frame_ms": 1715,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

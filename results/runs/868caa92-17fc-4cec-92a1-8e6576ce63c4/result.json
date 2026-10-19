@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 118162,
+  "stop_reason": "end_turn",
+  "session_id": "be02eca4-1bcb-4c41-b824-fcff38bf5194",
+  "total_cost_usd": 0.39738039999999997,
+  "usage": {
+    "input_tokens": 26,
+    "cache_creation_input_tokens": 19804,
+    "cache_read_input_tokens": 431822,
+    "output_tokens": 7624,
+    "output_tokens_details": {
+      "thinking_tokens": 1841
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 19804,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 26,
+      "outputTokens": 7624,
+      "cacheReadInputTokens": 431822,
+      "cacheCreationInputTokens": 19804,
+      "webSearchRequests": 0,
+      "costUSD": 0.39738039999999997,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1841,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 16,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I added `click.Duration`. The full test suite, lint, format check and strict mypy all pass.\n\n**Blocked on me**\nNothing.\n\n**Changed**\n- `src/click/types.py`: new `Duration(ParamType[timedelta, timedelta | int | str])`, placed after the UUID type, plus imports for `re` and `timedelta`. Its `name` is `\"duration\"` and its `repr` is `DURATION`. Help shows `DURATION` through click's normal uppercased-name metavar, and `to_info_dict()` gives `{'param_type': 'Duration', 'name': 'duration'}` from the base class.\n  - **How it parses:** a `timedelta` comes back unchanged. A non-negative `int`, or a string of digits only, means seconds. Anything else must fully match one regex: optional `\\d+d`, `\\d+h`, `\\d+m`, `\\d+s` groups in that order, case-insensitive, with optional whitespace between groups. That one regex rejects out-of-order units, repeated units, unknown units, fractions, signs and a unit with no number.\n  - **How it fails:** an empty match (`\"\"`, whitespace only) fails, and so does any other type. Everything goes through `self.fail(\"{value!r} is not a valid duration.\")`, which raises `BadParameter` with the value in the message.\n- `src/click/__init__.py`: exports `Duration`.\n- `docs/parameter-types.md` and `docs/api.md`: `autoclass:: Duration` entries next to `DateTime`.\n- `tests/test_types/test_Duration.py` (new): every accepted and rejected example from the spec, a check that a `timedelta` is returned as the same object, the repr and name, and a `--timeout` command covering a valid value, a bare number, no value, an invalid value (exit code 2) and the `DURATION` metavar in help.\n- `tests/test_info_dict.py`: a `Duration` case.\n\n**Verified**\n- `ruff check` and `ruff format --check` pass on the touched Python files, and `mypy` reports no issues in 29 files.\n- The full suite gives 2304 passed, 24 skipped, 1 xfailed.\n- The docs build was not run; I only added directives that match the existing ones.\n\n**Found**\nThese are decisions I made where the spec didn't say:\n- **`bool`:** `True`/`False` are rejected even though `bool` is technically an `int`.\n- **Negative ints:** `-5` is rejected, matching how `-5s` is treated.\n- **Space inside a group:** `1 h` is rejected, because whitespace is only allowed between groups.\n- **Non-ASCII digits:** strings like `\uff15s` (full-width digit) are rejected.\n- **Very large values:** something like `99999999999d` would overflow `timedelta`; it fails with the same `BadParameter` message instead of crashing.\n- **Bare number after a group:** `1h30` is rejected, because a number without a unit is only accepted when it's the whole string.\n- **Changelog:** there's no changelog file in this tree, so I didn't add an entry. The docstring has `versionadded:: 8.6`, taken from the `8.6.0.dev` version in `pyproject.toml`.",
+  "ttft_ms": 5384,
+  "type": "result",
+  "duration_ms": 127089,
+  "uuid": "c0e5a234-e31d-4ccb-8226-81331c4f619b",
+  "ttft_stream_ms": 1676,
+  "time_to_request_ms": 72,
+  "first_content_frame_ms": 1676,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

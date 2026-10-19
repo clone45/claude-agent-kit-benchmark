@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 16345,
+  "stop_reason": "end_turn",
+  "session_id": "d33e0da8-edba-4f66-aadd-996745d6eaae",
+  "total_cost_usd": 0.0646818,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 3134,
+    "cache_read_input_tokens": 69489,
+    "output_tokens": 1284,
+    "output_tokens_details": {
+      "thinking_tokens": 33
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 3134,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1284,
+      "cacheReadInputTokens": 69489,
+      "cacheCreationInputTokens": 3134,
+      "webSearchRequests": 0,
+      "costUSD": 0.0646818,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 33,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The wrap width is set in `HelpFormatter.__init__` (`src/click/formatting.py:127-142`), and it's stored as `self.width`.\n\n**How it's computed (lines 134-141):**\n- `max_width` defaults to 80 when nobody passes one.\n- If no explicit `width` is given, it uses the module global `FORCED_WIDTH` (`formatting.py:11`). If that's also `None`, it uses `max(min(shutil.get_terminal_size().columns, max_width) - 2, 50)`.\n- So the terminal's column count is capped at `max_width` (80 by default), then 2 is subtracted, giving 78 by default. The floor is 50: a 40-column terminal still gets width 50.\n- The docstring (line 118) says \"clamped to a maximum of 78\", which matches the default result.\n- An explicit `width` is used exactly as given. It skips the terminal check, the 80 cap and the 50 floor.\n\n**Where the context feeds in:** `Context.make_formatter` (`src/click/core.py:664-676`) calls `self.formatter_class(width=self.terminal_width, max_width=self.max_content_width)`. The help and usage code gets its formatter through `ctx.make_formatter()` (`core.py:1128`, `1268`).\n\n**Overrides:**\n- **Context arguments:** `Context.__init__` accepts `terminal_width` and `max_content_width` (documented at `core.py:265-275`). A context that doesn't set them inherits them from its parent (lines 438-449). If none is set, both are `None`, which means autodetect with a cap of 80.\n- **Per command:** pass `context_settings={\"terminal_width\": ..., \"max_content_width\": ...}` to the command. `Command.make_context` copies `context_settings` into the `Context(...)` keyword arguments unless the caller already passed them (`core.py:1386-1390`).\n- **Formatter class:** set `Context.formatter_class` (`core.py:340`) or override `make_formatter` to use a different formatter.\n- **Tests:** `CliRunner.isolation` (`src/click/testing.py:438-439`) sets `FORCED_WIDTH = 80` and restores it at line 593. That gives a fixed width of 80 in tests, unless a context passes its own `terminal_width`.",
+  "ttft_ms": 2605,
+  "type": "result",
+  "duration_ms": 16577,
+  "uuid": "4ddb17bf-16de-4d36-96d3-a840164472fa",
+  "ttft_stream_ms": 1678,
+  "time_to_request_ms": 71,
+  "first_content_frame_ms": 1679,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 121478,
+  "stop_reason": "end_turn",
+  "session_id": "50a37861-ddb3-4169-a225-595444d0e708",
+  "total_cost_usd": 0.5762952,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 34737,
+    "cache_read_input_tokens": 188016,
+    "output_tokens": 13037,
+    "output_tokens_details": {
+      "thinking_tokens": 3054
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 34737,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 13037,
+      "cacheReadInputTokens": 188016,
+      "cacheCreationInputTokens": 34737,
+      "webSearchRequests": 0,
+      "costUSD": 0.5762952,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3054,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Per-step chance is now in the Euclid engine. The six-argument `process` works exactly as before. The module and widget are unchanged.\n\n**Checks:** `vg_check.sh compile Euclid` is ok (the module's .cpp is the only one that includes the engine). `vg_check.sh tests` exits 0 with no failures: `pattern_test` 63 checks, `engine_test` 161 checks (up from the original set), `seq3_parity_test` 36 checks, and all the timeline tests.\n\n**Engine (`src/modules/Euclid/EuclidEngine.hpp`)**\n- **`euclid::Rng`** is the xorshift32 from the spec. It starts at `0x9E3779B9`, `seed(0)` stores that default, and `percent()` returns `next() % 100`. I wrote the constant as a literal rather than a `static const` member, because C++11 can fail to link a class constant used in a `?:` expression.\n- **`Sequencer`** gains `Rng rng` and a public `bool muted`, which means \"the current step is a hit that lost its roll\". Recording the loss in a flag means the pattern table is never touched. Only `muted` changes:\n  - A landing (a reset or an accepted clock) sets it to `hit && !roll(chance)`. Because of the `&&`, a rest never rolls.\n  - Idle samples leave it alone, so they never re-roll.\n  - `load()` clears it, so step 1's gate after load follows the pattern.\n- **Outputs:** `gate` is `hit && !muted` and `struck` is `landed && gate`. With chance 100 these are the same values as before, and `gate_gap` still reads the reported gate.\n- **`roll()`** returns true at 100 and false at 0 without touching the generator. For 1\u201399 it makes exactly one `rng.percent()` call. `chance` is clamped to 0..100 first.\n- **Six-argument `process`** now just calls the new one with chance 100.\n- **Comments:** a CHANCE paragraph at the top describes the rule, and the `gate`/`struck` descriptions now mention the roll.\n\n**One decision the spec didn't cover:** with a window of 0, a reset and a clock can both be accepted on the same sample. In that case I roll once, for the step the sample ends on (step 2), not once per landing. That keeps it to at most one roll per sample, and `struck` already worked that way.\n\n**Tests (`tests/euclid/engine_test.cpp`, described in its README)**\n- **Rng:** default state, `seed(0)`, a hand-computed `next()`, and `percent()`.\n- **Six-argument form unchanged:** over a 200,000-sample random stream of resets, clocks and knob changes, it gives the same output as chance 100 and as chance 250 (clamped) on every sample. None of the three touches the generator.\n- **Chance 0 (and a negative chance):** nothing ever strikes and the gate never goes high, nothing is rolled, the pattern stays intact, and load still shows step 1's gate.\n- **Determinism:** a second `Rng` with the same seed predicts every roll: one per landing on a hit, including a reset onto a hit, and none for rests or idle samples. Equal seeds give identical runs and different seeds differ.\n- **Lost roll:** no strike, and the gate stays low for 500 idle samples and through a ROT change, with no re-roll. The next clock then strikes. A reset from a lost step reports no `gate_gap`. The same roll at chance p+1 wins and holds the gate high.\n\nNothing is committed and no build output was left in the tree.",
+  "ttft_ms": 2493,
+  "type": "result",
+  "duration_ms": 131062,
+  "uuid": "4ccc8f52-6fb5-4d74-b730-c1fc91966e80",
+  "ttft_stream_ms": 1703,
+  "time_to_request_ms": 77,
+  "first_content_frame_ms": 1703,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

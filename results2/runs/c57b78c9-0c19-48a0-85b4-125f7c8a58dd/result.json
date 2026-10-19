@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 250667,
+  "stop_reason": "end_turn",
+  "session_id": "69451712-8634-407c-a026-4b1b3b4876d8",
+  "total_cost_usd": 2.1227625999999993,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 18990,
+    "cache_read_input_tokens": 586215,
+    "output_tokens": 2746,
+    "output_tokens_details": {
+      "thinking_tokens": 1015
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 18990,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 100,
+      "outputTokens": 25779,
+      "thinkingTokens": 8886,
+      "cacheReadInputTokens": 3423473,
+      "cacheCreationInputTokens": 115261,
+      "webSearchRequests": 0,
+      "costUSD": 2.1227625999999993,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The refactor was already done in this tree (checkpoint `f0a75b8`), and it matches the original behavior, so I changed no files.\n\n**What's in place in `src/modules/GrooveBox/GrooveBox.hpp`:** `process` (lines 977\u20131004) is now 28 lines of named steps:\n1. `readFromExpander` (when the expander is connected)\n2. `processMemorySlotSelection`\n3. `processCopyPasteButtons`\n4. `processResetInput`\n5. `processStepButtons`\n6. `processParameterLockButtons`\n7. `processStepKnobs`\n8. `processClockInput`, which calls either `fireStep` (made of `advanceTracks` and `triggerTracks`) or `processRatchets`\n9. `processOutputStage`\n10. `writeToExpander`\n11. `updateStepLights`, `updateMemorySlotLights`, `updateCopyPasteLights`\n\nThe new helpers are in a `private:` block (1006\u20131241), and `public:` is restored before `processTrack`. Every method that was public before is still public.\n\n**Behavior check against the original monolithic `process` (`f0a75b8^`):**\n- **Order and code:** every block was moved word for word, in the same per-sample order.\n- **`playback_step` in `fireStep`:** still reads the *member* `track_index`. In the original, the output loop's local `track_index` shadowed the member only inside that loop, which came after this line. In the new code that loop variable is named `track_id`.\n- **Per-sample state:** the clock counter, `first_step`, ratchet and `track_triggers` handling, the master-volume mix, and the `args.sampleTime` passed to the copy/paste lights are all unchanged.\n- **Scope:** the diff touches nothing outside the old `process` body, so the JSON, the member state and the expander messages are untouched. No other file calls the new methods.\n\n**Checks:** `bash scripts/vg_check.sh compile GrooveBox GrooveBoxExpander` reports both modules ok. `bash scripts/vg_check.sh tests` passes everything: Euclid pattern 63/63, engine 212/212, SEQ3 parity 36/36, and all timeline suites. None of those standalone tests exercise GrooveBox itself, so the compile check and the comparison above are what cover this refactor.",
+  "ttft_ms": 2031,
+  "type": "result",
+  "duration_ms": 40261,
+  "uuid": "adc88fbc-d54b-49ae-87e7-117fdba144ca",
+  "ttft_stream_ms": 892,
+  "time_to_request_ms": 99,
+  "first_content_frame_ms": 892,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

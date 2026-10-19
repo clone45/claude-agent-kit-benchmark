@@ -1,0 +1,1 @@
+Notes: CLAUDE.md lists the compile check and the standalone tests. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the compile check for every module you touched and the standalone tests, then end with a short summary of what you changed and why.

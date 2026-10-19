@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 12109,
+  "stop_reason": "end_turn",
+  "session_id": "7698d234-305e-4681-af9f-77560ddfae02",
+  "total_cost_usd": 0.0876646,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 5947,
+    "cache_read_input_tokens": 72783,
+    "output_tokens": 1275,
+    "output_tokens_details": {
+      "thinking_tokens": 101
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 5947,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1275,
+      "cacheReadInputTokens": 72783,
+      "cacheCreationInputTokens": 5947,
+      "webSearchRequests": 0,
+      "costUSD": 0.0876646,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 101,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Where the lookup happens** (all in `src/click/core.py`):\n- `Parameter.resolve_envvar_value` (L2868\u20132911) reads the explicit `envvar` from `os.environ`. If `envvar` is a list, it returns the first non-empty value. An empty string counts as unset.\n- `Option.resolve_envvar_value` (L3748\u20133770) calls the base method first. If that finds nothing, and `allow_from_autoenv` is true, `ctx.auto_envvar_prefix` is set and `self.name` is set, it builds the name `f\"{ctx.auto_envvar_prefix}_{self.name.upper()}\"` (L3764) and looks that up.\n- `Option.value_from_envvar` (L3772\u20133818) post-processes the raw string: it interprets flag values and splits values for `nargs`/`multiple`. `Parameter.value_from_envvar` (L2913) only splits when `nargs != 1`.\n\n**How the prefix is formed** (`Context.__init__`, L506\u2013521): an explicit prefix is uppercased. With no explicit prefix, a subcommand inherits `f\"{parent.auto_envvar_prefix}_{self.info_name.upper()}\"`. In both cases `-` is then replaced with `_`. For example, prefix `MY-APP`, subcommand `sync` and option `dry_run` give `MY_APP_SYNC_DRY_RUN`. `Option.get_help_extra` (L3626) builds the same name to display it in help.\n\n**Resolution order** (`Parameter.consume_value`, L2680\u20132726):\n1. The command-line value parsed into `opts` (`COMMANDLINE`).\n2. Environment, via `value_from_envvar` (`ENVIRONMENT`, L2704\u20132707).\n3. `ctx.lookup_default(self.name)` from the default map (`DEFAULT_MAP`, L2710\u20132713).\n4. `self.get_default(ctx)` (`DEFAULT`, L2720\u20132724).\n\nSo the environment is checked only after the command line, and before both the default map and the default. `Option.consume_value` (L3820) adds a prompt step afterwards. It prompts when the value is still unset or came from the default map or default, provided the option has `prompt` set and is required or `prompt_required`, and parsing isn't resilient.",
+  "ttft_ms": 1923,
+  "type": "result",
+  "duration_ms": 12317,
+  "uuid": "efd69def-cf85-49c2-a15f-7bf220fc927a",
+  "ttft_stream_ms": 656,
+  "time_to_request_ms": 70,
+  "first_content_frame_ms": 656,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

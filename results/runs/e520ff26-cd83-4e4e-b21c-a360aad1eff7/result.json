@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 77294,
+  "stop_reason": "end_turn",
+  "session_id": "8ecf1768-b762-48bd-aa54-26b5faad50cf",
+  "total_cost_usd": 0.2567698,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 10299,
+    "cache_read_input_tokens": 78929,
+    "output_tokens": 7928,
+    "output_tokens_details": {
+      "thinking_tokens": 4988
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 10299,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 7928,
+      "cacheReadInputTokens": 78929,
+      "cacheCreationInputTokens": 10299,
+      "webSearchRequests": 0,
+      "costUSD": 0.2567698,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 4988,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`version_option` is now 69 lines, down from 138. It runs from `src/click/decorators.py:524` to `:592`, and 52 of those lines are the original docstring, which I kept word for word. The full test suite passes (2262 passed, 24 skipped, 1 xfailed), and `ruff check`, `ruff format --check` and `mypy` all pass too.\n\n**What I changed** (all in `src/click/decorators.py`, as three new private helpers just above `version_option`):\n\n- **`_detect_package_name()`**: the frame inspection. It goes two frames up (past itself and past `version_option`) to reach the caller. It keeps the `__main__` \u2192 `__package__` fallback and the top-level-name split, and still deletes the frame references afterwards to avoid the reference cycle. It must be called directly from `version_option`, and its docstring says so.\n- **`_resolve_distribution_name()`**: the `importlib.metadata.packages_distributions()` fallback (e.g. `PIL` \u2192 `Pillow`). The two `RuntimeError`s (\"maps to multiple installed distributions\" and \"is not installed\") have the same messages and still use `from None`, so the exceptions look the same to callers.\n- **`_version_callback()`**: builds the `--version` callback. It applies the default message, then does the version lookup and raises the final \"Could not determine the version\" error.\n\n**Why it's built this way:**\n\n- **Same caching:** the callback still uses `nonlocal` to remember the program name, package name and version after the first run, just as before.\n- **Same error in a rare case:** I left the `try/except` around `importlib.metadata.version` inside the callback rather than moving it into a helper that returns the name and version together. That way, if the resolved distribution's version lookup also fails, the error is exactly what it was before.\n\nThe `version_option` body is now short: detect the package name if needed, set the option defaults, attach the callback, and call `option(...)`. Writing `param_decls or (\"--version\",)` behaves the same as the old `if not param_decls:` check. The public signature, annotations and docstring are unchanged, and no other public function was touched.\n\nI also checked by hand that the package is still detected as `mypkg` both when the module is imported and when it's run with `python -m mypkg.cli`. Nothing is committed.",
+  "ttft_ms": 3254,
+  "type": "result",
+  "duration_ms": 85274,
+  "uuid": "78a7dc01-0d3b-465a-93cb-7797cdfd5e54",
+  "ttft_stream_ms": 2607,
+  "time_to_request_ms": 87,
+  "first_content_frame_ms": 2607,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

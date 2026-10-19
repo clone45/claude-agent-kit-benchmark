@@ -1,0 +1,26 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "Refactor `style` in `src/click/termui.py`, which is about 125 lines long. Extract the color-argument handling (the lookup and validation of the `fg` and `bg` colors, including named colors, bright colors, 256-color integers, and RGB tuples) and the repeated per-attribute code into one or more private helper functions, so that `style` itself is under 60 lines and reads clearly.\n\nBehavior must not change: same public signature, same output bytes for every input, same exceptions and messages, same type annotations on the public function. Do not change any other public function. The full test suite, `ruff check`, `ruff format --check`, and `mypy` must pass.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "15",
+    "--session-id",
+    "88f1a429-9a14-4a0f-a445-2ea264805adb"
+  ],
+  "cwd": "/home/clone45/routing_test_work/click"
+}

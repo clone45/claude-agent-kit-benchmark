@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 44549,
+  "stop_reason": "end_turn",
+  "session_id": "69451712-8634-407c-a026-4b1b3b4876d8",
+  "total_cost_usd": 0.3381388000000001,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 10448,
+    "cache_read_input_tokens": 153546,
+    "output_tokens": 2279,
+    "output_tokens_details": {
+      "thinking_tokens": 528
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 10448,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 4536,
+      "thinkingTokens": 1089,
+      "cacheReadInputTokens": 225534,
+      "cacheCreationInputTokens": 25280,
+      "webSearchRequests": 0,
+      "costUSD": 0.3381388000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The decision point is the clock handler `GrooveBox::processClockInput` (`src/modules/GrooveBox/GrooveBox.hpp:1126`). On each rising edge at `STEP_INPUT`, it runs `fireStep()` if `clock_counter == clock_division`; on every other pulse it runs `processRatchets()`.\n\n1. **Step path:** `fireStep` (1142) calls `advanceTracks` (1154), which calls `Track::step()` (`Track.hpp:83`) to move `playback_position` forward and set `ratchet_counter` to 0. The first clock skips the advance. Then `triggerTracks` (1174) calls `GrooveBox::trigger(i)` for each track (450), which calls `Track::trigger()` (`Track.hpp:91`).\n2. **`Track::trigger` does:** a probability roll that sets `m.skipped`, then a check that the step is on (`m.steps[...]`). If both pass, it copies that step's parameter locks into `m.local_parameter_lock_settings`, applies sample-start snap, opens the ADSR gate, and calls `sample_player->trigger` (144).\n3. **Ratchet path:** `processRatchets` (1184) calls `Track::ratchety()` (`Track.hpp:160`). It fires only if the current step is on and the last step was not skipped (`!m.skipped`). It then looks up `ratchet_patterns[RATCHET lock][m.ratchet_counter]`, and if that slot is set it re-triggers the sample and the ADSR. The counter wraps at 8.\n4. **What makes a step sample different from a ratchet sample:**\n   - Only the step path advances the position, rolls probability, and reloads the step's parameter locks.\n   - A ratchet rolls no probability. It inherits the step's outcome through `m.skipped` and reuses the locks the step already loaded.\n   - A ratchet plays only where the per-pulse pattern has a hit.\n   - Sample start differs: `trigger` passes the local `sample_start`, read before snapping (`Track.hpp:128`, `144`). `ratchety` reads the snapped value back from the local settings (170). So with snap on, ratchets can start at a different position than the main hit. This looks like a bug.\n5. **Mute and solo:** both paths go through `GrooveBox::notMuted` (458). If any track is soloed, only soloed tracks play; otherwise a track plays unless it is muted. The check sits in `GrooveBox::trigger` (453) for steps and inside the `processRatchets` loop (1188) for ratchets.\n   - A muted track still advances (`advanceTracks` has no mute check), but its `Track::trigger` never runs. So `m.skipped` and the locks are left over from earlier steps.\n   - In the ratchet path, a muted track's `track_triggers[i]` and `ratchet_counter` are not updated at all.\n6. **Where mute/solo state comes from:** `processOutputStage` (~1314\u20131368) copies `mutes`/`solos` from the expander message. A track that gets muted or un-soloed while playing calls `Track::fadeOut()`; `Track::process` stops the player when the fade ends (~362\u2013368).\n   - `any_track_soloed` is computed from the *previous* `solos` before the new values are copied in (1317\u20131327), so solo changes reach `notMuted` one message late.",
+  "ttft_ms": 2294,
+  "type": "result",
+  "duration_ms": 22090,
+  "uuid": "67462104-a6b1-4c97-97cf-5f188eb401cf",
+  "ttft_stream_ms": 776,
+  "time_to_request_ms": 73,
+  "first_content_frame_ms": 776,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

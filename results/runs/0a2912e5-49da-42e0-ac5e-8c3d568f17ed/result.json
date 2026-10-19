@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 54878,
+  "stop_reason": "end_turn",
+  "session_id": "31ece36a-2c1b-4fb6-b8ef-b2f5bd95d24d",
+  "total_cost_usd": 0.25747739999999997,
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 10412,
+    "cache_read_input_tokens": 259007,
+    "output_tokens": 6115,
+    "output_tokens_details": {
+      "thinking_tokens": 2146
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 10412,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 20,
+      "outputTokens": 6115,
+      "cacheReadInputTokens": 259007,
+      "cacheCreationInputTokens": 10412,
+      "webSearchRequests": 0,
+      "costUSD": 0.25747739999999997,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2146,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 12,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The usage line no longer doubles the brackets: an optional `Choice` argument with `nargs=-1` now shows as `Usage: cli [OPTIONS] [foo|bar|baz]...`. The full test suite passes.\n\n**Blocked on me:** nothing.\n\n**Changed**\n- `src/click/core.py`: I moved the body of `Argument.make_metavar` into a new private method, `_format_metavar(ctx, reuse_type_brackets)`. When that flag is set, the argument is optional, and the type's metavar already starts with `[` and ends with `]` (as `Choice` and `DateTime` do), the method doesn't add a second pair of brackets. `get_usage_pieces` sets the flag; `make_metavar` doesn't, so its output is unchanged. Required arguments, the `!` deprecation marker and the `...` suffix work as before, and an explicit `metavar=` is still returned untouched.\n- `tests/test_arguments.py`: added `test_argument_usage_reuses_type_brackets`, which checks 12 usage lines:\n  - the three cases you gave: `[foo|bar|baz]...`, `[foo|bar|baz]` and `[%Y-%m-%d]`;\n  - an optional argument with a default, and one with `nargs=2`;\n  - a deprecated optional `Choice`, which renders as `[foo|bar|baz]!`;\n  - required `Choice` (`{foo|bar|baz}`, also with `...`) and required `DateTime` (`[%Y-%m-%d]`), which are unchanged;\n  - an explicit `metavar`, and an ordinary optional `int` argument (`[FOO]`).\n\n**Verified**\n- Full suite: 2272 passed, 24 skipped, 1 xfailed.\n- `ruff check` and `ruff format --check` are clean on both files, and `mypy` reports no issues.\n\n**Found**\n- **Help section still doubled:** the \"Positional arguments:\" list still shows `[[foo|bar|baz]]...`, because it uses `get_help_spec`, which goes through `make_metavar`. I left it alone because you asked only for the usage line. To fix it as well, `get_help_spec` would pass `reuse_type_brackets=True`; one line plus a test.\n- **Deprecated marker placement:** for a deprecated optional `Choice`, the `!` ends up outside the type's brackets (`[foo|bar|baz]!`). Putting it inside would make it look like part of the last choice (`bar!`).\n- **Custom types:** the check only looks at the first and last characters. A custom type whose metavar happens to be `[A] [B]` would wrongly lose its optional brackets. No built-in type produces a metavar like that.",
+  "ttft_ms": 1557,
+  "type": "result",
+  "duration_ms": 62110,
+  "uuid": "d57e1cd5-880c-4769-b8e4-fbe8c4230541",
+  "ttft_stream_ms": 923,
+  "time_to_request_ms": 65,
+  "first_content_frame_ms": 923,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

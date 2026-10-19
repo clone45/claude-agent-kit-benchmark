@@ -1,0 +1,164 @@
+<title>How We Tested Agent Kit</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,500;100,700;112,700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single reading column of about 66 characters, section by section, with one small flow diagram.
+   Same palette and type as the results page so the two read as one piece of work. */
+:root {
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10);
+  --cond-a: #2a78d6; --cond-b: #eb6834;
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10); --cond-a: #3987e5; --cond-b: #d95926;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10); --cond-a: #3987e5; --cond-b: #d95926;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.5;
+  padding-block: 36px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 700px; margin: 0 auto; display: grid; gap: 34px; }
+h1, h2 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: clamp(30px, 5vw, 42px); font-weight: 700; font-stretch: 112%; letter-spacing: -0.01em; }
+h2 { font-size: 21px; font-weight: 700; }
+p { margin: 0; max-width: 66ch; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+header { display: grid; gap: 12px; }
+.lede { font-size: 19px; color: var(--ink-2); }
+section { display: grid; gap: 12px; }
+ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; max-width: 66ch; }
+li b { font-weight: 600; }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--ring); border-radius: 6px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card .name { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 700; font-size: 16px; }
+.card .name i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.card.a .name i { background: var(--cond-a); } .card.b .name i { background: var(--cond-b); }
+.card ul { font-size: 15px; gap: 5px; }
+code { font-family: var(--font-mono); font-size: 0.86em; background: var(--surface); border: 1px solid var(--grid); border-radius: 3px; padding: 0 4px; }
+pre { margin: 0; font-family: var(--font-mono); font-size: 13px; line-height: 1.5; background: var(--surface); border: 1px solid var(--ring); border-radius: 6px; padding: 12px 14px; overflow-x: auto; }
+figure { margin: 0; display: grid; gap: 8px; }
+figure svg { width: 100%; height: auto; display: block; }
+figure text { font-family: var(--font-body); font-size: 13px; fill: var(--ink); }
+figure text.small { font-size: 11.5px; fill: var(--ink-2); }
+figure rect.box { fill: var(--surface); stroke: var(--axis); stroke-width: 1; }
+figure path.arrow { fill: none; stroke: var(--axis); stroke-width: 1.5; }
+figure .head { fill: var(--axis); }
+figcaption { font-size: 14px; color: var(--muted); }
+.note { border-left: 3px solid var(--axis); padding-left: 14px; color: var(--ink-2); font-size: 16px; max-width: 66ch; }
+footer { font-size: 13px; color: var(--muted); font-family: var(--font-mono); }
+a { color: inherit; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Method note · October 2026</div>
+    <h1>How We Tested Agent Kit</h1>
+    <p class="lede">A short account of how we measured claude-agent-kit against a plain Claude Code session, written so the plugin's authors can see exactly what we did, judge whether it was fair, and repeat it.</p>
+  </header>
+
+  <section>
+    <h2>Why we measured</h2>
+    <p>The plugin makes a clear claim: cheaper models can do the reading, searching, and routine implementation through subagents, so the main Opus session keeps its context small and spends its tokens on judgment and review. That is a testable claim, and the README publishes no measurements. We wanted numbers rather than impressions, for the four things a user would care about: cost per task, quality of the result, time taken, and how much context the main session ends up carrying.</p>
+  </section>
+
+  <section>
+    <h2>Two conditions, one difference</h2>
+    <div class="pair">
+      <div class="card a"><div class="name"><i></i>A: plain session</div><ul>
+        <li>Claude Code 2.1.303, run headlessly with <code>claude -p</code></li>
+        <li>Opus 5.5 as the main model, effort high</li>
+        <li>A short CLAUDE.md with the project's test and check commands</li>
+        <li>No plugin, no other user-level plugins or MCP servers</li>
+      </ul></div>
+      <div class="card b"><div class="name"><i></i>B: the same session with the plugin</div><ul>
+        <li>Everything in A, unchanged</li>
+        <li>The plugin at commit c8dfca7 loaded for the session with <code>--plugin-dir</code></li>
+        <li>Its "Agent contract" section appended to the same CLAUDE.md, filled in from the template with the project's real commands</li>
+        <li>Its hooks live: the orchestration rules injected at session start, the read-budget hook on Read and Bash</li>
+      </ul></div>
+    </div>
+    <p>Both conditions started every task from the same commit with the same prompt, in bypass-permissions mode so nothing waited on a human, with user-level settings excluded so that only the plugin distinguished them. The repository was reset before every run and the auto-memory folder cleared, so runs could not learn from each other. The two conditions were interleaved in random order.</p>
+  </section>
+
+  <section>
+    <h2>The tasks</h2>
+    <p>We used two codebases and chose tasks whose outcome a script could judge.</p>
+    <ul>
+      <li><b>pallets/click</b>, a Python library of about 13,000 lines with a six-second test suite: 17 tasks, each in a fresh session. Six bug fixes and two small features were built by reverting real upstream commits and holding their tests back as hidden tests; three refactors; four "find where this happens" questions with an answer key; two longer multi-step tasks.</li>
+      <li><b>Voxglitch</b>, a VCV Rack plugin of about 73,000 lines of C++ with 54 files over the plugin's 350-line threshold: 8 tasks, all new work the codebase had never seen, including three questions that require reading the largest headers, two engine features with hidden tests we wrote, one seeded regression, one refactor of a 400-line method, and one feature that spans engine, panel widget, and manual.</li>
+    </ul>
+    <p>Each task's starting tree is a single squashed commit with the changelog removed, so there is no history to mine for the answer. The Voxglitch tasks were also run as one continued session, task after task, with the harness committing a checkpoint after each so that context accumulates the way it does in a working day while every task is still diffed and checked on its own.</p>
+    <figure>
+      <svg viewBox="0 0 700 120" role="img" aria-label="Flow of one run: reset repo, run the session, checkpoint, hidden checks, blind diff">
+        <defs><marker id="h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+        <rect class="box" x="4" y="30" width="118" height="58" rx="5"/><text x="63" y="54" text-anchor="middle">Reset the repo</text><text class="small" x="63" y="72" text-anchor="middle">to the task's commit</text>
+        <path class="arrow" d="M122,59 L146,59" marker-end="url(#h)"/>
+        <rect class="box" x="148" y="30" width="118" height="58" rx="5"/><text x="207" y="54" text-anchor="middle">Run the session</text><text class="small" x="207" y="72" text-anchor="middle">A or B, same prompt</text>
+        <path class="arrow" d="M266,59 L290,59" marker-end="url(#h)"/>
+        <rect class="box" x="292" y="30" width="118" height="58" rx="5"/><text x="351" y="54" text-anchor="middle">Count everything</text><text class="small" x="351" y="72" text-anchor="middle">tokens, time, context</text>
+        <path class="arrow" d="M410,59 L434,59" marker-end="url(#h)"/>
+        <rect class="box" x="436" y="30" width="118" height="58" rx="5"/><text x="495" y="54" text-anchor="middle">Hidden checks</text><text class="small" x="495" y="72" text-anchor="middle">tests, lint, compile</text>
+        <path class="arrow" d="M554,59 L578,59" marker-end="url(#h)"/>
+        <rect class="box" x="580" y="30" width="116" height="58" rx="5"/><text x="638" y="54" text-anchor="middle">Blind diff</text><text class="small" x="638" y="72" text-anchor="middle">random id, graded later</text>
+      </svg>
+      <figcaption>One run. The hidden checks are copied in only after the session has ended, so neither condition can see or tailor to them.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>What we counted, and how</h2>
+    <ul>
+      <li><b>Tokens</b> come from Claude Code's own records: the per-model usage in each run's final result, which includes subagent requests, plus the per-call stream for cache-tier and context-size detail. Subagent transcripts give the model and call count of every delegated agent.</li>
+      <li><b>Cost</b> is those tokens priced at Anthropic's published per-token prices on the day, including cache writes and cache reads, per model. The runs used a Max subscription, so nothing was billed; the figures say what the same work would cost through the API. Our arithmetic matches Claude Code's own cost estimate to the cent.</li>
+      <li><b>Quality</b> is automatic where it can be: hidden tests, the project's full suite or standalone tests, lint and type checks or a syntax-only compile against the Rack SDK headers. Find-where answers are graded against an answer key, and every diff is also saved under a random id for grading without knowing the condition.</li>
+      <li><b>Time</b> is wall-clock around the whole run. <b>Context</b> is the prompt size of the main session's last API call, against the 1,000,000-token window Opus 5.5 has in Claude Code, plus any compaction events in the transcript.</li>
+      <li><b>Plugin activity</b> is counted directly: subagent calls by agent type, reads the hook denied, and review rejections that sent work back.</li>
+    </ul>
+    <p>Each task runs three times per condition on click and twice per condition and session shape on Voxglitch, because model output varies from run to run. We report the spread, and we say so when a difference between conditions is smaller than that spread.</p>
+  </section>
+
+  <section>
+    <h2>Two things we changed, disclosed</h2>
+    <ul>
+      <li>The plugin's SessionStart hook matches <code>startup|resume|clear|compact</code>. Claude Code reports a session started with <code>--fork-session</code> as <code>fork</code>, so in our copy we added <code>fork</code> to that matcher. It has no effect on any run that starts fresh or resumes.</li>
+      <li>One Voxglitch task is a seeded regression: we removed one line from the Euclid engine so that a reset no longer arms its clock-ignore window, and described the symptom the way a user would. The engine's own tests, held back as hidden tests, detect it. Every other task is either a real upstream change or new work.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Where this test is limited</h2>
+    <ul>
+      <li>It is headless. Nobody answers questions mid-task, so a session that stops to ask is counted as it ended. The plugin was designed with a person in the loop.</li>
+      <li>Most tasks finish in a few minutes. Only the chained Voxglitch sessions let context accumulate, and even those stay far from the 1M window, so compaction never happens.</li>
+      <li>Opus 5.5 has a 1M window and inexpensive cache reads. Claims written for 200K windows and five-minute caches may hold better there than here.</li>
+      <li>A subscription gets one-hour cache writes; API users get five-minute writes at a different price and more cache misses, so the exact dollar figures will not transfer.</li>
+      <li>Quality is near its ceiling on these tasks, so a review gate has little room to show a benefit. Two or three repetitions also leave small real differences inside the spread.</li>
+      <li>Both repositories are far smaller than the monorepos where reading costs dominate.</li>
+    </ul>
+    <p class="note">If the authors consider some other setup the fair one, for instance a particular Agent contract, a different main model, or a task shape the plugin is meant for, the harness can run it: every task, prompt, and command is a file, and a run is one command.</p>
+  </section>
+
+  <section>
+    <h2>Repeating it</h2>
+    <pre>python3 make_tasks.py --rebuild --verify     # click: build task trees, confirm hidden tests fail before the fix
+python3 run.py --reps 3                     # run every task in both conditions, reset between runs
+python3 make_tasks2.py --rebuild --verify    # voxglitch: the same, plus chain bases
+python3 run2.py --config config2.json --modes fresh,chain --reps 2
+python3 summarize.py --config config.json    # tables with means and spread, per task type
+python3 report.py --config config.json --config config2.json</pre>
+    <p>The harness is a folder of plain Python scripts, task prompts, hidden tests, answer keys, and a price table, with every run's raw output, transcript, diff, and check results saved alongside. The results themselves are on a companion page.</p>
+  </section>
+
+  <footer>Claude Code 2.1.303 · claude-opus-5-5 · claude-agent-kit c8dfca7 · pallets/click 2247b35 · Voxglitch d32b18f · prices checked 2026-10-18</footer>
+</div>

@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 16417,
+  "stop_reason": "end_turn",
+  "session_id": "b955e579-dc17-40cc-8014-725a7865d4da",
+  "total_cost_usd": 0.1026902,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 8246,
+    "cache_read_input_tokens": 64651,
+    "output_tokens": 1188,
+    "output_tokens_details": {
+      "thinking_tokens": 71
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 8246,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1188,
+      "cacheReadInputTokens": 64651,
+      "cacheCreationInputTokens": 8246,
+      "webSearchRequests": 0,
+      "costUSD": 0.1026902,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 71,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The wrap width is set in `HelpFormatter.__init__` (`src/click/formatting.py:128-142`) and is stored as `self.width`.\n\n- **Default:** `max_width` defaults to 80 (lines 134-135). If no `width` is passed, it uses `width = max(min(shutil.get_terminal_size().columns, max_width) - 2, 50)` (line 141). So with the defaults, help wraps at 78 columns at most.\n- **Terminal size:** `shutil.get_terminal_size().columns` is used, but capped at `max_width`. The result is minus 2 and never less than **50** (the minimum), even on a very narrow terminal.\n- **Test override:** the module-level `FORCED_WIDTH` (line 11) is checked before the terminal size (line 139). `CliRunner.isolation` in `src/click/testing.py:438-439` sets it to 80 and restores it at line 593.\n- **Explicit width:** if `width` is passed, it's used as-is. The `max_width` cap, the minus 2 and the 50 minimum are all skipped.\n- **Context hookup:** `Context.make_formatter` (`src/click/core.py:664-676`) passes `width=self.terminal_width, max_width=self.max_content_width`. `Command.get_help` calls it at line 1268.\n- **Context override:** `Context.__init__` takes `terminal_width` and `max_content_width` (core.py:378-379; documented at 265-275). Each is inherited from the parent context if not given (lines 438-449).\n- **Command override:** pass `context_settings={\"terminal_width\": ..., \"max_content_width\": ...}`. `Command.make_context` (core.py:1386-1388) copies these into the context's kwargs.\n- **Other overrides:** set `Context.formatter_class` (core.py:340) or subclass and override `make_formatter`.\n\nThe `HelpFormatter` docstring (line 118) says the width is \"clamped to a maximum of 78\". That's the effective result of 80 minus 2, not the `max_width` value itself.",
+  "ttft_ms": 2879,
+  "type": "result",
+  "duration_ms": 16609,
+  "uuid": "43e236c4-e555-4b07-a030-e4bc5c7c8332",
+  "ttft_stream_ms": 1707,
+  "time_to_request_ms": 67,
+  "first_content_frame_ms": 1707,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

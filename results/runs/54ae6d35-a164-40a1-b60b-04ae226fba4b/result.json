@@ -1,0 +1,103 @@
+{
+  "duration_api_ms": 97485,
+  "stop_reason": "end_turn",
+  "session_id": "d44de8fa-ef54-4820-a0ce-294908f64574",
+  "total_cost_usd": 0.47465670000000004,
+  "usage": {
+    "input_tokens": 22,
+    "cache_creation_input_tokens": 19744,
+    "cache_read_input_tokens": 341691,
+    "output_tokens": 7174,
+    "output_tokens_details": {
+      "thinking_tokens": 1977
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 19744,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 22,
+      "outputTokens": 7174,
+      "cacheReadInputTokens": 341691,
+      "cacheCreationInputTokens": 19744,
+      "webSearchRequests": 0,
+      "costUSD": 0.3698582,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1977,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    },
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 4965,
+      "cacheReadInputTokens": 48250,
+      "cacheCreationInputTokens": 20123,
+      "webSearchRequests": 0,
+      "costUSD": 0.10479850000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 484,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 1,
+    "requested": {
+      "background": 0,
+      "foreground": 1,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 1,
+    "spawned_by_subagents": 0,
+    "completed": 1,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {
+      "agent-kit:builder": 1
+    }
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 13,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I added `click.Duration`, which turns strings like `1h30m` into a `datetime.timedelta`. The full test suite, lint, format check and mypy all pass. Nothing is committed.\n\n**Blocked on me**\nNothing.\n\n**Changed**\n- `src/click/types.py`: new `Duration` class right after `DateTime`.\n  - A `timedelta` comes back unchanged, and an `int` is a number of seconds.\n  - Strings are checked against a regular expression that enforces the rules you gave: units in d, h, m, s order, each at most once, case-insensitive, whitespace allowed between groups, and a bare number meaning seconds.\n  - Every rejected value goes through `self.fail`, and the message includes the value.\n  - `name` is `\"duration\"` and `repr` is `DURATION`. The help metavar comes out as `DURATION` without overriding anything, because Click uses the type's name in upper case by default.\n- `src/click/__init__.py`: exports `Duration`.\n- `docs/parameter-types.md` and `docs/api.md`: `Duration` is listed next to `DateTime`, marked `versionadded:: 8.6.0`.\n- `tests/test_types/test_Duration.py` (new): every accepted and rejected example from your spec, the unchanged-`timedelta` case, `repr` and `name`, and a command using `click.option(\"--timeout\", type=click.Duration())`. It checks a valid value, exit code 2 with the value in the error output, and `--timeout DURATION` in `--help`.\n- `tests/test_info_dict.py`: checks that `to_info_dict()` gives `{\"param_type\": \"Duration\", \"name\": \"duration\"}`.\n\n**Verified**\n- `pytest -q`: 2298 passed, 24 skipped, 1 xfailed. The 74 tests in `test_Duration.py` and `test_info_dict.py` pass.\n- `ruff check src tests` and `ruff format --check src tests` are clean, and `mypy` reports no issues.\n- I did not build the docs.\n- A Builder subagent wrote the code. I read the whole diff instead of having a separate reviewer check it, then moved the regular expressions next to the class.\n\n**Found**\nThese are choices I made where your spec didn't say:\n- **`True`/`False` are rejected.** Python treats `bool` as a kind of `int`, but taking `True` as one second would be surprising.\n- **Negative integers are rejected,** to match the rule against negative strings like `-5s`.\n- **No space between a number and its unit:** `1 h` is rejected.\n- **Only ASCII digits count,** so digits from other scripts (such as Arabic-Indic numerals) are rejected.\n- **Very large values are rejected** with the normal error instead of crashing. This covers numbers too big for a `timedelta` and digit strings too long for Python to convert.",
+  "ttft_ms": 2708,
+  "type": "result",
+  "duration_ms": 107841,
+  "uuid": "c8da102f-47f1-4954-ac17-4d82b2c02196",
+  "ttft_stream_ms": 799,
+  "time_to_request_ms": 75,
+  "first_content_frame_ms": 799,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

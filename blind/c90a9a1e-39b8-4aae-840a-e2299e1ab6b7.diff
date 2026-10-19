@@ -1,0 +1,75 @@
+diff --git a/src/click/_termui_impl.py b/src/click/_termui_impl.py
+index fa26601..5867f73 100644
+--- a/src/click/_termui_impl.py
++++ b/src/click/_termui_impl.py
+@@ -123,6 +123,7 @@ class ProgressBar(t.Generic[V]):
+         exc_value: BaseException | None,
+         tb: TracebackType | None,
+     ) -> None:
++        self._apply_pending_steps()
+         self.render_finish()
+ 
+     def __iter__(self) -> cabc.Iterator[V]:
+@@ -333,6 +334,15 @@ class ProgressBar(t.Generic[V]):
+             self.render_progress()
+             self._completed_intervals = 0
+ 
++    def _apply_pending_steps(self) -> None:
++        # Steps stay pending until they add up to update_min_steps, so a length
++        # that is not a multiple of it leaves a remainder that never reaches
++        # pos. Apply it so the bar settles on its true final position.
++        if self._completed_intervals:
++            self.make_step(self._completed_intervals)
++            self._completed_intervals = 0
++            self.render_progress()
++
+     def finish(self) -> None:
+         self.eta_known = False
+         self.current_item = None
+@@ -368,6 +378,7 @@ class ProgressBar(t.Generic[V]):
+                 yield rv
+                 self.update(1)
+ 
++            self._apply_pending_steps()
+             self.finish()
+             self.render_progress()
+ 
+diff --git a/tests/test_termui.py b/tests/test_termui.py
+index 627c2aa..e27c00a 100644
+--- a/tests/test_termui.py
++++ b/tests/test_termui.py
+@@ -109,6 +109,34 @@ def test_progressbar_hidden_manual(runner, monkeypatch):
+     assert runner.invoke(cli, []).output == ""
+ 
+ 
++@pytest.mark.parametrize("update_min_steps", [1, 2, 3, 7, 19, 20, 21, 50])
++@pytest.mark.parametrize("drive", ["iterate", "update"])
++def test_progressbar_update_min_steps_reaches_end(monkeypatch, update_min_steps, drive):
++    """Steps pending below ``update_min_steps`` are applied when the bar
++    finishes, so it lands on its true final position instead of stopping at
++    the last multiple of the threshold (e.g. ``14/20`` for a threshold of 7).
++    """
++    monkeypatch.setattr(click._termui_impl, "isatty", lambda _: True)
++    stream = io.StringIO()
++
++    if drive == "iterate":
++        with click.progressbar(
++            range(20), show_pos=True, update_min_steps=update_min_steps, file=stream
++        ) as bar:
++            for _ in bar:
++                pass
++    else:
++        with click.progressbar(
++            length=20, show_pos=True, update_min_steps=update_min_steps, file=stream
++        ) as bar:
++            for _ in range(20):
++                bar.update(1)
++
++    assert bar.pos == 20
++    assert bar.finished
++    assert "20/20" in stream.getvalue()
++
++
+ @pytest.mark.parametrize("avg, expected", [([], 0.0), ([1, 4], 2.5)])
+ def test_progressbar_time_per_iteration(runner, avg, expected):
+     with _create_progress(2, avg=avg) as progress:

@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 113095,
+  "stop_reason": "end_turn",
+  "session_id": "a6339e87-8ca7-487d-9a39-4dcf942cbcc7",
+  "total_cost_usd": 0.44067,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 19976,
+    "cache_read_input_tokens": 243350,
+    "output_tokens": 11606,
+    "output_tokens_details": {
+      "thinking_tokens": 5687
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 19976,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 11606,
+      "cacheReadInputTokens": 243350,
+      "cacheCreationInputTokens": 19976,
+      "webSearchRequests": 0,
+      "costUSD": 0.44067,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 5687,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I refactored `CliRunner.isolation`. It went from about 195 lines to 54, and about half of what's left is the original docstring. The full test suite passes (2262 passed, 24 skipped, 1 xfailed), and `ruff check`, `ruff format --check` and `mypy` are all clean.\n\n**What changed** (all in `src/click/testing.py`; the new helpers sit after `make_input_stream`):\n\n- **`_IsolatedStreams`**: a small class that builds the `StreamMixer`, the optional `EchoingStdin` (with `_CHUNK_SIZE = 1`), and the `<stdin>`, `<stdout>` and `<stderr>` wrappers. Charsets, names, modes and `errors=\"backslashreplace\"` are the same as before. It also holds the replacement prompt and `should_strip_ansi` functions.\n- **`_make_input_funcs`**: returns the `visible_input`, `hidden_input` and `_getchar` closures, still wrapped in `@_pause_echo(echo_input)`. Their bodies are unchanged.\n- **`_make_should_strip_ansi`** and **`_make_pdb_init`**: return the other two replacements. The pdb wrapper's docstring is kept word for word.\n- **`_SavedGlobals`**: takes a snapshot of every global that gets replaced. `apply_env()` saves and applies the environment variables one by one inside the `try`, as before, so a failure partway through still restores only what was changed. `restore()` puts things back in the original order: env, stdout, stderr, stdin, the three termui functions, `utils`, then `_compat`, `FORCED_WIDTH`, and pdb last.\n- **`_set_environ`**: the \"set it, or delete it if `None`\" logic that was copied in two places before.\n\n`isolation` now reads in order: snapshot, build the streams, install them (one assignment per line, mirroring `restore()`), then `try`/`yield`/`finally: saved.restore()`.\n\n**Behavior:** the public signature, docstring and type annotations are unchanged, and no other public API was touched. Two small internal differences, neither of which can be observed:\n- The termui and pdb originals are now saved at the start rather than just before they're patched. Nothing changes them in between, so this makes no difference.\n- All three stream wrappers are built before any `sys.std*` assignment. Building a wrapper has no side effects, and if one fails (for example, a bad charset), the first one fails just as it did before, so nothing is left half-installed.\n\n**Typing:** the replacement functions are typed as `Callable[..., T]`. This is because `Callable[[...], T]` can't express default arguments, and mypy rejects assigning it to `termui.hidden_prompt_func` and `_compat.should_strip_ansi`. The `# type: ignore` comments that were already there for `utils.should_strip_ansi` and the pdb patch are kept where they're still needed.",
+  "ttft_ms": 3428,
+  "type": "result",
+  "duration_ms": 120484,
+  "uuid": "8e978b0a-908b-4304-8483-a44d3df9983d",
+  "ttft_stream_ms": 2851,
+  "time_to_request_ms": 71,
+  "first_content_frame_ms": 2851,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

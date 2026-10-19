@@ -1,0 +1,28 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "Where does click determine the width used to wrap help text? What are the default and the minimum width, how is the terminal size involved, and how can a command or context override the result?\n\nAnswer in at most 15 lines. For each part of the answer cite the file path and the function or method name, with line numbers where they help. Do not modify any files.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "15",
+    "--session-id",
+    "e3b3852b-faa2-4dbf-abf7-8e836c80c83c",
+    "--plugin-dir",
+    "/mnt/c/Code/routing_test/plugin"
+  ],
+  "cwd": "/home/clone45/routing_test_work/click"
+}

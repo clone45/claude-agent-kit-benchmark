@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 17578,
+  "stop_reason": "end_turn",
+  "session_id": "8b5f0385-aca1-42fe-8ee4-caeb92f75bc1",
+  "total_cost_usd": 0.1494456,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 12558,
+    "cache_read_input_tokens": 100708,
+    "output_tokens": 1440,
+    "output_tokens_details": {
+      "thinking_tokens": 75
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 12558,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 1440,
+      "cacheReadInputTokens": 100708,
+      "cacheCreationInputTokens": 12558,
+      "webSearchRequests": 0,
+      "costUSD": 0.1494456,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 75,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "It's decided while parsing, before the callback ever gets a chance to run:\n\n1. **Default** \u2014 `src/click/core.py`, `Group.__init__` (1785\u20131789): if `no_args_is_help` is left as `None`, it is set to `not invoke_without_command`. So a plain `Group` (where `invoke_without_command=False`) gets `no_args_is_help=True`.\n2. **The decision** \u2014 `Group.parse_args` (2038\u20132040): `if not args and self.no_args_is_help and not ctx.resilient_parsing: raise NoArgsIsHelpError(ctx)`. It's reached from `Command.make_context` (1393), so `Group.invoke` and the callback never run.\n3. **The help text** \u2014 `src/click/exceptions.py`, `NoArgsIsHelpError.__init__` (332\u2013336) uses `ctx.get_help()` as the message. Its `show()` (338\u2013339) prints it to stderr with no \"Usage error\" framing.\n4. **Printing and exit** \u2014 `Command.main` (1629\u20131633) catches it as a `ClickException`, calls `e.show`, and exits with `UsageError.exit_code`, which is 2 (`exceptions.py:77`). If `standalone_mode=False`, it re-raises instead.\n5. **The other flag** \u2014 `Group.invoke` (2058\u20132065): with no subcommand, `invoke_without_command=True` runs the group callback (`super().invoke`) and then the result callback. Otherwise it calls `ctx.fail(\"Missing command.\")`.\n\nHow the two flags combine:\n- **Defaults** (`False`/`None` \u2192 `True`): help is printed.\n- **`invoke_without_command=True`, `no_args_is_help` left unset** (\u2192 `False`): the callback runs.\n- **Both `True`**: help wins, because `parse_args` runs before `invoke`.\n- **Both `False`**: you get a \"Missing command.\" usage error.\n\n`Command.parse_args` (1396\u20131398) has the same check, but for a plain `Command` `no_args_is_help` defaults to `False`.",
+  "ttft_ms": 2073,
+  "type": "result",
+  "duration_ms": 18144,
+  "uuid": "c90cc4d5-0446-455d-87c6-c833da63659d",
+  "ttft_stream_ms": 1662,
+  "time_to_request_ms": 74,
+  "first_content_frame_ms": 1662,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

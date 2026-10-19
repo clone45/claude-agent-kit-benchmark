@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 53554,
+  "stop_reason": "end_turn",
+  "session_id": "9111cdf4-f10e-44e4-b22d-5bdecb926a72",
+  "total_cost_usd": 0.19483540000000002,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 9149,
+    "cache_read_input_tokens": 144437,
+    "output_tokens": 4635,
+    "output_tokens_details": {
+      "thinking_tokens": 1817
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 9149,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 4635,
+      "cacheReadInputTokens": 144437,
+      "cacheCreationInputTokens": 9149,
+      "webSearchRequests": 0,
+      "costUSD": 0.19483540000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1817,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed both problems in `_make_default_short_help` (`src/click/utils.py`) and added tests for every case you listed. The full suite passes: 2264 passed, 24 skipped, 1 xfailed, plus 31000 deselected, which comes from the project's own pytest settings. Ruff lint, the ruff format check and strict mypy are all clean.\n\n**What was wrong**\n- The old code stopped at the first word ending in a period, so `vs.` cut the sentence short.\n- It mixed the sentence check and the length check in one loop, then removed words from the end to make room for `...`. That gave wrong results at the edges. For example, it returned `\"123 567 9.\"` for `123 567 9. aaaa bbb` even though the sentence carries on after `9.`. It also didn't handle widths that are tiny, zero or negative.\n\n**What I changed**\n1. **Sentence end:** a period now ends the sentence only if it is the last word, or the next word doesn't start with a lowercase letter. So `vs. pears` carries on, while `fruit. 3` stops.\n2. **Shortening:** this is now a separate step that follows your rules:\n   - If the sentence-trimmed text fits within `max_length`, it comes back unchanged. That's why `ab` with width 2 stays `ab`.\n   - Otherwise, whole leading words are kept while they fit together with `...`, and `...` is added at the end.\n   - Words are split only on whitespace, so hyphenated words are never broken.\n   - If no word fits, or the width is smaller than 3 (including 0 and negative), the result is just `...`.\n3. **Kept as before:** only the first paragraph is used, runs of whitespace collapse to single spaces, and a leading `\\b` marker is skipped. Empty help still returns `\"\"`, even with a negative width; I chose that because there's nothing to shorten.\n\n**Tests** (`tests/test_utils/test_make_default_short_help.py`)\n- I changed one existing case. `123 567 9. aaaa bbb` at width 10 now expects `123 567...`, as your rule requires. A new `Aaaa` variant still checks that the sentence stops at `9.` when the next word is capitalised.\n- New cases cover all your examples, plus a period that ends the text, width 0, and width -1. Each case also runs again with the `\\b` marker added.\n- The test's length check now allows `...` to be longer than a width below 3.\n\nNothing is committed; the changes are in the working tree.",
+  "ttft_ms": 2959,
+  "type": "result",
+  "duration_ms": 60522,
+  "uuid": "25cac937-4315-49a7-b1d0-5c0dfa47ec11",
+  "ttft_stream_ms": 2306,
+  "time_to_request_ms": 60,
+  "first_content_frame_ms": 2306,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

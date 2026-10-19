@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 17404,
+  "stop_reason": "end_turn",
+  "session_id": "4c8f5281-0d39-4f02-8b82-f3dc52b46a48",
+  "total_cost_usd": 0.11559080000000001,
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 10221,
+    "cache_read_input_tokens": 46194,
+    "output_tokens": 1228,
+    "output_tokens_details": {
+      "thinking_tokens": 265
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 10221,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 6,
+      "outputTokens": 1228,
+      "cacheReadInputTokens": 46194,
+      "cacheCreationInputTokens": 10221,
+      "webSearchRequests": 0,
+      "costUSD": 0.11559080000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 265,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 3,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "All 23 `setShape` overrides are in `src/modules/VXDrums/VXDrumVoices.hpp`. Each one is reached through `Voices::setShape` (line 2149), which calls `knobNatural(...)` (line 2153) to convert the knob position first.\n\n**1. Recompute coefficients (call `updateCoeffs()`)**\n- Without clamping: `Clap::setShape` :488. Its `updateCoeffs` uses `shape` as the clap spacing in ms (:476).\n- With `clampd(v, 0.0, 1.0)` first: `SnareSweep` :1247, `SnareGate` :1341, `Clap909` :1454, `ClapLoFi` :1656, `ClapGate` :1756.\n\n**2. Only store the value (`shape = v;`)**\n- `Ping808` :346, `Snare909` :417, `SineKick` :653, `KickFm` :732, `Snare808` :922, `SnareLayered` :1009, `SnareRing` :1089.\n- `KickFm`, `Snare808` and `SnareRing` clamp the stored value later, inside the per-sample code (:760, :961, :1104), not in the override.\n\n**3. Clamp only, no recompute (`shape = clampd(v, 0.0, 1.0);`)**\n- `Hat` :562, `Snare606` :1168, `ClapTrap` :1551.\n\n**Overrides that do something else**\n- `KickDist::setShape` :826\u2013830 stores `shape`, then works out one value from it: `fold = fastMax(0.0, (shape - 0.6) / 0.4)`. It doesn't clamp and doesn't call `updateCoeffs()`.\n- `SampleModel::setShape` :1945 doesn't touch `shape` at all. It writes `start = clamp01(v)`, so on this model SHAPE sets the sample start point.",
+  "ttft_ms": 2842,
+  "type": "result",
+  "duration_ms": 17558,
+  "uuid": "f2115717-9d19-4a8c-9ee4-294011f81a0e",
+  "ttft_stream_ms": 2035,
+  "time_to_request_ms": 64,
+  "first_content_frame_ms": 2036,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 43901,
+  "stop_reason": "end_turn",
+  "session_id": "da773d96-fc5d-4df3-91a4-b3711dd791f8",
+  "total_cost_usd": 0.2215394,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 12385,
+    "cache_read_input_tokens": 186277,
+    "output_tokens": 4257,
+    "output_tokens_details": {
+      "thinking_tokens": 521
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 12385,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 4257,
+      "cacheReadInputTokens": 186277,
+      "cacheCreationInputTokens": 12385,
+      "webSearchRequests": 0,
+      "costUSD": 0.2215394,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 521,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`click.edit` now accepts `os.PathLike` values such as `pathlib.Path`, either as a single value or inside an iterable mixed with strings. `click.edit(filename=Path(...), editor=...)` edits the file and returns `None`, just like the string form. The full test suite passes (2264 passed, 24 skipped, 1 xfailed), and ruff check, ruff format check and strict mypy are all clean.\n\n**`src/click/termui.py`**\n- Imported `os`.\n- Changed the `filename` annotation to `str | os.PathLike[str] | Iterable[str | os.PathLike[str]] | None`, in both the `text: None` overload and the implementation signature. That overload is the one returning `None`, so mypy now gives `None` for path and mixed-list calls. The two `text`-based overloads don't take `filename`, so I left them alone.\n- The single-value check is now `isinstance(filename, (str, os.PathLike))`. Without it, a lone `Path` would be treated as an iterable of filenames.\n- Docstring: it now describes the accepted values (a `str` or `os.PathLike` path, or an iterable mixing both) and has a `.. versionchanged:: 8.6.0` note, matching the `8.6.0.dev` version in `pyproject.toml`. I also fixed an existing typo there: the docstring pointed to \"`click.file`\", which should be `click.edit`.\n\n**`src/click/_termui_impl.py`**\n- `Editor.edit_files` now takes `Iterable[str | os.PathLike[str]]` and runs each entry through `os.fspath` before building the command, so the editor always receives plain strings.\n\n**Tests**\n- New file `tests/typing/typing_edit.py` pins the `None` return type for `filename=\"f.txt\"`, `Path(\"f.txt\")` and `[\"f.txt\", Path(\"g.txt\")]`. To check that mypy really reads this file, I briefly added a wrong `assert_type`; mypy reported the error, and I removed the line.\n- In `tests/test_termui.py`, the new `test_edit_pathlike` covers a single `Path`, a list of `Path`s, and a mixed list. Each case runs the real `sed` editor and checks that exactly the right files changed. Like the existing edit tests, it is skipped on Windows.\n- A new case in `test_editor_path_normalization` checks that `edit_files` passes a path-like value to the subprocess as a plain string.\n\nNothing is committed; the changes are in the working tree.",
+  "ttft_ms": 3118,
+  "type": "result",
+  "duration_ms": 50823,
+  "uuid": "3127e518-99bd-4b44-a9d4-a13553f618f0",
+  "ttft_stream_ms": 1752,
+  "time_to_request_ms": 68,
+  "first_content_frame_ms": 1753,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

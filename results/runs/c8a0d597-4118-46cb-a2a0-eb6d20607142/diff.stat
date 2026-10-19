@@ -1,0 +1,8 @@
+ src/click/core.py       |  41 ++++++++++++++-
+ tests/test_commands.py  | 131 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/test_info_dict.py |  10 +++-
+ 3 files changed, 180 insertions(+), 2 deletions(-)
+
+M	src/click/core.py
+M	tests/test_commands.py
+M	tests/test_info_dict.py

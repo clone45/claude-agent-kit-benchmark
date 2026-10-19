@@ -1,0 +1,55 @@
+diff --git a/src/click/types.py b/src/click/types.py
+index 90eb7b7..d8a7106 100644
+--- a/src/click/types.py
++++ b/src/click/types.py
+@@ -1166,7 +1166,13 @@ class Path(ParamType[_PathT_co, str | os.PathLike[str]], t.Generic[_PathT_co]):
+     ) -> _PathT_co:
+         rv = value
+ 
+-        is_dash = self.file_okay and self.allow_dash and rv in (b"-", "-")
++        # Compare bytes only with bytes and str only with str, mixing them
++        # emits a BytesWarning under ``python -b``.
++        is_dash = (
++            self.file_okay
++            and self.allow_dash
++            and rv == (b"-" if isinstance(rv, bytes) else "-")
++        )
+ 
+         if not is_dash:
+             if self.resolve_path:
+diff --git a/tests/test_types/test_Path.py b/tests/test_types/test_Path.py
+index 2b0175d..b2ba4b7 100644
+--- a/tests/test_types/test_Path.py
++++ b/tests/test_types/test_Path.py
+@@ -1,6 +1,8 @@
+ import os
+ import pathlib
+ import platform
++import subprocess
++import sys
+ import tempfile
+ import typing as t
+ 
+@@ -163,3 +165,22 @@ def test_path_type(runner, cls, expect):
+ 
+ def test_path_converted_type_parameter_at_runtime():
+     assert t.get_args(click.Path[pathlib.Path]) == (pathlib.Path,)
++
++
++def test_path_allow_dash_no_bytes_warning():
++    """Detecting the dash must not compare bytes with str, which raises a
++    ``BytesWarning`` under ``python -bb``.
++    """
++    code = (
++        "import click\n"
++        "p = click.Path(allow_dash=True)\n"
++        "for v in ('-', '', b'-', b''):\n"
++        "    p.convert(v, None, None)\n"
++    )
++    result = subprocess.run(
++        [sys.executable, "-bb", "-W", "error::BytesWarning", "-c", code],
++        capture_output=True,
++        text=True,
++    )
++    assert result.returncode == 0, result.stderr
++    assert "BytesWarning" not in result.stderr

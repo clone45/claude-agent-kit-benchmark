@@ -1,0 +1,6 @@
+ src/click/core.py   | 23 ++++++++++++++-----
+ tests/test_basic.py | 63 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 81 insertions(+), 5 deletions(-)
+
+M	src/click/core.py
+M	tests/test_basic.py

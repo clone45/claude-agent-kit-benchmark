@@ -1,0 +1,279 @@
+diff --git a/src/click/decorators.py b/src/click/decorators.py
+index cc42e5d..29dd6e9 100644
+--- a/src/click/decorators.py
++++ b/src/click/decorators.py
+@@ -418,6 +418,105 @@ def password_option(*param_decls: str, **kwargs: t.Any) -> t.Callable[[FC], FC]:
+     return option(*param_decls, **kwargs)
+ 
+ 
++def _detect_package_name() -> str | None:
++    """Detect the top-level package name of the module that called
++    :func:`version_option` by inspecting the stack frames.
++    """
++    frame = inspect.currentframe()
++    # Go up two frames: past this function and past version_option.
++    f_back = frame.f_back if frame is not None else None
++    f_back = f_back.f_back if f_back is not None else None
++    f_globals = f_back.f_globals if f_back is not None else None
++    # break reference cycle
++    # https://docs.python.org/3/library/inspect.html#the-interpreter-stack
++    del frame
++
++    if f_globals is None:
++        return None
++
++    package_name: str | None = f_globals.get("__name__")
++
++    if package_name == "__main__":
++        package_name = f_globals.get("__package__")
++
++    if package_name:
++        package_name = package_name.partition(".")[0]
++
++    return package_name
++
++
++def _resolve_version(
++    package_name: str | None, version: str | None
++) -> tuple[str | None, str]:
++    """Return the ``(package_name, version)`` to show for
++    :func:`version_option`.
++
++    If ``version`` is not given, it is looked up with
++    :func:`importlib.metadata.version`. If ``package_name`` is not an
++    installed distribution, it is resolved as an import (top-level
++    module) name, and the returned package name is the distribution's.
++
++    :raise RuntimeError: ``version`` could not be determined.
++    """
++    if version is None and package_name is not None:
++        import importlib.metadata
++
++        try:
++            version = importlib.metadata.version(package_name)
++        except importlib.metadata.PackageNotFoundError:
++            # The given name didn't match an installed distribution.
++            # Try resolving it as an import (top-level module) name,
++            # e.g. ``PIL`` is provided by the ``Pillow`` distribution.
++            distributions = importlib.metadata.packages_distributions().get(
++                package_name, []
++            )
++            if len(distributions) == 1:
++                package_name = distributions[0]
++                version = importlib.metadata.version(package_name)
++            elif len(distributions) > 1:
++                raise RuntimeError(
++                    f"{package_name!r} maps to multiple installed"
++                    f" distributions ({', '.join(distributions)})."
++                    " Pass 'package_name' to disambiguate."
++                ) from None
++            else:
++                raise RuntimeError(
++                    f"{package_name!r} is not installed. Try passing"
++                    " 'package_name' instead."
++                ) from None
++
++    if version is None:
++        raise RuntimeError(
++            f"Could not determine the version for {package_name!r} automatically."
++        )
++
++    return package_name, version
++
++
++def _version_callback(
++    version: str | None, package_name: str | None, prog_name: str | None, message: str
++) -> t.Callable[[Context, Parameter, bool], None]:
++    """Create the callback for :func:`version_option` that prints the version message
++    and exits. The detected values are remembered for later invocations.
++    """
++
++    def callback(ctx: Context, param: Parameter, value: bool) -> None:
++        if not value or ctx.resilient_parsing:
++            return
++
++        nonlocal prog_name, version, package_name
++
++        if prog_name is None:
++            prog_name = ctx.find_root().info_name
++
++        package_name, version = _resolve_version(package_name, version)
++        values = {"prog": prog_name, "package": package_name, "version": version}
++        echo(message % values, color=ctx.color)
++        ctx.exit()
++
++    return callback
++
++
+ def version_option(
+     version: str | None = None,
+     *param_decls: str,
+@@ -426,136 +525,65 @@ def version_option(
+     message: str | None = None,
+     **kwargs: t.Any,
+ ) -> t.Callable[[FC], FC]:
+-    """Add a ``--version`` option which immediately prints the version
+-    number and exits the program.
++    """Add a ``--version`` option which immediately prints the version number and exits
++    the program.
+ 
+     If ``version`` is not provided, Click will try to detect it using
+-    :func:`importlib.metadata.version` to get the version for the
+-    ``package_name``.
++    :func:`importlib.metadata.version` to get the version for the ``package_name``.
+ 
+-    If ``package_name`` is not provided, Click will try to detect it by
+-    inspecting the stack frames. If the detected (or given) name does
+-    not match an installed distribution, Click resolves it as an import
+-    (top-level module) name via
+-    :func:`importlib.metadata.packages_distributions`, so e.g. ``PIL``
+-    resolves to the ``Pillow`` distribution.
++    If ``package_name`` is not provided, Click will try to detect it by inspecting the
++    stack frames. If the detected (or given) name does not match an installed
++    distribution, Click resolves it as an import (top-level module) name via
++    :func:`importlib.metadata.packages_distributions`, so e.g. ``PIL`` resolves to the
++    ``Pillow`` distribution.
+ 
+     .. note::
+-        The parameters and message variables accepted by this option are
+-        frozen: no new slots will be added, to keep the common case simple
+-        and predictable. If you need values it does not expose, such as a
+-        file path, the Python version, or git metadata, use
+-        :func:`custom_version_option` to render the output yourself.
++        The parameters and message variables accepted by this option are frozen: no
++        new slots will be added, to keep the common case simple and predictable. If you
++        need values it does not expose, such as a file path, the Python version, or git
++        metadata, use :func:`custom_version_option` to render the output yourself.
+ 
+         Rationale: `discussion #3527
+         <https://github.com/pallets/click/discussions/3527>`_.
+ 
+-    :param version: The version number to show. If not provided, Click
+-        will try to detect it.
+-    :param param_decls: One or more option names. Defaults to the single
+-        value ``"--version"``.
+-    :param package_name: The package name to detect the version from. If
+-        not provided, Click will try to detect it.
+-    :param prog_name: The name of the CLI to show in the message. If not
+-        provided, it will be detected from the command.
+-    :param message: The message to show. The values ``%(prog)s``,
+-        ``%(package)s``, and ``%(version)s`` are available. Defaults to
+-        ``"%(prog)s, version %(version)s"``.
++    :param version: The version number to show. If not provided, Click will try to
++        detect it.
++    :param param_decls: One or more option names. Defaults to the single value
++        ``"--version"``.
++    :param package_name: The package name to detect the version from. If not
++        provided, Click will try to detect it.
++    :param prog_name: The name of the CLI to show in the message. If not provided, it
++        will be detected from the command.
++    :param message: The message to show. The values ``%(prog)s``, ``%(package)s``, and
++        ``%(version)s`` are available. Defaults to ``"%(prog)s, version %(version)s"``.
+     :param kwargs: Extra arguments are passed to :func:`option`.
+     :raise RuntimeError: ``version`` could not be detected.
+ 
+     .. versionchanged:: 8.0
+-        Add the ``package_name`` parameter, and the ``%(package)s``
+-        value for messages.
++        Add the ``package_name`` parameter, and the ``%(package)s`` value for messages.
+ 
+     .. versionchanged:: 8.0
+-        Use :mod:`importlib.metadata` instead of ``pkg_resources``. The
+-        version is detected based on the package name, not the entry
+-        point name. The Python package name must match the installed
+-        package name, or be passed with ``package_name=``.
++        Use :mod:`importlib.metadata` instead of ``pkg_resources``. The version is
++        detected based on the package name, not the entry point name. The Python
++        package name must match the installed package name, or be passed with
++        ``package_name=``.
+ 
+     .. versionchanged:: 8.4.2
+-        When ``package_name`` does not match an installed distribution,
+-        Click now resolves it as an import (top-level module).
++        When ``package_name`` does not match an installed distribution, Click now
++        resolves it as an import (top-level module).
+     """
+     if message is None:
+         message = _("%(prog)s, version %(version)s")
+ 
+     if version is None and package_name is None:
+-        frame = inspect.currentframe()
+-        f_back = frame.f_back if frame is not None else None
+-        f_globals = f_back.f_globals if f_back is not None else None
+-        # break reference cycle
+-        # https://docs.python.org/3/library/inspect.html#the-interpreter-stack
+-        del frame
+-
+-        if f_globals is not None:
+-            package_name = f_globals.get("__name__")
+-
+-            if package_name == "__main__":
+-                package_name = f_globals.get("__package__")
+-
+-            if package_name:
+-                package_name = package_name.partition(".")[0]
+-
+-    def callback(ctx: Context, param: Parameter, value: bool) -> None:
+-        if not value or ctx.resilient_parsing:
+-            return
+-
+-        nonlocal prog_name
+-        nonlocal version
+-        nonlocal package_name
+-
+-        if prog_name is None:
+-            prog_name = ctx.find_root().info_name
+-
+-        if version is None and package_name is not None:
+-            import importlib.metadata
+-
+-            try:
+-                version = importlib.metadata.version(package_name)
+-            except importlib.metadata.PackageNotFoundError:
+-                # The given name didn't match an installed distribution.
+-                # Try resolving it as an import (top-level module) name,
+-                # e.g. ``PIL`` is provided by the ``Pillow`` distribution.
+-                distributions = importlib.metadata.packages_distributions().get(
+-                    package_name, []
+-                )
+-                if len(distributions) == 1:
+-                    package_name = distributions[0]
+-                    version = importlib.metadata.version(package_name)
+-                elif len(distributions) > 1:
+-                    raise RuntimeError(
+-                        f"{package_name!r} maps to multiple installed"
+-                        f" distributions ({', '.join(distributions)})."
+-                        " Pass 'package_name' to disambiguate."
+-                    ) from None
+-                else:
+-                    raise RuntimeError(
+-                        f"{package_name!r} is not installed. Try passing"
+-                        " 'package_name' instead."
+-                    ) from None
+-
+-        if version is None:
+-            raise RuntimeError(
+-                f"Could not determine the version for {package_name!r} automatically."
+-            )
+-
+-        echo(
+-            message % {"prog": prog_name, "package": package_name, "version": version},
+-            color=ctx.color,
+-        )
+-        ctx.exit()
+-
+-    if not param_decls:
+-        param_decls = ("--version",)
++        package_name = _detect_package_name()
+ 
+     kwargs.setdefault("is_flag", True)
+     kwargs.setdefault("expose_value", False)
+     kwargs.setdefault("is_eager", True)
+     kwargs.setdefault("help", _("Show the version and exit."))
+-    kwargs["callback"] = callback
+-    return option(*param_decls, **kwargs)
++    kwargs["callback"] = _version_callback(version, package_name, prog_name, message)
++    return option(*(param_decls or ("--version",)), **kwargs)
+ 
+ 
+ def custom_version_option(

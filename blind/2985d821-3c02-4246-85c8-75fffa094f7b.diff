@@ -1,0 +1,228 @@
+diff --git a/src/click/core.py b/src/click/core.py
+index 550ac60..ab305b1 100644
+--- a/src/click/core.py
++++ b/src/click/core.py
+@@ -56,6 +56,10 @@ if t.TYPE_CHECKING:
+ F = t.TypeVar("F", bound="t.Callable[..., t.Any]")
+ V = t.TypeVar("V")
+ 
++#: Storage name of the automatic help option. A user parameter can never derive
++#: this name from its declarations by accident, so ``help`` stays free for it.
++_HELP_OPTION_STORAGE_NAME = "_click_default_help"
++
+ 
+ def _complete_visible_commands(
+     ctx: Context, incomplete: str
+@@ -1148,6 +1152,33 @@ class Command:
+                     stacklevel=3,
+                 )
+ 
++            for param in params:
++                if param is help_option or param.name != _HELP_OPTION_STORAGE_NAME:
++                    continue
++
++                warnings.warn(
++                    (
++                        f"The parameter {param.spec} uses the name"
++                        f" {_HELP_OPTION_STORAGE_NAME!r}, which is reserved for the"
++                        " automatic help option."
++                    ),
++                    stacklevel=3,
++                )
++
++            names_counter = Counter(param.name for param in params if param.name)
++
++            for param in params:
++                if isinstance(param, Argument) and names_counter[param.name] > 1:
++                    warnings.warn(
++                        (
++                            f"The name {param.name!r} is used by an argument and"
++                            " another parameter. They will overwrite each other's"
++                            " value during parsing. Give one of them a different"
++                            " name."
++                        ),
++                        stacklevel=3,
++                    )
++
+         return params
+ 
+     def format_usage(self, ctx: Context, formatter: HelpFormatter) -> None:
+@@ -1189,8 +1220,15 @@ class Command:
+ 
+         Skipped if :attr:`add_help_option` is ``False``.
+ 
++        The option stores its value under the reserved name
++        ``_click_default_help`` rather than ``help``, so a user parameter named
++        ``help`` does not collide with it.
++
+         .. versionchanged:: 8.1.8
+             The help option is now cached to avoid creating it multiple times.
++
++        .. versionchanged:: 8.6.0
++            The help option stores its value under ``_click_default_help``.
+         """
+         help_option_names = self.get_help_option_names(ctx)
+ 
+@@ -1206,7 +1244,7 @@ class Command:
+             from .decorators import help_option
+ 
+             # Apply help_option decorator and pop resulting option
+-            help_option(*help_option_names)(self)
++            help_option(*help_option_names, _HELP_OPTION_STORAGE_NAME)(self)
+             self._help_option = self.params.pop()  # type: ignore[assignment]
+ 
+         return self._help_option
+diff --git a/tests/test_basic.py b/tests/test_basic.py
+index 2f0a93d..6f6b384 100644
+--- a/tests/test_basic.py
++++ b/tests/test_basic.py
+@@ -778,6 +778,124 @@ def test_help_invalid_default(runner):
+     assert "default: not found" in result.output
+ 
+ 
++def test_help_option_storage_name():
++    cli = click.Command("cli")
++    ctx = click.Context(cli)
++    assert cli.get_help_option(ctx).name == "_click_default_help"
++
++
++@pytest.mark.parametrize(
++    ("params", "args", "expect"),
++    [
++        ([click.Argument(["help"])], ["value"], {"help": "value"}),
++        ([click.Option(["--assist", "help"])], ["--assist", "x"], {"help": "x"}),
++        ([click.Option(["--assist", "help"])], [], {"help": None}),
++    ],
++)
++def test_param_named_help(runner, params, args, expect):
++    cli = click.Command("cli", params=params, callback=lambda **kw: kw)
++    result = runner.invoke(cli, args, standalone_mode=False)
++    assert result.exception is None
++    assert result.return_value == expect
++
++    result = runner.invoke(cli, ["--help"])
++    assert result.exit_code == 0
++    assert "Show this message and exit." in result.output
++
++
++@pytest.mark.parametrize("help_names", [["--help"], ["--man"], ["/?"], ["-h", "/?"]])
++def test_help_option_names_print_help(runner, help_names):
++    cli = click.Command(
++        "cli",
++        params=[click.Argument(["help"], required=False)],
++        context_settings={"help_option_names": help_names},
++        callback=lambda help: help,
++    )
++    for name in help_names:
++        result = runner.invoke(cli, [name])
++        assert result.exit_code == 0
++        assert "Show this message and exit." in result.output
++
++    result = runner.invoke(cli, ["value"], standalone_mode=False)
++    assert result.return_value == "value"
++
++
++def test_help_option_reused_flag_replaces_help(runner):
++    @click.command()
++    @click.option("--help", default="default value")
++    def cli(help):
++        click.echo(f"help={help}")
++
++    ctx = click.Context(cli)
++    assert cli.get_help_option(ctx) is None
++
++    result = runner.invoke(cli, [])
++    assert result.exit_code == 0
++    assert result.output == "help=default value\n"
++
++    result = runner.invoke(cli, ["--help", "given"])
++    assert result.exit_code == 0
++    assert result.output == "help=given\n"
++    assert "Show this message and exit." not in result.output
++
++
++@pytest.mark.parametrize(
++    "params",
++    [
++        [click.Argument(["value"]), click.Option(["--value"])],
++        [click.Option(["--value"]), click.Argument(["value"])],
++        [click.Argument(["value"]), click.Argument(["VALUE"])],
++        [click.Argument(["help"]), click.Option(["--assist", "help"])],
++    ],
++)
++def test_argument_storage_name_collision_warns(params):
++    cli = click.Command("cli", params=params)
++    name = params[0].name
++
++    with pytest.warns(UserWarning, match=f"'{name}' is used by an argument") as rec:
++        cli.get_params(click.Context(cli))
++
++    assert "overwrite each other's value during parsing" in str(rec[0].message)
++
++
++@pytest.mark.parametrize(
++    "param",
++    [
++        click.Option(["--_click-default-help"]),
++        click.Option(["--other", "_click_default_help"]),
++    ],
++)
++def test_reserved_help_storage_name_warns(param):
++    cli = click.Command("cli", params=[param])
++
++    with pytest.warns(UserWarning, match="reserved for the automatic help option"):
++        cli.get_params(click.Context(cli))
++
++
++def test_reserved_help_storage_name_warns_without_help_option():
++    cli = click.Command(
++        "cli",
++        params=[click.Argument(["_click_default_help"])],
++        add_help_option=False,
++    )
++
++    with pytest.warns(UserWarning, match="reserved for the automatic help option"):
++        cli.get_params(click.Context(cli))
++
++
++def test_feature_switches_sharing_storage_name_do_not_warn(runner):
++    @click.command()
++    @click.option("--upper", "transformation", flag_value="upper")
++    @click.option("--lower", "transformation", flag_value="lower", default=True)
++    def cli(transformation):
++        click.echo(transformation)
++
++    # The test suite turns warnings into errors, so any warning fails here.
++    cli.get_params(click.Context(cli))
++    assert runner.invoke(cli, ["--upper"]).output == "upper\n"
++    assert runner.invoke(cli, []).output == "lower\n"
++
++
+ def test_version_option_resolves_import_name_to_distribution(runner, monkeypatch):
+     """When ``package_name`` (detected or passed) is an import name that
+     differs from its installed distribution name (``PIL`` vs ``Pillow``),
+diff --git a/tests/test_info_dict.py b/tests/test_info_dict.py
+index fbf85a1..9e1dfba 100644
+--- a/tests/test_info_dict.py
++++ b/tests/test_info_dict.py
+@@ -9,7 +9,7 @@ BOOL_PARAM_TYPE = (click.BOOL, {"param_type": "Bool", "name": "boolean"})
+ HELP_OPTION = (
+     None,
+     {
+-        "name": "help",
++        "name": "_click_default_help",
+         "param_type_name": "option",
+         "opts": ["--help"],
+         "secondary_opts": [],
+@@ -343,3 +343,11 @@ def test_command_to_info_dict_multiple_arguments():
+     args = [p for p in params if p["param_type_name"] == "argument"]
+     assert [p["name"] for p in args] == ["src", "dst"]
+     assert [p["help"] for p in args] == ["source path", "destination path"]
++
++
++def test_help_option_info_dict_beside_param_named_help():
++    cli = click.Command("cli", params=[click.Argument(["help"])])
++    ctx = click.Context(cli)
++    params = cli.to_info_dict(ctx)["params"]
++    assert [p["name"] for p in params] == ["help", "_click_default_help"]
++    assert params[1] == HELP_OPTION[1]

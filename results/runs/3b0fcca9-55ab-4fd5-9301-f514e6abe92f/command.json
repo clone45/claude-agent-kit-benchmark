@@ -1,0 +1,26 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "Refactor `version_option` in `src/click/decorators.py`, which is about 140 lines long. Extract the logic that works out the package name and the version (the frame inspection, the `importlib.metadata` lookup, and the error raised when nothing is found) into one or more private module-level helper functions, so that `version_option` itself is under 70 lines and the decorator body is easy to follow.\n\nBehavior must not change: same public signature, same detected package names and versions, same messages, same exceptions, same type annotations on the public function. Do not change any other public function. The full test suite, `ruff check`, `ruff format --check`, and `mypy` must pass.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "15",
+    "--session-id",
+    "fcb28610-5e72-41a2-9a61-382b6d9a8c78"
+  ],
+  "cwd": "/home/clone45/routing_test_work/click"
+}

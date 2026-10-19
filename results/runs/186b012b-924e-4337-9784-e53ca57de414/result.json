@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 77907,
+  "stop_reason": "end_turn",
+  "session_id": "97a1c1d2-60c6-47a2-a394-f9eaf22ceedc",
+  "total_cost_usd": 0.3431832,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 16624,
+    "cache_read_input_tokens": 145716,
+    "output_tokens": 9050,
+    "output_tokens_details": {
+      "thinking_tokens": 4459
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 16624,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 9050,
+      "cacheReadInputTokens": 145716,
+      "cacheCreationInputTokens": 16624,
+      "webSearchRequests": 0,
+      "costUSD": 0.3431832,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 4459,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 6,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`CliRunner.isolation` in `src/click/testing.py` is now 46 lines, and 13 of those are its body; the rest is the signature and the unchanged docstring. The full test suite passes (2262 passed, 24 skipped, 1 xfailed), and `ruff check`, `ruff format --check` and `mypy` are all clean. Nothing is committed.\n\n**What moved where:**\n- **`_IsolatedStreams`** (new private class) does the stream setup. Its constructor builds the stdin, stdout and stderr streams exactly as before: same encodings and names, `errors=\"backslashreplace\"` on stderr, and one-character reads when `echo_stdin` is on. `visible_input`, `hidden_input`, `getchar` and `should_strip_ansi` are now methods on it. `install()` swaps in the streams and those hooks in the original order.\n- **`_SavedState`** (new private class) holds the restore logic. It records all the global values `isolation` replaces when it is created. `update_environ()` applies the environment overrides and remembers the old values. `restore()` undoes everything in the original order: environment first, then stdout, stderr and stdin, the click hooks, `FORCED_WIDTH`, and finally `pdb.Pdb.__init__`.\n- **`_set_environ()`** replaces the two identical set-or-delete loops, one for applying the environment and one for restoring it.\n- **`_make_pdb_init()`** returns the `pdb.Pdb.__init__` patch, moved out unchanged with its docstring.\n\n**Behavior is preserved:**\n- The public signature, docstring and type annotations are the same, and no other public function changed.\n- The setup order is the same as before. In particular, `FORCED_WIDTH` is set before the streams are built, so error paths behave exactly as they did.\n- The environment is still applied inside the `try`, so a partly applied environment is still undone.\n- The four replacement hooks used to be nested functions wrapped with `@_pause_echo(...)`. They are now methods that use `with _pause_echo(...)` around the same code, which is equivalent and removed three `# type: ignore` comments.\n\nOne small difference: `termui` and `_compat` now see bound methods instead of plain functions while isolation is active. Callers don't notice, since the call signatures are the same.",
+  "ttft_ms": 2354,
+  "type": "result",
+  "duration_ms": 85605,
+  "uuid": "e71fd6e5-3d3d-4fa5-b91c-04bc0d227d24",
+  "ttft_stream_ms": 1669,
+  "time_to_request_ms": 72,
+  "first_content_frame_ms": 1669,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

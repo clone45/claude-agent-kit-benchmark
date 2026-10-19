@@ -1,0 +1,28 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "Add a new parameter type `click.Duration` to `src/click/types.py`, exported from `src/click/__init__.py`, that converts a string into a `datetime.timedelta`.\n\nAccepted input:\n- A `datetime.timedelta` instance is returned unchanged.\n- An `int` means that many seconds.\n- A string is one or more unit groups, each a non-negative integer followed by a unit letter: `d` for days, `h` for hours, `m` for minutes, `s` for seconds. Groups appear in descending unit order and each unit at most once. Unit letters are case-insensitive, whitespace between groups is allowed, and surrounding whitespace is ignored. A bare integer string with no unit means seconds. Examples: `90s` is 90 seconds; `5m` is 5 minutes; `1h30m` and `1h 30m` are 90 minutes; `2d` is 2 days; `1D2H3M4S` is 1 day, 2 hours, 3 minutes, 4 seconds; `45` is 45 seconds; `0s` and `0` are zero.\n\nRejected input fails through the type's `fail` method, which raises `click.BadParameter`, with a message that includes the offending value: the empty string, unknown units such as `5x`, fractional numbers such as `1.5h`, negative values such as `-5s`, out-of-order or repeated units such as `30m1h` or `1h1h`, a unit with no number such as `h`, text such as `abc`, and any value that is not a string, an int, or a timedelta.\n\nThe type's `name` is `duration`, `to_info_dict()` reports `'param_type': 'Duration'` and `'name': 'duration'`, `repr(click.Duration())` is `DURATION`, and the metavar shown in help for an option of this type is `DURATION`. A `Duration()` with no constructor arguments is all that is required. Document the new type alongside the other parameter types in the docs, and add tests covering the cases above, including a command that uses `click.option(\"--timeout\", type=click.Duration())`.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "30",
+    "--session-id",
+    "c5fe7419-388c-4dc0-b887-c8af8b63886d",
+    "--plugin-dir",
+    "/mnt/c/Code/routing_test/plugin"
+  ],
+  "cwd": "/home/clone45/routing_test_work/click"
+}

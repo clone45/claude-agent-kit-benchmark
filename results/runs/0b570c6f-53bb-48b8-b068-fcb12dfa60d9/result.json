@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 33933,
+  "stop_reason": "end_turn",
+  "session_id": "7990e1a2-9a57-46db-8757-ddb8c46b3799",
+  "total_cost_usd": 0.20479139999999998,
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 12042,
+    "cache_read_input_tokens": 187577,
+    "output_tokens": 3543,
+    "output_tokens_details": {
+      "thinking_tokens": 385
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 12042,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 20,
+      "outputTokens": 3543,
+      "cacheReadInputTokens": 187577,
+      "cacheCreationInputTokens": 12042,
+      "webSearchRequests": 0,
+      "costUSD": 0.20479139999999998,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 385,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 12,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`Command.get_help_option_names` now returns the help option names in the order they were declared. The full suite passes (2258 passed, 24 skipped, 1 xfailed), and ruff (lint and format) and mypy are clean.\n\n**The change** (`src/click/core.py`): the method used to start from a `set`, which threw away the declared order. It now:\n1. collects every name used in another parameter's `opts` or `secondary_opts`, so both `--shout` and `--no-shout` count as taken;\n2. goes through `ctx.help_option_names` with `dict.fromkeys`, which drops duplicates and keeps each name's first position;\n3. leaves out any name that is already taken.\n\nI also expanded the docstring and added a `versionchanged:: 8.5.0` note. There's no changelog file in this tree, so I didn't add an entry.\n\n**One thing you might not expect:** the order is kept in the help option's names, but the `--help` output doesn't show it. Click's help formatter sorts names by prefix length, so `['--help', '-h', '-?']` still prints as `-h, -?, --help`. That sorting happens later and separately, so I left it alone.\n\n**Tests** (`tests/test_basic.py`):\n- A parametrized test covers all six of your examples. It adds a case for the primary flag (`--shout`) being taken, alongside your `--no-shout` case.\n- One test checks that when every name is filtered out, `get_help_option` returns `None`, so no help option is added.\n- One test checks that the generated help option receives its names in declared order (`opts == ['--help', '-h', '-?']`).\n\nNothing is committed; the changes are in the working tree.",
+  "ttft_ms": 2097,
+  "type": "result",
+  "duration_ms": 41633,
+  "uuid": "7e21f700-186e-4303-93b6-67dfe1ea7846",
+  "ttft_stream_ms": 858,
+  "time_to_request_ms": 71,
+  "first_content_frame_ms": 858,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

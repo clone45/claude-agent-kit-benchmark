@@ -1,0 +1,28 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "This is the next task in the same working session. Changes from the earlier tasks have been checked in by the harness; continue from the current state of the tree.\n\nIn GrooveBox (`src/modules/GrooveBox/GrooveBox.hpp` and `src/modules/GrooveBox/Track.hpp`), where is it decided on each clock step whether a track fires its sample, and where are ratchets, the extra re-triggers between clock steps, produced? Describe the two code paths, what distinguishes a step sample from a ratchet sample, and where mute and solo enter each path.\n\nAnswer in at most 15 lines. For each part of the answer cite the file path and the function or method name, with line numbers where they help. Do not modify any files.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "20",
+    "--resume",
+    "42945aa0-b8c2-453b-bd26-10eee3e1b624",
+    "--plugin-dir",
+    "/mnt/c/Code/routing_test/plugin"
+  ],
+  "cwd": "/home/clone45/routing_test_work/voxglitch"
+}

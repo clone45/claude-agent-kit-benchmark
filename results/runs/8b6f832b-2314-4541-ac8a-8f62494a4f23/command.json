@@ -1,0 +1,26 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "Make `click.Path` in `src/click/types.py` generic over the type of the value it converts to, so that the `path_type` argument narrows what `convert`, calling the type instance directly, `coerce_path_result`, and `click.prompt(type=...)` return for static type checkers:\n\n- `click.Path(path_type=pathlib.Path).convert(\"a/b.txt\", None, None)` is typed `pathlib.Path`; `path_type=str` gives `str`; `path_type=bytes` gives `bytes`.\n- `click.Path()` without `path_type` keeps returning `str | bytes | os.PathLike[str]`.\n- `click.Path[pathlib.Path]` is a valid explicit annotation and works at runtime: `typing.get_args(click.Path[pathlib.Path]) == (pathlib.Path,)`.\n- `click.Path(path_type=pathlib.Path)` is assignable to `click.ParamType[pathlib.Path]`, and `click.Path()` to `click.ParamType[str | bytes | os.PathLike[str]]`.\n- Calling the instance with a `pathlib.PurePosixPath` input is accepted and returns the converted type; calling it with `None` returns `None`.\n\nRuntime behavior must not change. The project supports Python 3.10 and later, so a TypeVar with a default needs `typing_extensions` under `TYPE_CHECKING` and a runtime fallback. `mypy` (strict, checking `src` and `tests/typing` as configured in `pyproject.toml`) must pass. Add a `tests/typing/typing_path.py` with `assert_type` checks for the cases above, and a runtime test for the `get_args` behavior. Note the change in the class docstring.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "15",
+    "--session-id",
+    "e567bdba-7858-4e3c-89bd-b3b10bbe2924"
+  ],
+  "cwd": "/home/clone45/routing_test_work/click"
+}

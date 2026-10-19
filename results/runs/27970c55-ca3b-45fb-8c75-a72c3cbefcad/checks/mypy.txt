@@ -1,0 +1,5 @@
+rc=0 timed_out=False
+--- stdout
+Success: no issues found in 29 source files
+
+--- stderr

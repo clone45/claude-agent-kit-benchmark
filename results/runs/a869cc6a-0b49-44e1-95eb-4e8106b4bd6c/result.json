@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 27254,
+  "stop_reason": "end_turn",
+  "session_id": "7f3315f4-9548-45c4-ab8a-24d3d6a9082d",
+  "total_cost_usd": 0.07603299999999999,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 3482,
+    "cache_read_input_tokens": 87625,
+    "output_tokens": 1531,
+    "output_tokens_details": {
+      "thinking_tokens": 137
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 3482,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1531,
+      "cacheReadInputTokens": 87625,
+      "cacheCreationInputTokens": 3482,
+      "webSearchRequests": 0,
+      "costUSD": 0.07603299999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 137,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 6,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The decision happens at parse time, before any callback runs.\n\n1. **Defaults**: `src/click/core.py`, `Group.__init__` (l.1785\u20131789). If you don't pass `no_args_is_help`, it is set to `not invoke_without_command`. A plain `@click.group()` has `invoke_without_command=False`, so it gets `no_args_is_help=True`.\n2. **The check**: `Group.parse_args` (l.2038\u20132040) runs `if not args and self.no_args_is_help and not ctx.resilient_parsing: raise NoArgsIsHelpError(ctx)`. It is called from `Command.make_context` (l.1393), so the callback never gets a chance to run. `Command.parse_args` (l.1396\u20131398) has the same check for plain commands, but there `no_args_is_help` defaults to False.\n3. **The help text**: `src/click/exceptions.py`, `NoArgsIsHelpError.__init__` (l.335\u2013336) uses `ctx.get_help()` as the error message. Its `show()` (l.338\u2013339) prints that message to stderr without the usual \"Error:\" prefix.\n4. **Printing and exit**: `Command.main` (core.py l.1629\u20131633) catches it as a `ClickException`, calls `e.show()` and exits with code 2, inherited from `UsageError`. With `standalone_mode=False` the exception is re-raised instead.\n5. **How the two flags combine**: `Group.invoke` (l.2058\u20132066) only runs if parsing succeeded. When there is no subcommand, it runs the group callback if `invoke_without_command=True`, and otherwise fails with \"Missing command.\"\n   - `invoke_without_command=False` (default): `no_args_is_help` becomes True, so bare `cli` prints help. If you set `no_args_is_help=False` explicitly, you get \"Missing command.\" instead.\n   - `invoke_without_command=True`: `no_args_is_help` becomes False, so bare `cli` runs the callback. If you set both to True, help wins with zero args, because `parse_args` raises before `invoke` is reached. With only options given (e.g. `cli --flag`), the callback runs.",
+  "ttft_ms": 6794,
+  "type": "result",
+  "duration_ms": 27770,
+  "uuid": "05f91a9d-ef21-41c5-b949-a9d616020357",
+  "ttft_stream_ms": 5741,
+  "time_to_request_ms": 72,
+  "first_content_frame_ms": 5742,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

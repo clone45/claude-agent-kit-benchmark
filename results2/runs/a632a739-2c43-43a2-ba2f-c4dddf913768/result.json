@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 27451,
+  "stop_reason": "end_turn",
+  "session_id": "e5ce4014-ceee-4e8f-95f0-9f568e67ca43",
+  "total_cost_usd": 0.19717979999999996,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 17115,
+    "cache_read_input_tokens": 82739,
+    "output_tokens": 2184,
+    "output_tokens_details": {
+      "thinking_tokens": 465
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 17115,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2184,
+      "cacheReadInputTokens": 82739,
+      "cacheCreationInputTokens": 17115,
+      "webSearchRequests": 0,
+      "costUSD": 0.19717979999999996,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 465,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Order of checks on a left-button press (all in `src/modules/PianoRoll/PianoRollEditorWidget.hpp`):\n\n1. **`onButton`** (1624) sees a left press and calls **`beginDrag(e.pos, e.mods)`** (1889). That calls `zoneAt`, and for `ZONE_GRID` it hands off to **`beginGridDrag(position, shift)`** (2032), where the order of checks is written as a lettered A\u2013F chain.\n2. Before any edge test, `beginGridDrag` works out `index = noteIndexAt(step, pitch)` (1406, a half-open `[start, end)` step test) and `in_box` from `selectionBounds` (1455). Shift (A) and a press inside a 2+-note selection box (B \u2192 `beginMove`/`beginMoveSelection`) both return early, so a note inside a group selection can't be resized.\n3. **C, edge grab:** `edgeGrabAt(position, grab)` (1422). On a hit it sets `drag_mode = DRAG_RESIZE`, and `drag_left_edge = grab.left_edge` picks left or right. **D, move:** only if no edge was hit, `index >= 0` leads to `selectOnly` + `beginMove`. E (dismiss the box) and F (paint a new note) come after that.\n4. **The grab zone** is computed inside `edgeGrabAt`, which scans notes topmost-first and only looks at the pitch under the pointer. The size is `zone = min(EDGE_GRAB_W, max(1, (x1 - x0)/3))` (1439). It's measured in pixels from `xOfStep`, and `EDGE_GRAB_W` is 4 px (`PianoRollGeometry.hpp:127`). So the zone is a third of the note's width, at least 1 px and at most 4 px. Shrinking it for short notes keeps the edge zones from covering the whole note, so the body stays grabbable for a move.\n5. **The right edge is tested first:** `|x - x1| <= zone` (1441). It wins any overlap and has no width condition. The pixel test matters because `noteIndexAt` treats the end step as outside the note.\n6. **Why the left edge of a short note can't be grabbed:** the left test (1445) also requires `(x1 - x0) > EDGE_GRAB_MIN_NOTE_W`, which is `EDGE_GRAB_W * 2.5` = 10 px (`PianoRollGeometry.hpp:128`). The comment says this prevents a left grab being confused with a right grab. For a note 10 px wide or less, a press near its start fails C and falls through to D, so it moves the note instead.\n7. The hover cursor in `onHover` (1593\u20131601) runs the same order (box \u2192 `edgeGrabAt` \u2192 `noteIndexAt` \u2192 empty space), so the resize cursor appears exactly where a press would resize.",
+  "ttft_ms": 2274,
+  "type": "result",
+  "duration_ms": 28030,
+  "uuid": "1b246cc1-dbbe-4982-a993-6c61a1ca2023",
+  "ttft_stream_ms": 1919,
+  "time_to_request_ms": 71,
+  "first_content_frame_ms": 1919,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

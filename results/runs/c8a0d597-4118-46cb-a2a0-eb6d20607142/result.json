@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 160446,
+  "stop_reason": "end_turn",
+  "session_id": "7ef90d5e-b708-4955-85fb-782862d0de1e",
+  "total_cost_usd": 0.7316763999999999,
+  "usage": {
+    "input_tokens": 46,
+    "cache_creation_input_tokens": 40193,
+    "cache_read_input_tokens": 865342,
+    "output_tokens": 11844,
+    "output_tokens_details": {
+      "thinking_tokens": 3264
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 40193,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 46,
+      "outputTokens": 11844,
+      "cacheReadInputTokens": 865342,
+      "cacheCreationInputTokens": 40193,
+      "webSearchRequests": 0,
+      "costUSD": 0.7316763999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3264,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 30,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The automatic help option now stores its value under `_click_default_help`, so user parameters named `help` work. Commands also warn when an argument's value would be overwritten by another parameter, or when a parameter takes the reserved name. The full suite passes: 2268 passed, 24 skipped, 1 xfailed.\n\n**Blocked on me**\nNothing.\n\n**Changed**\n- `src/click/core.py`:\n  - Added the private constant `_HELP_OPTION_STORAGE_NAME = \"_click_default_help\"`.\n  - `get_help_option` passes that name as an explicit declaration alongside the help flags. Because it is a valid identifier, help flags that aren't, like `/?`, get a valid name and trigger no warning. Its docstring now mentions the reserved name and has a `versionchanged:: 8.6.0` note.\n  - `get_params` has two new `UserWarning` checks, next to the existing duplicate-flag check:\n    - an `Argument` whose storage name is shared with any other parameter;\n    - any parameter other than the help option itself that uses the reserved name.\n  - Options that share a name with each other, like the `--upper`/`--lower` feature switches, don't warn.\n- `tests/test_info_dict.py`: the help option fixture now expects `\"name\": \"_click_default_help\"`. Added `test_help_option_to_info_dict`, which checks the shape from both `get_help_option(ctx).to_info_dict()` and `cli.to_info_dict(ctx)`.\n- `tests/test_commands.py`: new tests for:\n  - the storage name, with `--help`, `--man`, `-h --help` and `/?`;\n  - `Argument([\"help\"])`;\n  - `Option([\"--assist\", \"help\"])`, with default and custom help names;\n  - `@click.option(\"--help\", default=...)`: `get_help_option` returns `None`, the default and passed values both arrive, and no help text is printed;\n  - the argument-collision warning, in three layouts;\n  - the reserved-name warning, for an argument and an option, with and without the help option;\n  - feature switches producing no warning.\n\n**Verified**\n- Ruff check, ruff format check and mypy are all clean.\n- I ran the full suite after the last edit. Since warnings are errors, it also shows that no existing test sets off the new checks.\n- Point 3 needed no code change. Defining your own `--help` already removed it from the help option's names; the new test confirms that.\n\n**Found**\n- Breaking change: anything that read the help option's name as `\"help\"` now sees `_click_default_help`, including `to_info_dict()` output. The existing info-dict fixture was the only place in the tests that relied on it.\n- An argument named `_click_default_help` triggers both warnings when the help option is present, since it also collides with that option. I think that's correct, and the test allows for it.\n- I didn't add a `CHANGES.rst` entry, because the task said to keep everything else unchanged. One would be needed if this is released.",
+  "ttft_ms": 4736,
+  "type": "result",
+  "duration_ms": 182995,
+  "uuid": "c2fbe723-9468-43b2-bc24-f9f292b70b6d",
+  "ttft_stream_ms": 3305,
+  "time_to_request_ms": 62,
+  "first_content_frame_ms": 3305,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,4 @@
+ src/click/decorators.py | 133 ++++++++++++++++++++++++++++++++----------------
+ 1 file changed, 88 insertions(+), 45 deletions(-)
+
+M	src/click/decorators.py

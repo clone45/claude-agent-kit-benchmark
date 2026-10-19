@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 65871,
+  "stop_reason": "end_turn",
+  "session_id": "cbdb9cf3-f826-4ae5-99c2-5a94ae0d0f42",
+  "total_cost_usd": 0.25891780000000003,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 12659,
+    "cache_read_input_tokens": 205269,
+    "output_tokens": 5826,
+    "output_tokens_details": {
+      "thinking_tokens": 1911
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 12659,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 5826,
+      "cacheReadInputTokens": 205269,
+      "cacheCreationInputTokens": 12659,
+      "webSearchRequests": 0,
+      "costUSD": 0.25891780000000003,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1911,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 11,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Optional `Choice` and `DateTime` arguments no longer get doubled brackets in the usage line. The full suite passes (2278 passed, 24 skipped, 1 xfailed), and ruff, the format check and mypy are clean.\n\n**The cause:** `Argument.make_metavar` wraps every optional argument in `[...]`. `Choice` and `DateTime` already return a bracketed metavar for optional arguments, so they ended up as `[[foo|bar|baz]]`.\n\n**The fix** (`src/click/core.py`):\n- **`_is_bracketed(metavar)`:** a new private helper that returns true only when the whole metavar is one `[...]` group. `[foo|bar]` counts; `[a]|[b]` and unbalanced strings like `[a` don't, so those still get the outer brackets.\n- **`Argument.get_usage_pieces`:** for an optional argument with no explicit `metavar=`, if the type's metavar is already bracketed it's used as-is, then `!` (deprecated) and `...` (`nargs != 1`) are added. Results: `[foo|bar|baz]...` with `nargs=-1`, `[foo|bar|baz]` with `required=False`, and `[%Y-%m-%d]` for the `DateTime` case. Everything else still goes through `make_metavar`, so required arguments (e.g. `{foo|bar|baz}`), plain arguments and explicit metavars are unchanged.\n\n**Decision for you:** for a deprecated optional `Choice` I put the `!` after the closing bracket, `[foo|bar|baz]!`, so it can't be misread as part of the last choice (`baz!`). The alternative, `[foo|bar|baz!]`, would match the shape of the existing `[SRC!]`. If you prefer that, it's a one-line change.\n\n**Not changed:** I kept to `get_usage_pieces` as you asked, so the same doubling still appears in two other places that use `make_metavar`: the argument's row in `--help` (only shown when the argument has `help=` text or is deprecated) and the name in error messages. Applying the same check in `make_metavar` would fix all three, but it would change those outputs too.\n\n**Tests** (`tests/test_arguments.py`):\n- **`test_argument_type_brackets_mark_optional`** checks the exact usage line for `Choice` and `DateTime` across required, `required=False`, `default=`, `nargs=-1`, `nargs=2`, deprecated and explicit-metavar cases.\n- **`test_argument_type_brackets_whole_metavar`** uses a custom type to check which metavars count as already bracketed.",
+  "ttft_ms": 3421,
+  "type": "result",
+  "duration_ms": 73129,
+  "uuid": "02ba72cc-10ef-4107-9860-84c8b7d5a195",
+  "ttft_stream_ms": 2441,
+  "time_to_request_ms": 76,
+  "first_content_frame_ms": 2441,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

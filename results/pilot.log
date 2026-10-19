@@ -1,0 +1,16 @@
+plan: 4 cells over 2 tasks x 2 conditions x 1 reps (gaps only)
+
+=== B1 / B / rep 0 -> 91fd8f27-5f5b-405b-89b5-31f9f7815dc4
+   status=completed subtype=success turns=10 wall=65.2s cost=$0.356 (claude $0.3560162) ctx_end=28713 checks=all_pass=True subagents=0
+
+=== B1 / A / rep 0 -> 10e8e0a3-fa6f-4063-890b-79a41c53af9d
+   status=completed subtype=success turns=8 wall=64.4s cost=$0.216 (claude $0.21615) ctx_end=23738 checks=all_pass=True subagents=0
+
+=== Q1 / B / rep 0 -> b3482a24-fe0d-4135-b260-5652533aa4f9
+   status=completed subtype=success turns=4 wall=21.1s cost=$0.146 (claude $0.14639780000000002) ctx_end=24085 checks=all_pass=True subagents=0
+
+=== Q1 / A / rep 0 -> 80447bde-18cf-4cd0-a8e3-bb293c5832bc
+   status=completed subtype=success turns=3 wall=13.6s cost=$0.100 (claude $0.10039220000000001) ctx_end=20007 checks=all_pass=True subagents=0
+
+done
+exit=0

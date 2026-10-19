@@ -1,0 +1,94 @@
+{
+  "duration_api_ms": 150886,
+  "stop_reason": "end_turn",
+  "session_id": "aac397c5-613e-438d-a901-8726c0d4af3b",
+  "total_cost_usd": 0.674801,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 1474,
+    "cache_read_input_tokens": 42020,
+    "output_tokens": 1098,
+    "output_tokens_details": {
+      "thinking_tokens": 71
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 1474,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 26,
+      "outputTokens": 16478,
+      "cacheReadInputTokens": 329980,
+      "cacheCreationInputTokens": 42240,
+      "webSearchRequests": 0,
+      "costUSD": 0.674801,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 6708,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "origin": {
+    "kind": "task-notification",
+    "producer": "session-task",
+    "runId": "0mvergp3u-b92acccc"
+  },
+  "subagent_stats": {
+    "spawned": 1,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 1
+    },
+    "started_in_background": 1,
+    "max_depth": 1,
+    "spawned_by_subagents": 0,
+    "completed": 1,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {
+      "agent-kit:refuter": 1
+    }
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 1,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I split the setup and restore code out of `CliRunner.isolation`. It is now 48 lines, down from about 195, and the full test suite and all three static checks pass.\n\n**Blocked on me**\nNothing.\n\n**Changed** (only `src/click/testing.py`, not committed)\n- **`_IsolatedStreams`** (new class): builds the `StreamMixer` and the `<stdin>`, `<stdout>` and `<stderr>` wrappers, with the same names, modes, encodings, `errors=\"backslashreplace\"` on stderr and `_CHUNK_SIZE = 1` when `echo_stdin` is on. The prompt, getchar and ANSI-stripping replacements are now methods on it: `visible_input`, `hidden_input`, `_getchar` and `should_strip_ansi`. An `install()` method swaps all of them in, plus the pdb patch.\n- **`_SavedGlobals`** (new class): records the originals when created. Its `restore()` puts them back in the same order as before: stdout, stderr, stdin, the termui hooks, both `should_strip_ansi` hooks, `FORCED_WIDTH`, then `pdb.Pdb.__init__`.\n- **`_make_pdb_init()`** (new function): builds the pdb patch. The function and its long docstring were moved unchanged.\n- **`_update_environ()`** (new function): handles both setting and restoring environment variables. As before, it runs inside the `try` and records each variable's old value just before changing it, so a failure partway through still restores whatever was touched.\n- **`isolation`** now just does the steps in order: make the input stream, save the originals, set `FORCED_WIDTH`, call `make_env`, build and install the streams, apply the environment, `yield`, then restore. Its signature, annotations and docstring are unchanged, and no other public function or method was touched.\n\nI chose small classes rather than one long function full of closures because the setup and the restore each work on a group of related values, so each group now sits in one place.\n\n**Verified**\n- `.venv/bin/python -m pytest -q`: 2262 passed, 24 skipped, 1 xfailed.\n- `ruff check`, `ruff format --check` and `mypy` all pass.\n- A separate reviewer agent checked the diff against each requirement above and found no blocking issues.\n\n**Found**\nThree small differences, none of which I expect to matter:\n- The `termui`, `utils`, `_compat` and pdb originals are now saved slightly earlier, before `make_env()` runs instead of after. This would only show up if a subclass's `make_env()` overrode one of those hooks.\n- If building the streams failed, the old code could leave `sys.stdin` replaced. Now nothing is replaced until everything is built. A failure there still leaves `FORCED_WIDTH` at 80, exactly as before.\n- The replacement prompt functions are now methods instead of decorated inner functions. Their `__name__` is the same, but they no longer have `__wrapped__` and their qualified names differ. Nothing in `src/` or `tests/` looks at these.\n\nNo follow-up needed.",
+  "ttft_ms": 1877,
+  "type": "result",
+  "duration_ms": 10811,
+  "uuid": "b5d6752d-7af0-498d-b1d8-6b031fd4eaf7",
+  "ttft_stream_ms": 1318,
+  "time_to_request_ms": 21,
+  "first_content_frame_ms": 1318,
+  "queued_turn_count": 0,
+  "result_index": 1
+}

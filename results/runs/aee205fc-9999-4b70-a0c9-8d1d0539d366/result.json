@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 115498,
+  "stop_reason": "end_turn",
+  "session_id": "c278afb8-67d5-46af-9dc9-d123fd08a118",
+  "total_cost_usd": 0.5221779999999999,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 27397,
+    "cache_read_input_tokens": 231250,
+    "output_tokens": 12834,
+    "output_tokens_details": {
+      "thinking_tokens": 7886
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 27397,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 12834,
+      "cacheReadInputTokens": 231250,
+      "cacheCreationInputTokens": 27397,
+      "webSearchRequests": 0,
+      "costUSD": 0.5221779999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 7886,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`version_option` is now 67 lines, down from 138. The full test suite passes (2262 passed, 24 skipped, 1 xfailed), and `ruff check`, `ruff format --check` and `mypy` are clean. I also confirmed by hand that calling it from a module `fakepkg.sub` still detects the package name `fakepkg`.\n\n**What changed in `src/click/decorators.py`:**\n- **`_detect_package_name()`** does the frame inspection. It now lives one call deeper, so it walks up two frames (past itself and past `version_option`) to reach the same caller as before. The `None` handling, the `__main__` \u2192 `__package__` fallback, the `partition(\".\")` step and `del frame` are all kept.\n- **`_resolve_version(package_name, version)`** does the `importlib.metadata` lookup and the import-name fallback (e.g. `PIL` \u2192 `Pillow`). It also raises all three `RuntimeError`s, with the original messages and the original `from None` on the two that had it. It returns `(package_name, version)`.\n- **`_version_callback(...)`** builds the `--version` callback. It still saves the detected program name, package name and version, so later invocations reuse them as before.\n- **`version_option`** now just: sets the default message (still translated at decoration time, as before), detects the package name if needed, sets the option kwargs and attaches the callback. Its signature and annotations are unchanged, and no other public function was touched.\n\n**Two things that go beyond what you asked for:**\n- **I rewrapped the docstring** to the 88-column line limit. On its own it was 52 of the 70 lines, so extracting the detection logic wasn't enough. I checked programmatically that the words are identical; only the line breaks moved, so the rendered docs are the same.\n- **I also extracted the callback**, which you didn't ask for. Even with the shorter docstring, keeping it inline left the function at 81 lines.\n\n**One tiny behavior difference:** in one very unlikely case, a later `--version` call can raise a slightly different error than before. It needs a name that maps to exactly one distribution, and then `importlib.metadata.version()` fails for that distribution. Previously the closure had already switched to the distribution name before that error, so a second `--version` call would retry with it. Now it retries with the original name. Every normal path, and every case the tests cover, behaves the same.\n\nNothing is committed; the changes are in the working tree.",
+  "ttft_ms": 1831,
+  "type": "result",
+  "duration_ms": 121950,
+  "uuid": "a0b2978f-fbf1-486a-ad2f-a6d5dd072c7b",
+  "ttft_stream_ms": 1046,
+  "time_to_request_ms": 67,
+  "first_content_frame_ms": 1046,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

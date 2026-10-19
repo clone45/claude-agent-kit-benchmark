@@ -1,0 +1,6 @@
+$ bash scripts/vg_check.sh compile VXDrumSequencer
+rc=0 timed_out=False
+--- stdout
+ok   VXDrumSequencer.cpp
+
+--- stderr

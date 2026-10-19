@@ -1,0 +1,7 @@
+$ bash scripts/vg_check.sh compile GrooveBox GrooveBoxExpander
+rc=0 timed_out=False
+--- stdout
+ok   GrooveBox.cpp
+ok   GrooveBoxExpander.cpp
+
+--- stderr

@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 40507,
+  "stop_reason": "end_turn",
+  "session_id": "24b55c52-d9ba-4ad9-8edd-743092e22283",
+  "total_cost_usd": 0.2289278,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 12731,
+    "cache_read_input_tokens": 183019,
+    "output_tokens": 4521,
+    "output_tokens_details": {
+      "thinking_tokens": 1841
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 12731,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 4521,
+      "cacheReadInputTokens": 183019,
+      "cacheCreationInputTokens": 12731,
+      "webSearchRequests": 0,
+      "costUSD": 0.2289278,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1841,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The bar now applies any held-back steps when it finishes, so `bar.pos == 20`, `bar.finished` is true and `20/20` is rendered for every threshold. The full suite passes.\n\n**Blocked on me**\nNothing.\n\n**Changed** (nothing committed)\n- `src/click/_termui_impl.py`:\n  - Added a small helper, `_apply_pending_steps()`, which applies the steps that `update()` was still holding back (below the `update_min_steps` threshold) and resets the counter.\n  - When iterating, the bar calls it before `finish()` and the final render, so the last line shows `20/20`.\n  - The context manager's `__exit__` calls it too and redraws if any steps were pending, which covers the manual `bar.update(1)` path. It only applies progress that really happened. It doesn't force the bar to \"finished\" if you leave the `with` block early, because that would claim work that wasn't done.\n- `tests/test_termui.py`: added `test_progress_bar_update_min_steps_final_position`. It drives a `length=20, show_pos=True` bar by iterating and by calling `update(1)`, with thresholds 1, 3, 7, 19, 20, 21 and 100. It checks `pos == 20`, `finished`, that nothing is left pending, and that `20/20` is in the output.\n\n**Verified**\n- Without the fix, 10 of the 14 new test cases fail. The 4 that pass are thresholds 1 and 20, where 20 divides evenly so nothing is left over. With the fix, all 14 pass.\n- `ruff check` and `ruff format --check` are clean on both files, and `mypy` reports no issues.\n- Full suite: 2264 passed, 24 skipped, 1 xfailed.\n\n**Found**\n- When the output isn't a terminal, iterating the bar never moves `pos` at all, whatever the threshold. This was already the case and is separate from this bug, so I left it alone. If `bar.pos` should be correct in that mode too, the plain pass-through branch in `generator()` would need to count steps.",
+  "ttft_ms": 1248,
+  "type": "result",
+  "duration_ms": 47505,
+  "uuid": "caef71c0-4fdf-4afd-87ae-650bffe99d6f",
+  "ttft_stream_ms": 708,
+  "time_to_request_ms": 68,
+  "first_content_frame_ms": 708,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

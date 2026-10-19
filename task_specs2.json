@@ -1,0 +1,203 @@
+{
+  "comment": "Phase two on voxglitch. `id` is the frozen identity; `label` is display only. Checks are shell commands run from the repo root after hidden files are copied in; `no_changes` and `process_length` are harness-internal.",
+  "tasks": [
+    {
+      "id": "fc39494d-56ef-4a44-ac66-610a77136d40",
+      "label": "Q1",
+      "type": "find",
+      "length": "short",
+      "prompt_file": "tasks2/Q1.md",
+      "seed": null,
+      "hidden": null,
+      "checks": [
+        {
+          "name": "no_changes",
+          "internal": true
+        }
+      ],
+      "answer_key": "private/answer_keys2/Q1.md"
+    },
+    {
+      "id": "04a61372-b465-4f77-bf12-5ec6f6c75956",
+      "label": "Q2",
+      "type": "find",
+      "length": "short",
+      "prompt_file": "tasks2/Q2.md",
+      "seed": null,
+      "hidden": null,
+      "checks": [
+        {
+          "name": "no_changes",
+          "internal": true
+        }
+      ],
+      "answer_key": "private/answer_keys2/Q2.md"
+    },
+    {
+      "id": "0ce43ab2-930c-44ef-8b6f-7a82683bdb64",
+      "label": "Q3",
+      "type": "find",
+      "length": "short",
+      "prompt_file": "tasks2/Q3.md",
+      "seed": null,
+      "hidden": null,
+      "checks": [
+        {
+          "name": "no_changes",
+          "internal": true
+        }
+      ],
+      "answer_key": "private/answer_keys2/Q3.md"
+    },
+    {
+      "id": "5391cc70-e2f5-4574-9845-96914d95eb34",
+      "label": "B1",
+      "type": "bugfix",
+      "length": "short",
+      "prompt_file": "tasks2/B1.md",
+      "seed": "seed_euclid_window",
+      "hidden": "base_euclid_tests",
+      "checks": [
+        {
+          "name": "hidden",
+          "cmd": "bash scripts/vg_check.sh tests"
+        },
+        {
+          "name": "tests",
+          "cmd": "bash scripts/vg_check.sh tests"
+        },
+        {
+          "name": "compile_euclid",
+          "cmd": "bash scripts/vg_check.sh compile Euclid"
+        }
+      ]
+    },
+    {
+      "id": "be62a537-364e-4d6c-bfdd-5fceef234c75",
+      "label": "F1",
+      "type": "feature",
+      "length": "short",
+      "prompt_file": "tasks2/F1.md",
+      "seed": null,
+      "hidden": [
+        [
+          "tasks2/hidden_src/chance_hidden_test.cpp",
+          "tests/euclid/chance_hidden_test.cpp"
+        ]
+      ],
+      "checks": [
+        {
+          "name": "hidden",
+          "cmd": "g++ -std=c++11 -O2 -I src -o /tmp/vg_hidden_f1 tests/euclid/chance_hidden_test.cpp && /tmp/vg_hidden_f1"
+        },
+        {
+          "name": "tests",
+          "cmd": "bash scripts/vg_check.sh tests"
+        },
+        {
+          "name": "compile_euclid",
+          "cmd": "bash scripts/vg_check.sh compile Euclid"
+        }
+      ]
+    },
+    {
+      "id": "3d41b6f5-b40d-450f-bc20-8d14384aa2b0",
+      "label": "F2",
+      "type": "feature",
+      "length": "short",
+      "prompt_file": "tasks2/F2.md",
+      "seed": null,
+      "hidden": [
+        [
+          "tasks2/hidden_src/direction_hidden_test.cpp",
+          "tests/vx_drum_sequencer/direction_hidden_test.cpp"
+        ]
+      ],
+      "checks": [
+        {
+          "name": "hidden",
+          "cmd": "g++ -std=c++11 -O2 -I src/modules/VXDrumSequencer -o /tmp/vg_hidden_f2 tests/vx_drum_sequencer/direction_hidden_test.cpp && /tmp/vg_hidden_f2"
+        },
+        {
+          "name": "tests",
+          "cmd": "bash scripts/vg_check.sh tests"
+        },
+        {
+          "name": "compile_vxds",
+          "cmd": "bash scripts/vg_check.sh compile VXDrumSequencer"
+        }
+      ]
+    },
+    {
+      "id": "310f6386-d0f0-44e6-ac67-7c2f2f5fd147",
+      "label": "R1",
+      "type": "refactor",
+      "length": "short",
+      "prompt_file": "tasks2/R1.md",
+      "seed": null,
+      "hidden": null,
+      "checks": [
+        {
+          "name": "tests",
+          "cmd": "bash scripts/vg_check.sh tests"
+        },
+        {
+          "name": "compile_groovebox",
+          "cmd": "bash scripts/vg_check.sh compile GrooveBox GrooveBoxExpander"
+        },
+        {
+          "name": "process_length",
+          "internal": true
+        }
+      ],
+      "function_metrics": [
+        [
+          "src/modules/GrooveBox/GrooveBox.hpp",
+          "process"
+        ]
+      ]
+    },
+    {
+      "id": "53e59ae9-d60b-4146-973b-b2ade24bb9a9",
+      "label": "L1",
+      "type": "long",
+      "length": "long",
+      "prompt_file": "tasks2/L1.md",
+      "seed": null,
+      "hidden": [
+        [
+          "tasks2/hidden_src/accent_hidden_test.cpp",
+          "tests/euclid/accent_hidden_test.cpp"
+        ]
+      ],
+      "checks": [
+        {
+          "name": "hidden",
+          "cmd": "g++ -std=c++11 -O2 -I src -o /tmp/vg_hidden_l1 tests/euclid/accent_hidden_test.cpp && /tmp/vg_hidden_l1"
+        },
+        {
+          "name": "tests",
+          "cmd": "bash scripts/vg_check.sh tests"
+        },
+        {
+          "name": "compile_euclid",
+          "cmd": "bash scripts/vg_check.sh compile Euclid"
+        },
+        {
+          "name": "manual",
+          "cmd": "test $(grep -ci accent docs/modules/euclid/user_manual.md) -ge 2"
+        }
+      ]
+    }
+  ],
+  "chain_order": [
+    "Q1",
+    "Q2",
+    "Q3",
+    "B1",
+    "F1",
+    "F2",
+    "R1",
+    "L1"
+  ]
+}

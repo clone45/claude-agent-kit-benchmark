@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 37648,
+  "stop_reason": "end_turn",
+  "session_id": "b2050fdb-7389-4b97-b1e4-741a58e9434d",
+  "total_cost_usd": 0.2748122,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 25604,
+    "cache_read_input_tokens": 152161,
+    "output_tokens": 1975,
+    "output_tokens_details": {
+      "thinking_tokens": 320
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 25604,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 1975,
+      "cacheReadInputTokens": 152161,
+      "cacheCreationInputTokens": 25604,
+      "webSearchRequests": 0,
+      "costUSD": 0.2748122,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 320,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed it with a one-line change in the engine. All the standalone tests now pass, and the Euclid compile check passes.\n\n**Cause.** In `euclid::Sequencer::process` (`src/modules/Euclid/EuclidEngine.hpp`), a reset moved the playhead to step 1 and struck it, but it never opened the 1 ms clock-ignore window. Only `load()` opened it, which is why patch load behaved correctly and resets didn't. After a reset the window stayed closed, so a clock on the same sample, or less than 1 ms later, moved straight on to step 2. That left Euclid one step ahead of SEQ3 and Clocked. The comments already described the window that \"the reset just armed\"; the call that opens it was simply missing.\n\n**Fix.** The reset branch now opens the window (`window.arm(window_samples)`) before moving to step 1. This follows the order set out in `ResetClockWindow.hpp`: open the window on reset, go to step 1, check the clock, then count the window down. The result:\n- A reset and clock on the same sample plays step 1 once.\n- Clock edges inside the window are dropped.\n- The first clock after the window advances to step 2.\n- A reset inside an open window restarts it at full length.\n\nThe module adapter (`Euclid.hpp`) needed no change, since it already passes the window length on every sample.\n\n**Tests.** Before the fix, `engine_test` had 18 failures and `seq3_parity_test` had 10, all from this bug. They covered the window being opened, clocks at +1, +47 and +44 being dropped, the same-sample case, the 1-, 45- and 96-sample window lengths, and position mismatches against the SEQ3 model. After the fix, `pattern_test` (63 checks), `engine_test` (113) and `seq3_parity_test` (36) all pass, as does the rest of `vg_check.sh tests`. I didn't add a regression case because those existing cases already catch this failure directly. `vg_check.sh compile Euclid` passes; Euclid is the only module I touched. Nothing is committed.",
+  "ttft_ms": 5123,
+  "type": "result",
+  "duration_ms": 58625,
+  "uuid": "7f982b4a-203d-4a7d-bc63-f09d0a805523",
+  "ttft_stream_ms": 4493,
+  "time_to_request_ms": 66,
+  "first_content_frame_ms": 4494,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

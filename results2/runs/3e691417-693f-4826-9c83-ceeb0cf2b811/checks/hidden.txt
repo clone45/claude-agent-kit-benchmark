@@ -1,0 +1,10 @@
+$ g++ -std=c++11 -O2 -I src -o /tmp/vg_hidden_l1 tests/euclid/accent_hidden_test.cpp && /tmp/vg_hidden_l1
+rc=0 timed_out=False
+--- stdout
+accent off
+every hit, every second hit
+reset restarts the count
+load zeroes; clamp; mid-run change keeps the count
+accent_hidden_test: 10 checks, 0 failures
+
+--- stderr

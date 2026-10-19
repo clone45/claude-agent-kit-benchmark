@@ -1,0 +1,56 @@
+{
+  "harness_dir": "/mnt/c/Code/routing_test",
+  "work_dir": "/home/clone45/routing_test_work",
+  "repo_dir": "/home/clone45/routing_test_work/click",
+  "upstream_dir": "/home/clone45/routing_test_work/click-upstream",
+  "upstream_url": "https://github.com/pallets/click",
+  "base_commit": "2247b35ea1c47c727d7a06e51fa280e12a863ff6",
+  "plugin_dir": "/mnt/c/Code/routing_test/plugin",
+  "claude_bin": "claude",
+  "model": "opus",
+  "effort": "high",
+  "permission_mode": "bypassPermissions",
+  "conditions": [
+    {
+      "id": "59b253d3-f1a3-4642-bcd3-6a2c9fae721e",
+      "label": "A",
+      "description": "plain Opus session",
+      "plugin": false,
+      "claude_md": "tasks/CLAUDE_A.md"
+    },
+    {
+      "id": "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9",
+      "label": "B",
+      "description": "Opus session with the agent-kit plugin and its Agent contract",
+      "plugin": true,
+      "claude_md": "tasks/CLAUDE_B.md"
+    }
+  ],
+  "venv_python": ".venv/bin/python",
+  "venv_packages": [
+    "pytest",
+    "ruff",
+    "mypy",
+    "typing_extensions"
+  ],
+  "timeouts_s": {
+    "short": 2400,
+    "long": 4800,
+    "check": 900
+  },
+  "max_budget_usd": {
+    "short": 15,
+    "long": 30
+  },
+  "rate_limit_wait_s": 900,
+  "rate_limit_max_retries": 8,
+  "prices_file": "prices.json",
+  "clean_keep": [
+    ".venv",
+    ".mypy_cache"
+  ],
+  "report": {
+    "name": "Phase 1: click",
+    "subtitle": "17 short tasks on pallets/click, each in a fresh session. Small files, a fast test suite, the plugin's threshold rarely reached."
+  }
+}

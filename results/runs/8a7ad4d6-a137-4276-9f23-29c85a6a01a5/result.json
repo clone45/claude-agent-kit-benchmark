@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 56946,
+  "stop_reason": "end_turn",
+  "session_id": "418f2c71-8391-4d8e-8f29-9438159f8e03",
+  "total_cost_usd": 0.22613119999999998,
+  "usage": {
+    "input_tokens": 22,
+    "cache_creation_input_tokens": 9798,
+    "cache_read_input_tokens": 238796,
+    "output_tokens": 4995,
+    "output_tokens_details": {
+      "thinking_tokens": 1197
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 9798,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 22,
+      "outputTokens": 4995,
+      "cacheReadInputTokens": 238796,
+      "cacheCreationInputTokens": 9798,
+      "webSearchRequests": 0,
+      "costUSD": 0.22613119999999998,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1197,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 11,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Optional `Choice` and `DateTime` arguments now show a single pair of brackets in the usage line. The full test suite passes (2272 passed, 24 skipped, 1 xfailed), and ruff, the format check and mypy are all clean.\n\n**The fix** (`src/click/core.py`): `Argument.get_usage_pieces` builds its output with `Argument.make_metavar`, which always wrapped an optional argument's metavar in `[...]`. `Choice` and `DateTime` already wrap their metavar in brackets to list the allowed values, so you got `[[foo|bar|baz]]`. Now, when the type's metavar is already enclosed in brackets, those brackets count as the optional marker and no second pair is added:\n- `Choice` with `nargs=-1` \u2192 `[foo|bar|baz]...`\n- `Choice` with `required=False` \u2192 `[foo|bar|baz]`\n- `DateTime(formats=['%Y-%m-%d'])` with `required=False` \u2192 `[%Y-%m-%d]`\n\nRequired arguments (`{foo|bar|baz}`, `FOO`), the `...` suffix for `nargs != 1`, and arguments with an explicit `metavar=` work as before.\n\n**Choices I made:**\n- **Where the fix lives.** I put it in `make_metavar` rather than only in `get_usage_pieces`, because the argument's help row and its \"Missing argument\" error message use the same function. Fixing it there keeps all three consistent; otherwise the help row would still show `[[foo|bar|baz]]`.\n- **How brackets are detected.** A small helper, `_is_bracketed`, checks that the opening `[` matches the final `]`, not just that the string starts and ends with brackets. A custom type whose metavar is `[a]|[b]` is not one bracketed group, so it still gets the optional marker: `[[a]|[b]]`.\n- **The `!` deprecation marker.** It's still added after the metavar, so a deprecated optional `Choice` renders as `[foo|bar|baz]!`. Before, it was `[[foo|bar|baz]!]`; putting the `!` inside the brackets would have made it look attached to `baz`.\n\n**Tests** (`tests/test_basic.py`): I added two parametrized tests:\n- `test_bracketed_type_argument_usage` covers the three cases above, plus required, required with `nargs=-1`, deprecated, and `DateTime` with `nargs=-1` / `nargs=2` / `required=True`. It also checks that `[[` never appears in the help output.\n- `test_partially_bracketed_type_argument_usage` covers the `[a]|[b]` case.\n\nNothing was committed; the changes are in the working tree.",
+  "ttft_ms": 2783,
+  "type": "result",
+  "duration_ms": 63897,
+  "uuid": "a944c539-0611-4d74-b2ed-ce8617e15748",
+  "ttft_stream_ms": 1894,
+  "time_to_request_ms": 63,
+  "first_content_frame_ms": 1894,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

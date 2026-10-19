@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 73855,
+  "stop_reason": "end_turn",
+  "session_id": "fcb28610-5e72-41a2-9a61-382b6d9a8c78",
+  "total_cost_usd": 0.3118852,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 14001,
+    "cache_read_input_tokens": 136446,
+    "output_tokens": 8627,
+    "output_tokens_details": {
+      "thinking_tokens": 5141
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 14001,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 8627,
+      "cacheReadInputTokens": 136446,
+      "cacheCreationInputTokens": 14001,
+      "webSearchRequests": 0,
+      "costUSD": 0.3118852,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 5141,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 6,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've refactored `version_option` in `src/click/decorators.py`. It went from 138 lines to 69, with the docstring unchanged. The full test suite passes (2262 passed, 24 skipped, 1 xfailed), and `ruff check`, `ruff format --check` and `mypy` are all clean.\n\n**New private helpers:**\n- **`_detect_package_name(frame)`** does the frame inspection. `version_option` passes in its own frame, and the helper reads the caller's module globals from it, so it still finds the module that called `version_option`. The `__main__`/`__package__` handling and the `.partition(\".\")[0]` step are unchanged.\n- **`_resolve_version(package_name)`** does the `importlib.metadata` lookup, including the fallback through `packages_distributions()`. It returns the distribution name and the version. It raises the same three `RuntimeError` messages as before, and still uses `from None` inside the `except` block.\n- **`_version_callback(version, package_name, prog_name, message)`** builds the `--version` callback. As before, it fills in `prog_name` and looks up the version the first time the option is used, then remembers them. It also applies the default `message`.\n\n**What's left in `version_option`:** the docstring, then: detect the package name if neither `version` nor `package_name` was given, set the option defaults, attach the callback, and call `option(...)`. Its signature and type annotations are unchanged, and no other public function was touched.\n\n**Why the callback moved too:** you asked me to extract only the package-name and version logic. But the docstring alone is about 60 lines including the signature, so keeping the callback inside `version_option` would have left it at about 80 lines. Rather than shorten the public documentation, I moved the callback into `_version_callback` as well.\n\n**One behaviour difference:** suppose a module name maps to exactly one distribution, but the second `importlib.metadata.version()` call then raises `PackageNotFoundError`. That exception is the same as before. Before, the callback also kept the swapped-in distribution name for any later call in the same process; now it keeps the original name. This can only happen if the installed metadata is broken.\n\nNothing has been committed; the changes are in the working tree.",
+  "ttft_ms": 1702,
+  "type": "result",
+  "duration_ms": 81653,
+  "uuid": "f8196016-23a5-41bc-a339-961ad2856332",
+  "ttft_stream_ms": 635,
+  "time_to_request_ms": 73,
+  "first_content_frame_ms": 635,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

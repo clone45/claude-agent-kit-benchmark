@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 14139,
+  "stop_reason": "end_turn",
+  "session_id": "2242725c-f5fa-4399-91a3-d1e01f5f1a73",
+  "total_cost_usd": 0.151558,
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 14449,
+    "cache_read_input_tokens": 54210,
+    "output_tokens": 1255,
+    "output_tokens_details": {
+      "thinking_tokens": 103
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 14449,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 6,
+      "outputTokens": 1255,
+      "cacheReadInputTokens": 54210,
+      "cacheCreationInputTokens": 14449,
+      "webSearchRequests": 0,
+      "costUSD": 0.151558,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 103,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 3,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "- **Explicit `envvar` lookup:** `src/click/core.py`, `Parameter.resolve_envvar_value` (2868\u20132911). If `envvar` is a single string, it returns that variable's value. If it is a list, it returns the first variable with a non-empty value. An empty value counts as unset.\n- **Auto-prefix lookup:** `Option.resolve_envvar_value` (3748\u20133770) calls the base method first. Only if that returns nothing, and `allow_from_autoenv` is true, `ctx.auto_envvar_prefix` is set and `self.name` exists, it reads `f\"{ctx.auto_envvar_prefix}_{self.name.upper()}\"` (3764). So an explicit `envvar` always wins over the auto name.\n- **How the prefix is built:** `Context.__init__` (506\u2013521).\n  - A prefix you pass in is uppercased.\n  - If you pass none, it is inherited as `f\"{parent.auto_envvar_prefix}_{self.info_name.upper()}\"`, so subcommands nest (e.g. `MYAPP_SUB`).\n  - In both cases `-` is then replaced with `_`.\n  - Example: option `--user-name` on subcommand `sub` under prefix `myapp` reads `MYAPP_SUB_USER_NAME`. `self.name` is already the underscored identifier.\n- **Turning the string into a value:** `Option.value_from_envvar` (3772\u20133818) handles it. It splits values when `nargs != 1` or `multiple` is set, and parses non-boolean flags via `str_to_bool` / `flag_value`. The base version is `Parameter.value_from_envvar` (2913\u20132926).\n- **Resolution order:** `Parameter.consume_value` (2680\u20132725) tries each source only while the value is still `UNSET`:\n  1. the command line (`opts`), as `COMMANDLINE`\n  2. the environment, via `value_from_envvar`, as `ENVIRONMENT` (2703\u20132707)\n  3. the default map, via `ctx.lookup_default`, as `DEFAULT_MAP` (2709\u20132713)\n  4. the default, via `get_default`, as `DEFAULT` (2720\u20132724)\n- **Prompt step:** `Option.consume_value` (3820ff) runs after the base method. It prompts only when the value is still `UNSET` or came from `DEFAULT_MAP`/`DEFAULT`, so a value from the environment suppresses the prompt.",
+  "ttft_ms": 2009,
+  "type": "result",
+  "duration_ms": 14551,
+  "uuid": "7d94bdd3-59e6-4575-839f-7d5c8e8d547a",
+  "ttft_stream_ms": 1669,
+  "time_to_request_ms": 69,
+  "first_content_frame_ms": 1669,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

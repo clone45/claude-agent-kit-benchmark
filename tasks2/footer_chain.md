@@ -1,0 +1,1 @@
+This is the next task in the same working session. Changes from the earlier tasks have been checked in by the harness; continue from the current state of the tree.

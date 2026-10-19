@@ -1,0 +1,6 @@
+ src/click/types.py            |  4 +++-
+ tests/test_types/test_Path.py | 23 +++++++++++++++++++++++
+ 2 files changed, 26 insertions(+), 1 deletion(-)
+
+M	src/click/types.py
+M	tests/test_types/test_Path.py

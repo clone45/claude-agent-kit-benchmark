@@ -1,0 +1,23 @@
+{
+  "comment": "Authored task list. `id` is the frozen identity; `label` is display only. `source_commit` tasks are built by reverse-applying that upstream commit's src and tests changes onto the base; their hidden tests are the test files that differ between the task tree and the base. `hidden_extra` lists harness-written test files copied in at check time.",
+  "tasks": [
+    {"id": "5eff33e2-804a-4461-a028-9391efe47653", "label": "B1", "type": "bugfix", "length": "short", "source_commit": "f67c2bb", "prompt_file": "tasks/B1.md", "checks": ["hidden", "full", "ruff", "format", "mypy"]},
+    {"id": "e700d894-82d1-4dc0-90a9-7143841d4be2", "label": "B2", "type": "bugfix", "length": "short", "source_commit": "6f85d26", "prompt_file": "tasks/B2.md", "checks": ["hidden", "full", "ruff", "format", "mypy"]},
+    {"id": "1fd91c42-48b9-49ac-ab31-64c8ec6b0332", "label": "B3", "type": "bugfix", "length": "short", "source_commit": "f58ca3e", "prompt_file": "tasks/B3.md", "checks": ["hidden", "full", "ruff", "format", "mypy"]},
+    {"id": "4e1cc327-a360-4241-a8ca-86fe7cb9a527", "label": "B4", "type": "bugfix", "length": "short", "source_commit": "f316d5c", "prompt_file": "tasks/B4.md", "checks": ["hidden", "full", "ruff", "format", "mypy"]},
+    {"id": "066ee060-108f-42e6-8dba-51bc54ecf3af", "label": "B5", "type": "bugfix", "length": "short", "source_commit": "047adef", "prompt_file": "tasks/B5.md", "checks": ["hidden", "full", "ruff", "format", "mypy"]},
+    {"id": "31f96468-8290-45a8-9983-59818c0b0c20", "label": "B6", "type": "bugfix", "length": "short", "source_commit": "762c97e", "prompt_file": "tasks/B6.md", "checks": ["hidden", "full", "ruff", "format", "mypy"]},
+    {"id": "dadf1d84-ec6a-4de6-afbb-b6529d34a9f9", "label": "F1", "type": "feature", "length": "short", "source_commit": "a1d8785", "prompt_file": "tasks/F1.md", "checks": ["hidden", "full", "ruff", "format", "mypy"]},
+    {"id": "1afc7462-1dfe-443f-baf1-bf833156338e", "label": "F2", "type": "feature", "length": "short", "source_commit": "22177f8", "prompt_file": "tasks/F2.md", "checks": ["hidden", "full", "ruff", "format", "mypy"]},
+    {"id": "64305200-2e10-4028-a457-bf116432b4bb", "label": "R1", "type": "refactor", "length": "short", "source_commit": null, "prompt_file": "tasks/R1.md", "checks": ["full", "ruff", "format", "mypy"], "function_metrics": [["src/click/termui.py", "style"]]},
+    {"id": "ea3d7a07-3f44-43e6-84c7-92a4405f37c9", "label": "R2", "type": "refactor", "length": "short", "source_commit": null, "prompt_file": "tasks/R2.md", "checks": ["full", "ruff", "format", "mypy"], "function_metrics": [["src/click/decorators.py", "version_option"]]},
+    {"id": "9ccbb480-9b13-46ab-b51c-de86eb274e70", "label": "R3", "type": "refactor", "length": "short", "source_commit": null, "prompt_file": "tasks/R3.md", "checks": ["full", "ruff", "format", "mypy"], "function_metrics": [["src/click/testing.py", "isolation"]]},
+    {"id": "37f68e03-8023-4778-9579-404db03d1e19", "label": "Q1", "type": "find", "length": "short", "source_commit": null, "prompt_file": "tasks/Q1.md", "checks": ["no_changes"], "answer_key": "private/answer_keys/Q1.md"},
+    {"id": "f9acaf8f-781f-4fcb-a1f7-9f4abdae5d44", "label": "Q2", "type": "find", "length": "short", "source_commit": null, "prompt_file": "tasks/Q2.md", "checks": ["no_changes"], "answer_key": "private/answer_keys/Q2.md"},
+    {"id": "5d025ace-c09a-4e9e-a238-8333831b0168", "label": "Q3", "type": "find", "length": "short", "source_commit": null, "prompt_file": "tasks/Q3.md", "checks": ["no_changes"], "answer_key": "private/answer_keys/Q3.md"},
+    {"id": "72129778-5e53-462c-97e6-e0ac6cbaa485", "label": "Q4", "type": "find", "length": "short", "source_commit": null, "prompt_file": "tasks/Q4.md", "checks": ["no_changes"], "answer_key": "private/answer_keys/Q4.md"},
+    {"id": "6b244621-7868-408c-b25f-175c38096293", "label": "L1", "type": "long", "length": "long", "source_commit": null, "prompt_file": "tasks/L1.md", "hidden_extra": [["tasks/hidden_src/test_duration_acceptance.py", "tests/test_types/test_duration_acceptance.py"]], "checks": ["hidden", "full", "ruff", "format", "mypy"]},
+    {"id": "b7f34f75-8c2d-4168-976f-03ab0b2e8c6c", "label": "L2", "type": "long", "length": "long", "source_commit": "3495fba", "prompt_file": "tasks/L2.md", "checks": ["hidden", "full", "ruff", "format", "mypy"],
+     "strip_tests": [["tests/test_arguments.py", "test_argument_name_case_transform_can_collide"], ["tests/test_arguments.py", "test_argument_name_can_collide_with_an_option"], ["tests/test_options.py", "test_winstyle_options"]]}
+  ]
+}

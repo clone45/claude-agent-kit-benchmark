@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 85587,
+  "stop_reason": "end_turn",
+  "session_id": "a2348cad-b191-4bb7-ad0d-861529eb3186",
+  "total_cost_usd": 0.3512988,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 18473,
+    "cache_read_input_tokens": 213154,
+    "output_tokens": 8041,
+    "output_tokens_details": {
+      "thinking_tokens": 2811
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 18473,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 8041,
+      "cacheReadInputTokens": 213154,
+      "cacheCreationInputTokens": 18473,
+      "webSearchRequests": 0,
+      "costUSD": 0.3512988,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2811,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`click.Path` is now generic over the value it converts to, and `path_type` narrows the return type of `convert`, of calling the instance, of `coerce_path_result`, and of `click.prompt(type=...)`. All checks pass: the full test suite (2262 passed, 24 skipped, 1 xfailed), `mypy` strict on `src` and `tests/typing`, `ruff check` and `ruff format --check`.\n\n**`src/click/types.py`**\n- **New type variable `_PathT_co`:** its default is `str | bytes | os.PathLike[str]`, the old return type, so `click.Path()` without `path_type` keeps returning that union. It follows the existing `_InputT_contra` pattern: `typing_extensions` under `TYPE_CHECKING`, a real default on Python 3.13+, and a plain TypeVar before that.\n- **Class:** `Path` is now `ParamType[_PathT_co], t.Generic[_PathT_co]`, the same shape as `Choice`. The input type stays `Any`, so calling an instance with a `PurePosixPath` type-checks.\n- **`__init__` overloads:** with `path_type` omitted or `None`, the instance is `Path[str | bytes | os.PathLike[str]]`; with `path_type=X`, it is `Path[X]`. `path_type` stays a positional parameter, so existing calls aren't affected.\n- **Return types:** `self.type` is now `type[_PathT_co] | None`. `coerce_path_result` and `convert` return `_PathT_co`. Runtime behaviour is unchanged: only casts were added, plus one `type: ignore` on the `self.type(value)` call.\n- **Docstring:** added a `versionchanged:: 8.5.0` entry describing the change.\n\n**Tests**\n- **`tests/typing/typing_path.py` (new):** `assert_type` checks for every case you listed. These are `convert` with `pathlib.Path`, `str` and `bytes`, the default union, and `coerce_path_result`. They also cover the explicit `click.Path[pathlib.Path]` annotation and assignment to `click.ParamType[...]`. Finally, calling the instance with a `PurePosixPath` and with `None`, and `click.prompt`. I also checked separately that a deliberately wrong `assert_type` makes mypy fail, so these checks do catch mismatches.\n- **`tests/test_types/test_Path.py`:** added `test_path_class_getitem`, which asserts `t.get_args(click.Path[pathlib.Path]) == (pathlib.Path,)`.\n\nI also ran the pre-3.13 fallback by hand on Python 3.10. `click.Path[pathlib.Path]` gives `(pathlib.Path,)`, and `ParamType[int]` still fills in the default input type correctly.\n\nI didn't restrict `path_type` to path-like classes, because it currently accepts any class whose constructor takes a path. A tighter limit could reject code that works today.\n\nNothing is committed; the changes are in the working tree.",
+  "ttft_ms": 4597,
+  "type": "result",
+  "duration_ms": 94153,
+  "uuid": "af2a1d07-1928-46c4-b368-1adcad69bb83",
+  "ttft_stream_ms": 3251,
+  "time_to_request_ms": 77,
+  "first_content_frame_ms": 3251,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

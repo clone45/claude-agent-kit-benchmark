@@ -1,0 +1,503 @@
+{
+  "base_commit": "2247b35ea1c47c727d7a06e51fa280e12a863ff6",
+  "plugin_commit": "c8dfca76f0085ea2406fd30db6ff33dc53923489",
+  "tasks": [
+    {
+      "id": "5eff33e2-804a-4461-a028-9391efe47653",
+      "label": "B1",
+      "type": "bugfix",
+      "length": "short",
+      "source_commit": "f67c2bb",
+      "prompt": "Click builds the one-line short help shown in command listings from the first paragraph of a command's help text, in `_make_default_short_help` in `src/click/utils.py`. Two things are wrong with how it abbreviates.\n\n1. It treats every word that ends with a period as the end of the sentence, so help text like `Weigh apples vs. pears.` is cut down to `Weigh apples vs.`. A period should end the sentence only when it ends the text, or when the next word does not start with a lowercase letter. So `Weigh apples vs. pears.` stays whole, `Pick a fruit. 3 remain.` becomes `Pick a fruit.`, and `123 567 9. aaaa bbb` continues past `9.` and is then shortened by length.\n\n2. Shortening to `max_length` is unreliable. The rules should be: if the sentence-trimmed text fits within `max_length`, return it unchanged. Otherwise keep as many whole leading words as fit together with the `...` suffix inside `max_length`, never splitting a word (hyphenated words count as one word), and return them followed by `...`. If not even one word fits, or `max_length` is smaller than the suffix itself (including zero or negative values), return just `...`. Examples with `max_length` 10: `123 567 90123.` gives `123 567...`; `123 5678 xxxxxx` gives `123...`; `Weigh apples vs. pears and plums.` with 20 gives `Weigh apples vs....`; `well-behaved.` with 8 gives `...`; `supercalifragilistic` with 10 gives `...`; `ab cd` with 3 or with 2 gives `...`; `ab` with 2 gives `ab`.\n\nKeep the existing behavior otherwise: only the first paragraph is considered, runs of whitespace collapse to single spaces, and a leading `\\b` no-rewrap marker is ignored. Fix the function and add tests for the new cases.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-5eff33e2-804a-4461-a028-9391efe47653-a",
+          "commit": "370d8f0ffb104daa4dc5072bd48bac10d7d0129d"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-5eff33e2-804a-4461-a028-9391efe47653-b",
+          "commit": "942bed0c071223a03df6fa4af6efd1d0b9ea2fbc"
+        }
+      },
+      "hidden_tests": [
+        "tests/test_utils/test_make_default_short_help.py"
+      ],
+      "checks": [
+        "hidden",
+        "full",
+        "ruff",
+        "format",
+        "mypy"
+      ],
+      "function_metrics": [],
+      "answer_key": null
+    },
+    {
+      "id": "e700d894-82d1-4dc0-90a9-7143841d4be2",
+      "label": "B2",
+      "type": "bugfix",
+      "length": "short",
+      "source_commit": "6f85d26",
+      "prompt": "`click.Path.convert` in `src/click/types.py` detects the `-` dash value used with `allow_dash=True` by testing `rv in (b\"-\", \"-\")`. When the value is `bytes`, that compares bytes with str. Python reports such comparisons as a `BytesWarning` under `python -b`, and under `python -bb` the warning becomes an error.\n\nRunning `click.Path(allow_dash=True).convert(v, None, None)` for each of `'-'`, `''`, `b'-'` and `b''` under `python -bb` must complete without any `BytesWarning`. Fix the comparison so bytes are only ever compared with bytes and str with str, and add a regression test that performs that check in a subprocess started with `-bb`.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-e700d894-82d1-4dc0-90a9-7143841d4be2-a",
+          "commit": "4d128e88fa7abd60c32703eb53a6e7f8fabc70eb"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-e700d894-82d1-4dc0-90a9-7143841d4be2-b",
+          "commit": "008d3efbbc674ffec85928a30675e45aacf844a6"
+        }
+      },
+      "hidden_tests": [
+        "tests/test_types/test_Path.py"
+      ],
+      "checks": [
+        "hidden",
+        "full",
+        "ruff",
+        "format",
+        "mypy"
+      ],
+      "function_metrics": [],
+      "answer_key": null
+    },
+    {
+      "id": "1fd91c42-48b9-49ac-ab31-64c8ec6b0332",
+      "label": "B3",
+      "type": "bugfix",
+      "length": "short",
+      "source_commit": "f58ca3e",
+      "prompt": "`Sentinel` in `src/click/_utils.py` is an `enum.Enum` whose members, such as `UNSET`, are meant to be singletons. Copying a member with `copy.copy` or `copy.deepcopy`, or round-tripping it through `pickle`, must return the very same member object. Today the default Enum reduction uses the member's value, which is a bare `object()`, so the round trip either fails or yields a different object.\n\nMake `copy.copy(s) is s`, `copy.deepcopy(s) is s`, and `pickle.loads(pickle.dumps(s)) is s` hold for every `Sentinel` member. A consequence that must also hold: a `click.Option([\"--name\"])`, whose `default` is `UNSET`, still has `default is UNSET` and `name == \"name\"` after being copied, deep-copied, or pickled and unpickled. Add tests.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-1fd91c42-48b9-49ac-ab31-64c8ec6b0332-a",
+          "commit": "fcfe37ecb9d8cb7253b2dbae50ac424ab23cf88f"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-1fd91c42-48b9-49ac-ab31-64c8ec6b0332-b",
+          "commit": "a1cf0da8dd6014433a106205ebaf57c069a7c0c4"
+        }
+      },
+      "hidden_tests": [
+        "tests/test_utils/test_sentinel.py"
+      ],
+      "checks": [
+        "hidden",
+        "full",
+        "ruff",
+        "format",
+        "mypy"
+      ],
+      "function_metrics": [],
+      "answer_key": null
+    },
+    {
+      "id": "4e1cc327-a360-4241-a8ca-86fe7cb9a527",
+      "label": "B4",
+      "type": "bugfix",
+      "length": "short",
+      "source_commit": "f316d5c",
+      "prompt": "`click.progressbar`, implemented by the `ProgressBar` class in `src/click/_termui_impl.py`, batches updates with `update_min_steps`. When the total length is not a multiple of `update_min_steps`, the remainder is left pending at the end. For `length=20, show_pos=True, update_min_steps=7` the bar finishes showing `14/20`, `bar.pos` stays below 20, and the rendered output never contains `20/20`. The same happens whether the bar is driven by iterating over it or by calling `bar.update(1)` twenty times.\n\nFix it so that when the bar finishes, which is when its context manager exits, any pending steps are applied and the true final position is rendered: `bar.pos == 20`, `bar.finished` is true, and `20/20` appears in the output, for every `update_min_steps` value, including values larger than the length. Add a regression test that drives the bar both ways with several thresholds.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-4e1cc327-a360-4241-a8ca-86fe7cb9a527-a",
+          "commit": "17c2bcdfee7251446c2eafd799313df777770fcf"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-4e1cc327-a360-4241-a8ca-86fe7cb9a527-b",
+          "commit": "2c9b3c5ffd1eb2a1120653e7f473688a01bdbc0c"
+        }
+      },
+      "hidden_tests": [
+        "tests/test_termui.py"
+      ],
+      "checks": [
+        "hidden",
+        "full",
+        "ruff",
+        "format",
+        "mypy"
+      ],
+      "function_metrics": [],
+      "answer_key": null
+    },
+    {
+      "id": "066ee060-108f-42e6-8dba-51bc54ecf3af",
+      "label": "B5",
+      "type": "bugfix",
+      "length": "short",
+      "source_commit": "047adef",
+      "prompt": "`Command.get_help_option_names` in `src/click/core.py` builds a `set` from `Context.help_option_names`, so the list it returns comes back in arbitrary order.\n\nChange it to return the names in their declared order, with duplicates dropped (the first occurrence is kept), and with any name already used by another parameter's `opts` or `secondary_opts` removed, including both halves of a flag such as `--shout/--no-shout`. Examples: `['-h', '--help']` with no other parameters returns `['-h', '--help']`; `['--help', '-h', '-?']` returns `['--help', '-h', '-?']`; `['-h', '--help', '-h']` returns `['-h', '--help']`; `['-h', '--help']` when another option defines `--help` returns `['-h']`; `['--no-shout', '--help']` when an option `--shout/--no-shout` exists returns `['--help']`; when every name is filtered out the result is `[]`. Add tests covering these cases.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-066ee060-108f-42e6-8dba-51bc54ecf3af-a",
+          "commit": "b0c99f120d24f00144c13326cfd6e0865ffa0cdd"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-066ee060-108f-42e6-8dba-51bc54ecf3af-b",
+          "commit": "ef318ba0e813714de4945b15221d4a648be77714"
+        }
+      },
+      "hidden_tests": [
+        "tests/test_commands.py"
+      ],
+      "checks": [
+        "hidden",
+        "full",
+        "ruff",
+        "format",
+        "mypy"
+      ],
+      "function_metrics": [],
+      "answer_key": null
+    },
+    {
+      "id": "31f96468-8290-45a8-9983-59818c0b0c20",
+      "label": "B6",
+      "type": "bugfix",
+      "length": "short",
+      "source_commit": "762c97e",
+      "prompt": "In the usage synopsis, an optional `Argument` (one with `required=False` or `nargs=-1`) is wrapped in square brackets. When the argument's type already brackets its metavar to enumerate the allowed values, as `click.Choice` and `click.DateTime` do, the brackets are doubled: `Usage: cli [OPTIONS] [[foo|bar|baz]]...`.\n\nFix `Argument.get_usage_pieces` in `src/click/core.py` so the type's own brackets serve as the optional marker. A `Choice(['foo', 'bar', 'baz'])` argument with `nargs=-1` renders as `[foo|bar|baz]...`, with `required=False` as `[foo|bar|baz]`, and a `DateTime(formats=['%Y-%m-%d'])` argument with `required=False` as `[%Y-%m-%d]`. Required arguments, the `!` deprecation marker, and the `...` suffix for `nargs != 1` keep their current behavior. Add tests.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-31f96468-8290-45a8-9983-59818c0b0c20-a",
+          "commit": "d2ed83ac2d2dca87bbf298d2af2bbc7eafb7c4c7"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-31f96468-8290-45a8-9983-59818c0b0c20-b",
+          "commit": "e82cb3f6600551f63948c29cd951ba46ca97c9c4"
+        }
+      },
+      "hidden_tests": [
+        "tests/test_basic.py"
+      ],
+      "checks": [
+        "hidden",
+        "full",
+        "ruff",
+        "format",
+        "mypy"
+      ],
+      "function_metrics": [],
+      "answer_key": null
+    },
+    {
+      "id": "dadf1d84-ec6a-4de6-afbb-b6529d34a9f9",
+      "label": "F1",
+      "type": "feature",
+      "length": "short",
+      "source_commit": "a1d8785",
+      "prompt": "`click.edit` in `src/click/termui.py` accepts its `filename` parameter as a `str` or an iterable of `str`. Extend it to also accept `os.PathLike` values such as `pathlib.Path`, both as a single value and inside the iterable mixed with strings, and update `Editor.edit_files` in `src/click/_termui_impl.py` to match. `click.edit(filename=pathlib.Path(...), editor=...)` must edit that file and return `None`, exactly like the string form does.\n\nUpdate the type annotations and both `@overload` signatures so that `mypy`, which `pyproject.toml` configures to check `src` and `tests/typing` in strict mode, accepts `click.edit(filename=Path(\"f.txt\"))` and `click.edit(filename=[\"f.txt\", Path(\"g.txt\")])` with a `None` return type. A small typing check file under `tests/typing/` is the project's way of pinning that. Update the docstring to describe the new accepted values, and add a runtime test.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-dadf1d84-ec6a-4de6-afbb-b6529d34a9f9-a",
+          "commit": "3219e1cc252ebc201a05b42e4303d439b643d6fb"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-dadf1d84-ec6a-4de6-afbb-b6529d34a9f9-b",
+          "commit": "1cb7e71618ea9d76d968bcc364bb1fbb875cef59"
+        }
+      },
+      "hidden_tests": [
+        "tests/test_termui.py",
+        "tests/typing/typing_edit.py"
+      ],
+      "checks": [
+        "hidden",
+        "full",
+        "ruff",
+        "format",
+        "mypy"
+      ],
+      "function_metrics": [],
+      "answer_key": null
+    },
+    {
+      "id": "1afc7462-1dfe-443f-baf1-bf833156338e",
+      "label": "F2",
+      "type": "feature",
+      "length": "short",
+      "source_commit": "22177f8",
+      "prompt": "Make `click.Path` in `src/click/types.py` generic over the type of the value it converts to, so that the `path_type` argument narrows what `convert`, calling the type instance directly, `coerce_path_result`, and `click.prompt(type=...)` return for static type checkers:\n\n- `click.Path(path_type=pathlib.Path).convert(\"a/b.txt\", None, None)` is typed `pathlib.Path`; `path_type=str` gives `str`; `path_type=bytes` gives `bytes`.\n- `click.Path()` without `path_type` keeps returning `str | bytes | os.PathLike[str]`.\n- `click.Path[pathlib.Path]` is a valid explicit annotation and works at runtime: `typing.get_args(click.Path[pathlib.Path]) == (pathlib.Path,)`.\n- `click.Path(path_type=pathlib.Path)` is assignable to `click.ParamType[pathlib.Path]`, and `click.Path()` to `click.ParamType[str | bytes | os.PathLike[str]]`.\n- Calling the instance with a `pathlib.PurePosixPath` input is accepted and returns the converted type; calling it with `None` returns `None`.\n\nRuntime behavior must not change. The project supports Python 3.10 and later, so a TypeVar with a default needs `typing_extensions` under `TYPE_CHECKING` and a runtime fallback. `mypy` (strict, checking `src` and `tests/typing` as configured in `pyproject.toml`) must pass. Add a `tests/typing/typing_path.py` with `assert_type` checks for the cases above, and a runtime test for the `get_args` behavior. Note the change in the class docstring.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-1afc7462-1dfe-443f-baf1-bf833156338e-a",
+          "commit": "a8dfdc0214369a5da85b9f2ace5371d410698982"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-1afc7462-1dfe-443f-baf1-bf833156338e-b",
+          "commit": "a78563bfd62d77ec79adb91a91e84921a263f62c"
+        }
+      },
+      "hidden_tests": [
+        "tests/test_types/test_Path.py",
+        "tests/typing/typing_path.py"
+      ],
+      "checks": [
+        "hidden",
+        "full",
+        "ruff",
+        "format",
+        "mypy"
+      ],
+      "function_metrics": [],
+      "answer_key": null
+    },
+    {
+      "id": "64305200-2e10-4028-a457-bf116432b4bb",
+      "label": "R1",
+      "type": "refactor",
+      "length": "short",
+      "source_commit": null,
+      "prompt": "Refactor `style` in `src/click/termui.py`, which is about 125 lines long. Extract the color-argument handling (the lookup and validation of the `fg` and `bg` colors, including named colors, bright colors, 256-color integers, and RGB tuples) and the repeated per-attribute code into one or more private helper functions, so that `style` itself is under 60 lines and reads clearly.\n\nBehavior must not change: same public signature, same output bytes for every input, same exceptions and messages, same type annotations on the public function. Do not change any other public function. The full test suite, `ruff check`, `ruff format --check`, and `mypy` must pass.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-64305200-2e10-4028-a457-bf116432b4bb-a",
+          "commit": "92a59f475539610f323164edfe63bf49be92ceff"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-64305200-2e10-4028-a457-bf116432b4bb-b",
+          "commit": "d13900035d0a43dbb2dd5951ffb46db690f42bb4"
+        }
+      },
+      "hidden_tests": [],
+      "checks": [
+        "full",
+        "ruff",
+        "format",
+        "mypy"
+      ],
+      "function_metrics": [
+        [
+          "src/click/termui.py",
+          "style"
+        ]
+      ],
+      "answer_key": null
+    },
+    {
+      "id": "ea3d7a07-3f44-43e6-84c7-92a4405f37c9",
+      "label": "R2",
+      "type": "refactor",
+      "length": "short",
+      "source_commit": null,
+      "prompt": "Refactor `version_option` in `src/click/decorators.py`, which is about 140 lines long. Extract the logic that works out the package name and the version (the frame inspection, the `importlib.metadata` lookup, and the error raised when nothing is found) into one or more private module-level helper functions, so that `version_option` itself is under 70 lines and the decorator body is easy to follow.\n\nBehavior must not change: same public signature, same detected package names and versions, same messages, same exceptions, same type annotations on the public function. Do not change any other public function. The full test suite, `ruff check`, `ruff format --check`, and `mypy` must pass.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-ea3d7a07-3f44-43e6-84c7-92a4405f37c9-a",
+          "commit": "aef8d3ed88192dd8f7783d14545df83ab96d5780"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-ea3d7a07-3f44-43e6-84c7-92a4405f37c9-b",
+          "commit": "5f343fb86a03a2f6601f452b39e439fff28f948c"
+        }
+      },
+      "hidden_tests": [],
+      "checks": [
+        "full",
+        "ruff",
+        "format",
+        "mypy"
+      ],
+      "function_metrics": [
+        [
+          "src/click/decorators.py",
+          "version_option"
+        ]
+      ],
+      "answer_key": null
+    },
+    {
+      "id": "9ccbb480-9b13-46ab-b51c-de86eb274e70",
+      "label": "R3",
+      "type": "refactor",
+      "length": "short",
+      "source_commit": null,
+      "prompt": "Refactor `CliRunner.isolation` in `src/click/testing.py`, which is about 195 lines long. Split it so that the stream setup (building the input, output and error streams and the `_pause_echo`, `visible_input`, `hidden_input`, `_getchar` and `should_strip_ansi` replacements) and the restore logic at the end live in well-named private helpers or a small helper class, and `isolation` itself is under 80 lines.\n\nBehavior must not change: same public signature, same streams and encodings, same environment handling, same restoration order on exit, same type annotations on the public method. Do not change any other public function or method. The full test suite, `ruff check`, `ruff format --check`, and `mypy` must pass.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-9ccbb480-9b13-46ab-b51c-de86eb274e70-a",
+          "commit": "f0c7393bb77959236f009443a51f393cff8ef227"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-9ccbb480-9b13-46ab-b51c-de86eb274e70-b",
+          "commit": "771772d6478c16c0e68d2c2faf0af553fde4edca"
+        }
+      },
+      "hidden_tests": [],
+      "checks": [
+        "full",
+        "ruff",
+        "format",
+        "mypy"
+      ],
+      "function_metrics": [
+        [
+          "src/click/testing.py",
+          "isolation"
+        ]
+      ],
+      "answer_key": null
+    },
+    {
+      "id": "37f68e03-8023-4778-9579-404db03d1e19",
+      "label": "Q1",
+      "type": "find",
+      "length": "short",
+      "source_commit": null,
+      "prompt": "When `click.echo` writes to a stream, where does click decide whether ANSI color codes are stripped from the output, and what inputs feed that decision? Name the functions and files involved and summarize the rule they implement.\n\nAnswer in at most 15 lines. For each part of the answer cite the file path and the function or method name, with line numbers where they help. Do not modify any files.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-37f68e03-8023-4778-9579-404db03d1e19-a",
+          "commit": "ca1d4b930851cb1bad7245e38167742a699f152f"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-37f68e03-8023-4778-9579-404db03d1e19-b",
+          "commit": "6b4ba59c98d49fc8e7c3323047f5b1a1dea89147"
+        }
+      },
+      "hidden_tests": [],
+      "checks": [
+        "no_changes"
+      ],
+      "function_metrics": [],
+      "answer_key": "private/answer_keys/Q1.md"
+    },
+    {
+      "id": "f9acaf8f-781f-4fcb-a1f7-9f4abdae5d44",
+      "label": "Q2",
+      "type": "find",
+      "length": "short",
+      "source_commit": null,
+      "prompt": "Where does click determine the width used to wrap help text? What are the default and the minimum width, how is the terminal size involved, and how can a command or context override the result?\n\nAnswer in at most 15 lines. For each part of the answer cite the file path and the function or method name, with line numbers where they help. Do not modify any files.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-f9acaf8f-781f-4fcb-a1f7-9f4abdae5d44-a",
+          "commit": "13f7cef39b2e44efd58fae3f90188c86fcb93b2a"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-f9acaf8f-781f-4fcb-a1f7-9f4abdae5d44-b",
+          "commit": "7dd245a129dfde9a62061d47d831810b0b6a04e2"
+        }
+      },
+      "hidden_tests": [],
+      "checks": [
+        "no_changes"
+      ],
+      "function_metrics": [],
+      "answer_key": "private/answer_keys/Q2.md"
+    },
+    {
+      "id": "5d025ace-c09a-4e9e-a238-8333831b0168",
+      "label": "Q3",
+      "type": "find",
+      "length": "short",
+      "source_commit": null,
+      "prompt": "A `click.Group` invoked with no arguments prints its help instead of running its callback. Where is that decided, and how do `invoke_without_command` and `no_args_is_help` interact to produce it?\n\nAnswer in at most 15 lines. For each part of the answer cite the file path and the function or method name, with line numbers where they help. Do not modify any files.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-5d025ace-c09a-4e9e-a238-8333831b0168-a",
+          "commit": "702265bd16f77542714fd5119cfa76121c00c620"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-5d025ace-c09a-4e9e-a238-8333831b0168-b",
+          "commit": "b1e794cca3e2b9760c14d60fd19751b8e300e033"
+        }
+      },
+      "hidden_tests": [],
+      "checks": [
+        "no_changes"
+      ],
+      "function_metrics": [],
+      "answer_key": "private/answer_keys/Q3.md"
+    },
+    {
+      "id": "72129778-5e53-462c-97e6-e0ac6cbaa485",
+      "label": "Q4",
+      "type": "find",
+      "length": "short",
+      "source_commit": null,
+      "prompt": "Which code resolves an option's value from environment variables, and how does `auto_envvar_prefix` on the Context get combined with the parameter name to form the variable that is looked up? Also state where in the value-resolution order the environment is consulted relative to command-line arguments, the default map, and the default.\n\nAnswer in at most 15 lines. For each part of the answer cite the file path and the function or method name, with line numbers where they help. Do not modify any files.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-72129778-5e53-462c-97e6-e0ac6cbaa485-a",
+          "commit": "39703a6b426a3dda35665a28bc180653545fbc1b"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-72129778-5e53-462c-97e6-e0ac6cbaa485-b",
+          "commit": "4d1a6042087fc26381e75b5bc57338c859ee2bf6"
+        }
+      },
+      "hidden_tests": [],
+      "checks": [
+        "no_changes"
+      ],
+      "function_metrics": [],
+      "answer_key": "private/answer_keys/Q4.md"
+    },
+    {
+      "id": "6b244621-7868-408c-b25f-175c38096293",
+      "label": "L1",
+      "type": "long",
+      "length": "long",
+      "source_commit": null,
+      "prompt": "Add a new parameter type `click.Duration` to `src/click/types.py`, exported from `src/click/__init__.py`, that converts a string into a `datetime.timedelta`.\n\nAccepted input:\n- A `datetime.timedelta` instance is returned unchanged.\n- An `int` means that many seconds.\n- A string is one or more unit groups, each a non-negative integer followed by a unit letter: `d` for days, `h` for hours, `m` for minutes, `s` for seconds. Groups appear in descending unit order and each unit at most once. Unit letters are case-insensitive, whitespace between groups is allowed, and surrounding whitespace is ignored. A bare integer string with no unit means seconds. Examples: `90s` is 90 seconds; `5m` is 5 minutes; `1h30m` and `1h 30m` are 90 minutes; `2d` is 2 days; `1D2H3M4S` is 1 day, 2 hours, 3 minutes, 4 seconds; `45` is 45 seconds; `0s` and `0` are zero.\n\nRejected input fails through the type's `fail` method, which raises `click.BadParameter`, with a message that includes the offending value: the empty string, unknown units such as `5x`, fractional numbers such as `1.5h`, negative values such as `-5s`, out-of-order or repeated units such as `30m1h` or `1h1h`, a unit with no number such as `h`, text such as `abc`, and any value that is not a string, an int, or a timedelta.\n\nThe type's `name` is `duration`, `to_info_dict()` reports `'param_type': 'Duration'` and `'name': 'duration'`, `repr(click.Duration())` is `DURATION`, and the metavar shown in help for an option of this type is `DURATION`. A `Duration()` with no constructor arguments is all that is required. Document the new type alongside the other parameter types in the docs, and add tests covering the cases above, including a command that uses `click.option(\"--timeout\", type=click.Duration())`.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-6b244621-7868-408c-b25f-175c38096293-a",
+          "commit": "e3d48c25cb3aa7ee6555d12c5700dc7087f302b6"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-6b244621-7868-408c-b25f-175c38096293-b",
+          "commit": "b20e3042089d242af3d7a059712dcbf63a99ec8f"
+        }
+      },
+      "hidden_tests": [
+        "tests/test_types/test_duration_acceptance.py"
+      ],
+      "checks": [
+        "hidden",
+        "full",
+        "ruff",
+        "format",
+        "mypy"
+      ],
+      "function_metrics": [],
+      "answer_key": null
+    },
+    {
+      "id": "b7f34f75-8c2d-4168-976f-03ab0b2e8c6c",
+      "label": "L2",
+      "type": "long",
+      "length": "long",
+      "source_commit": "3495fba",
+      "prompt": "Click's automatic `--help` option stores its value under the parameter name `help`, so a user parameter named `help` collides with it: `click.Argument([\"help\"])` or `click.Option([\"--assist\", \"help\"])` breaks parsing or loses its value. Make these changes in `src/click/core.py`.\n\n1. The automatic help option must store its value under the reserved name `_click_default_help`. Define the constant as a private module-level name `_HELP_OPTION_STORAGE_NAME`. `Command.get_help_option(ctx).name` is `_click_default_help`, and `to_info_dict()` reports that name for the help option. As a result, a command whose only parameter is `click.Argument([\"help\"])` receives the positional value under `help`, an option `click.Option([\"--assist\", \"help\"])` receives its value, custom `help_option_names` such as `[\"--man\"]` keep working, help option names that are not valid Python identifiers such as `[\"/?\"]` work without triggering any warning, and the help flag still prints the help text (containing `Show this message and exit.`) and exits with code 0.\n\n2. When a command collects its parameters, warn with `UserWarning` about storage-name collisions. If an `Argument` shares its storage name with any other parameter, warn with a message containing `'<name>' is used by an argument` and saying the two will overwrite each other's value during parsing. If any parameter claims the reserved help storage name, warn with a message containing `reserved for the automatic help option`. Options that deliberately share a storage name, such as feature switches `--upper` and `--lower` both writing to `transformation`, must not warn. The test suite turns warnings into errors, so only the intended cases may warn.\n\n3. An option that reuses the `--help` flag itself, as in `@click.option(\"--help\", default=\"default value\")`, replaces the automatic help option: `get_help_option` returns `None`, the option receives its default when the flag is absent and the given value when it is passed, and no help text is printed. Confirm this works and cover it with a test.\n\nKeep everything else unchanged. Update the docstring of `get_help_option` to mention the reserved name, and add tests for each point, including the info-dict shape of the help option.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+      "branches": {
+        "59b253d3-f1a3-4642-bcd3-6a2c9fae721e": {
+          "branch": "t-b7f34f75-8c2d-4168-976f-03ab0b2e8c6c-a",
+          "commit": "752adc7072c3b7474f4c4cef990efddf1c640369"
+        },
+        "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9": {
+          "branch": "t-b7f34f75-8c2d-4168-976f-03ab0b2e8c6c-b",
+          "commit": "49053c40cd05b8f9368f798734009a0e25ad7745"
+        }
+      },
+      "hidden_tests": [
+        "tests/test_arguments.py",
+        "tests/test_basic.py",
+        "tests/test_info_dict.py",
+        "tests/test_options.py"
+      ],
+      "checks": [
+        "hidden",
+        "full",
+        "ruff",
+        "format",
+        "mypy"
+      ],
+      "function_metrics": [],
+      "answer_key": null
+    }
+  ]
+}

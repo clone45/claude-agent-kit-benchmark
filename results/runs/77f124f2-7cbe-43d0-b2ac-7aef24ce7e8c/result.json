@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 18429,
+  "stop_reason": "end_turn",
+  "session_id": "c6bab7e6-febc-4b6b-baec-962984546145",
+  "total_cost_usd": 0.102368,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 8464,
+    "cache_read_input_tokens": 66520,
+    "output_tokens": 1066,
+    "output_tokens_details": {
+      "thinking_tokens": 14
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 8464,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1066,
+      "cacheReadInputTokens": 66520,
+      "cacheCreationInputTokens": 8464,
+      "webSearchRequests": 0,
+      "costUSD": 0.102368,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 14,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The decision happens in one line of `echo`. When the message is a `str` (bytes skip it), `src/click/utils.py` `echo()` (line ~330) runs `if should_strip_ansi(file, resolve_color_default(color)): out = strip_ansi(out)`.\n\nWhat feeds it:\n1. **The `color` argument to `echo`** goes through `resolve_color_default()` in `src/click/globals.py:54`. An explicit `True`/`False` is returned as is. Otherwise it returns the current context's `ctx.color`, or `None` if there's no context.\n2. **`Context.color`** is set in `src/click/core.py` `Context.__init__` (lines 522\u2013526). If it isn't given, it's inherited from `parent.color`.\n3. **The target stream `file`**: whatever was passed in, or the default stdout/stderr (stderr when `err=True`).\n\nThe rule, in `should_strip_ansi()` in `src/click/_compat.py:502-513`:\n- If `color` is not `None`, strip exactly when `color` is false (explicit or context setting wins).\n- If `color` is `None` and the stream has a `color` attribute (the pager's `_PagerWriter`), don't strip, because the pager handles it itself.\n- Otherwise strip when the stream is not a TTY and is not Jupyter output: `not isatty(stream) and not _is_jupyter_kernel_output(stream)`. If no stream is given, it checks `sys.stdin`.\n- Helpers: `isatty()` (`_compat.py:540`) calls `stream.isatty()` and treats any exception as `False`. `_is_jupyter_kernel_output()` (`_compat.py:495`) unwraps click's stream wrappers and checks whether the stream's class module starts with `ipykernel.`.\n\nThe stripping itself is `strip_ansi()` (`_compat.py:491`), which removes matches of `_ansi_re` (`\\033\\[[0-?]*[ -/]*[@-~]`, line 19).",
+  "ttft_ms": 3594,
+  "type": "result",
+  "duration_ms": 18608,
+  "uuid": "a2776878-4f08-4b3c-a68c-b71e396c905c",
+  "ttft_stream_ms": 2303,
+  "time_to_request_ms": 70,
+  "first_content_frame_ms": 2303,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

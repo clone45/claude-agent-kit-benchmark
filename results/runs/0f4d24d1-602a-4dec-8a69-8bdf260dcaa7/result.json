@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 87875,
+  "stop_reason": "end_turn",
+  "session_id": "2cf8169b-d92d-4b7f-8151-bf0003676b3c",
+  "total_cost_usd": 0.35869900000000005,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 14104,
+    "cache_read_input_tokens": 187455,
+    "output_tokens": 10416,
+    "output_tokens_details": {
+      "thinking_tokens": 6529
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 14104,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 10416,
+      "cacheReadInputTokens": 187455,
+      "cacheCreationInputTokens": 14104,
+      "webSearchRequests": 0,
+      "costUSD": 0.35869900000000005,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 6529,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I split `version_option` into three private helpers in `src/click/decorators.py`. The function is now 69 lines from `def` to the end, down from 138, and the full test suite, `ruff check`, `ruff format --check` and `mypy` all pass.\n\n**Blocked on me:** nothing.\n\n**Changed:** only `src/click/decorators.py`. I left the signature, type annotations and docstring of `version_option` as they were, and didn't touch any other public function.\n- **`_detect_package_name()`** finds the calling module's top-level package by looking at the stack. Because it is now one call deeper, it steps back two frames instead of one. The `__main__`/`__package__` handling and the reference-cycle cleanup are unchanged.\n- **`_resolve_version(package_name)`** does the `importlib.metadata` lookup, the fallback that treats the name as an import name, and all three `RuntimeError`s with their messages unchanged. It returns the package name (switched to the distribution name if the fallback found it) and the version.\n- **`_version_callback(...)`** builds the `--version` callback. It still fills in the program name and version the first time the option is used and reuses them after that. The default message is still set when the decorator is applied.\n- **`version_option`** now only detects the package name, sets the option defaults and returns `option(...)`. Writing `param_decls or (\"--version\",)` behaves the same as the old `if not param_decls:` block. The time each step runs hasn't changed: the stack is inspected when the decorator is applied, and the metadata lookup only happens when `--version` is used.\n\n**Verified:**\n- **Tests:** 2262 passed, 24 skipped, 1 xfailed (about 6 seconds).\n- **Static checks:** `ruff check`, `ruff format --check` and `mypy` are clean.\n- **Two manual runs of the extra-frame change:** from a throwaway package `mypkg`, detection returns `'mypkg'` (not `click`) both on import and when run with `python -m mypkg.cli`. Both give the expected \"`'mypkg' is not installed`\" error.\n\n**Found:** one tiny difference that can't happen in practice. If an import name maps to exactly one distribution but looking up that distribution's version then fails, the old code had already swapped the stored package name before the exception escaped; the new code doesn't. The exception raised is the same either way, and since that distribution name comes from the installed packages, the lookup shouldn't fail. No follow-up needed.",
+  "ttft_ms": 1480,
+  "type": "result",
+  "duration_ms": 97301,
+  "uuid": "63b55475-db0e-4fc2-8641-6d018e29f7ae",
+  "ttft_stream_ms": 704,
+  "time_to_request_ms": 95,
+  "first_content_frame_ms": 704,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

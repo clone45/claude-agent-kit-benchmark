@@ -1,0 +1,10 @@
+ src/click/_termui_impl.py   |  4 ++--
+ src/click/termui.py         | 24 +++++++++++++++++++-----
+ tests/test_termui.py        | 31 +++++++++++++++++++++++++++++++
+ tests/typing/typing_edit.py | 12 ++++++++++++
+ 4 files changed, 64 insertions(+), 7 deletions(-)
+
+M	src/click/_termui_impl.py
+M	src/click/termui.py
+M	tests/test_termui.py
+A	tests/typing/typing_edit.py

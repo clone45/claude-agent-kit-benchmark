@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 72291,
+  "stop_reason": "end_turn",
+  "session_id": "bf8ac895-c48e-44d9-b922-88d0d428c477",
+  "total_cost_usd": 0.45978279999999994,
+  "usage": {
+    "input_tokens": 24,
+    "cache_creation_input_tokens": 27500,
+    "cache_read_input_tokens": 333434,
+    "output_tokens": 8650,
+    "output_tokens_details": {
+      "thinking_tokens": 2367
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 27500,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 24,
+      "outputTokens": 8650,
+      "cacheReadInputTokens": 333434,
+      "cacheCreationInputTokens": 27500,
+      "webSearchRequests": 0,
+      "costUSD": 0.45978279999999994,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2367,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 12,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "A user parameter named `help` no longer collides with the automatic `--help` option. The full test suite passes (2264 passed, 24 skipped, 1 xfailed), and ruff lint, ruff format and strict mypy are all clean. Nothing is committed; the changes are in the working tree.\n\n**What changed in `src/click/core.py`:**\n\n1. **Reserved name.** I added the private constant `_HELP_OPTION_STORAGE_NAME = \"_click_default_help\"`. `get_help_option` now passes it to the help option as its explicit name. Before, the help option took the name `help` from its `--help` flag, so a user argument or option named `help` overwrote its value during parsing. Giving it a fixed name also fixes flags like `/?`: before, Click tried to derive a name from `?`, which isn't a valid Python identifier, and that triggered a deprecation warning. I updated the `get_help_option` docstring with a `versionchanged:: 8.6.0` note about the reserved name (8.6.0 is the version currently in development).\n\n2. **Collision warnings in `get_params`.** These sit next to the existing duplicate-flag warning and raise a `UserWarning` when:\n   - any parameter other than the help option itself uses `_click_default_help` (\"reserved for the automatic help option\"), or\n   - an argument shares its storage name with any other parameter (\"'<name>' is used by an argument \u2026 will overwrite each other's value during parsing\").\n\n   Options that share a name on purpose, like `--upper`/`--lower` both writing to `transformation`, don't warn. One judgement call: the reserved-name warning also fires on a command with `add_help_option=False`, where there's no actual clash, because your spec says \"any parameter\".\n\n3. **`--help` reused by a user option.** This already worked without code changes: the automatic option is dropped, `get_help_option` returns `None`, and the user's option gets its default or the passed value. I added a test to pin it down.\n\n**Tests:**\n- **`tests/test_basic.py`:** a parametrized test covering no collision, an argument named `help`, `--assist help`, custom `--man` names and `/?`. It checks the help option's name, that the value reaches the callback, and that the help flag still prints `Show this message and exit.` and exits with code 0. There are also tests for a parameter claiming the reserved name and for an option reusing `--help`.\n- **`tests/test_arguments.py` and `tests/test_options.py`:** warnings for argument/argument and argument/option collisions, a check that feature-switch options don't warn, and the `/?` Windows-style options test.\n- **`tests/test_info_dict.py`:** the expected help-option info dict now has `\"name\": \"_click_default_help\"`, and a new `test_help_option` checks that shape directly.",
+  "ttft_ms": 1218,
+  "type": "result",
+  "duration_ms": 88397,
+  "uuid": "e1457c75-b4ea-4463-a6a1-b2d7e4092faf",
+  "ttft_stream_ms": 695,
+  "time_to_request_ms": 61,
+  "first_content_frame_ms": 695,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 61837,
+  "stop_reason": "end_turn",
+  "session_id": "54bd885c-f231-4a44-a5aa-50517b42ea5f",
+  "total_cost_usd": 0.30245500000000003,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 20720,
+    "cache_read_input_tokens": 198655,
+    "output_tokens": 4845,
+    "output_tokens_details": {
+      "thinking_tokens": 1042
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 20720,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 4845,
+      "cacheReadInputTokens": 198655,
+      "cacheCreationInputTokens": 20720,
+      "webSearchRequests": 0,
+      "costUSD": 0.30245500000000003,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1042,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`click.edit(filename=...)` now accepts a `pathlib.Path` (or any `os.PathLike[str]`), both on its own and inside a list mixed with strings. It edits the file and returns `None`, the same as the string form. The full test suite passes and mypy is clean.\n\n**Blocked on me:** nothing.\n\n**Changed** (left uncommitted in the working tree):\n- **`src/click/termui.py`:**\n  - `filename` is now typed `str | os.PathLike[str] | cabc.Iterable[str | os.PathLike[str]] | None`. This is in both the `text: None` overload and the main function signature. The two overloads where `text` is `str` or `bytes` never had a `filename` parameter, so I left them alone.\n  - At runtime, a single path-like value is now wrapped in a tuple just like a single `str`. Before, a `Path` went straight to `list()` and failed, because a `Path` can't be iterated.\n  - The docstring now says `str` and `os.PathLike` values are accepted and can be mixed in the iterable, and has a `versionchanged:: 8.6.0` note (the version in `pyproject.toml` is `8.6.0.dev`).\n  - I also fixed a typo in that docstring: it said \"Invoke `click.file` once per file\", and there is no `click.file`, so it now says `click.edit`.\n- **`src/click/_termui_impl.py`:** `Editor.edit_files` now takes `cabc.Iterable[str | os.PathLike[str]]` and converts each entry with `os.fspath()`, so the command passed to `subprocess` is still a list of plain strings.\n- **`tests/typing/typing_edit.py`** (new): checks that `click.edit(filename=...)` has type `None` for a `str`, a `Path`, `[\"f.txt\", Path(\"g.txt\")]`, and a tuple of `Path`s.\n- **`tests/test_termui.py`:** new `test_edit_pathlike`, which runs `sed` as the editor on a single `Path` and on a `[str, Path]` list, then checks both the `None` return and the edited file contents. Like the existing edit tests, it is skipped on Windows because there is no `sed`.\n\n**Verified:**\n- `ruff check` and `ruff format --check` pass on all four files.\n- `mypy` reports no issues across 29 source files, which includes the new typing file.\n- `pytest tests/test_termui.py -k edit`: 21 passed, 2 skipped.\n- Full suite: 2261 passed, 24 skipped, 1 xfailed.\n- I didn't run the new tests against the old code to watch them fail. They should: the old signature has no overload that accepts a `Path`, and the old runtime raises a `TypeError` on one.\n\n**Found:** No changelog file exists in this tree, so there's no changelog entry; the `versionchanged` note in the docstring is the only record of the change.",
+  "ttft_ms": 8169,
+  "type": "result",
+  "duration_ms": 69508,
+  "uuid": "36c4f19a-3e7e-4b13-b855-fd71900bcb0d",
+  "ttft_stream_ms": 7086,
+  "time_to_request_ms": 76,
+  "first_content_frame_ms": 7087,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

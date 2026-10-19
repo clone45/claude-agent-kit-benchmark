@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 26225,
+  "stop_reason": "end_turn",
+  "session_id": "13fe22ac-7961-425b-a127-5441c605dbbd",
+  "total_cost_usd": 0.1777698,
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 15500,
+    "cache_read_input_tokens": 56829,
+    "output_tokens": 2119,
+    "output_tokens_details": {
+      "thinking_tokens": 640
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 15500,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 6,
+      "outputTokens": 2119,
+      "cacheReadInputTokens": 56829,
+      "cacheCreationInputTokens": 15500,
+      "webSearchRequests": 0,
+      "costUSD": 0.1777698,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 640,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 3,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Both paths start in `GrooveBox::process`, in the clock block at `GrooveBox.hpp:1085\u20131128`. Each STEP_INPUT pulse goes to one path or the other depending on `clock_counter` against `clock_division` (8).\n\n1. **Step path** (`GrooveBox.hpp:1087\u20131117`, runs when `clock_counter == clock_division`): every track calls `Track::step()` (`Track.hpp:83`), which moves the playhead forward and resets `ratchet_counter` to 0. Then `GrooveBox::trigger(i)` (`GrooveBox.hpp:450`) runs for each track.\n2. **Step: the fire decision** is in `Track::trigger()` (`Track.hpp:91\u2013151`). It rolls the PROBABILITY lock and records the outcome in `m.skipped`. If the roll passes and `m.steps[playback_position]` is set, it copies that step's parameter locks into `m.local_parameter_lock_settings`, snaps SAMPLE_START if snap is on, gates the ADSR and calls `sample_player->trigger()`.\n3. **Ratchet path** (`GrooveBox.hpp:1118\u20131126`, the `else` branch): runs on the other 7 of every 8 pulses and calls `Track::ratchety()` (`Track.hpp:160\u2013183`). It re-fires only if the current step is on, `m.skipped == false`, and the RATCHET pattern bit at `ratchet_counter` is set. The counter wraps at 8, but only indices 0\u20136 are reached between steps.\n4. **What distinguishes them:** a step sample makes a fresh probability roll and loads that step's parameter locks. A ratchet sample makes no roll of its own: it inherits the step's outcome through `m.skipped` and reuses the locks already loaded. Only the step path calls `fade_out.reset()`. The step path also passes the pre-snap `sample_start` local (`Track.hpp:144`), while a ratchet passes the snapped value from the stored locks (`Track.hpp:170`), so with snap on the two can start at different positions.\n5. **Mute and solo** are both decided by `GrooveBox::notMuted()` (`GrooveBox.hpp:458`): if any track is soloed, only soloed tracks pass; otherwise a track passes when it isn't muted.\n   - In the step path the check is inside the `GrooveBox::trigger()` wrapper (`:453`), so a muted track never calls `Track::trigger()` and its `m.skipped` and locks keep their old values.\n   - In the ratchet path the check is inline at `:1123`. A muted track's `track_triggers[i]` isn't updated, so it keeps its last value.\n6. **Where mute and solo are set:** the expander message handler (`GrooveBox.hpp:1244\u20131295`) fills `mutes`, `solos` and `any_track_soloed`. When a track newly becomes muted or loses out to a solo, it calls `fadeOut()` to cut a sample that is already playing.\n\n**Possible bug:** if a track is unmuted partway through a step, its next ratchet pulses check only the old `m.skipped` and locks from the last step it actually played. They may fire using that stale state.",
+  "ttft_ms": 4248,
+  "type": "result",
+  "duration_ms": 26633,
+  "uuid": "ef229847-1759-4b38-b2ad-26565d947c76",
+  "ttft_stream_ms": 3270,
+  "time_to_request_ms": 60,
+  "first_content_frame_ms": 3270,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

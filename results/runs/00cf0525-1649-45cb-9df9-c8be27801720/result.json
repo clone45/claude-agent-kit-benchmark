@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 51982,
+  "stop_reason": "end_turn",
+  "session_id": "bc4cd9b1-f6f1-4bac-8a49-811738c9adac",
+  "total_cost_usd": 0.18940300000000002,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 8270,
+    "cache_read_input_tokens": 141835,
+    "output_tokens": 4741,
+    "output_tokens_details": {
+      "thinking_tokens": 1665
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 8270,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 4741,
+      "cacheReadInputTokens": 141835,
+      "cacheCreationInputTokens": 8270,
+      "webSearchRequests": 0,
+      "costUSD": 0.18940300000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1665,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`style` is still 115 lines, so I missed the under-60 target, but the code inside it is now 21 lines. Of the 115, 80 are the docstring and 14 are the signature. Getting under 60 would mean deleting most of the docstring, and Sphinx publishes it as the API reference (`docs/api.md:100`, `.. autofunction:: style`). I kept the docs.\n\n**What changed** (`src/click/termui.py`):\n- **Color handling** was already in its own private helper, `_interpret_color`, which looks up and validates named, bright, 256-color and RGB values and raises the `ValueError`s. I left it as it was. I added a small `_color_code(color, offset)` that returns the full escape sequence, or `\"\"` when the color is `None`. That replaces the two `if fg/bg is not None` branches.\n- **Per-attribute code**: added `_attribute_code(enabled, on, off)`, which returns `\\033[{on}m` or `\\033[{off}m`, or `\"\"` when the value is `None`. Same truthiness check as before. This replaces the eight copy-pasted `if x is not None: bits.append(...)` blocks.\n- **`style` now** builds one `bits` list with one line per color or attribute, in the original order, then adds the reset code. Empty strings disappear in the join, so the output is the same. Colors are still checked in the same order (`fg` before `bg`), so bad input raises the same exception at the same point.\n\nThe public signature, type annotations and docstring are unchanged, and no other public function was touched.\n\n**Checks:**\n- I compared the old and new `style` side by side on 4,704 input combinations, including invalid colors, bools, lists, non-string text and `reset=False`. Outputs and exceptions matched in every case.\n- Full test suite: 2262 passed, 24 skipped, 1 xfailed.\n- `ruff check`, `ruff format --check` and `mypy` all pass.\n\nThe comparison script is in `/tmp/eqcheck/`, outside the repo. Nothing is committed.",
+  "ttft_ms": 3184,
+  "type": "result",
+  "duration_ms": 59406,
+  "uuid": "c6d1a11b-899c-46d8-9af0-3c1c64362598",
+  "ttft_stream_ms": 2194,
+  "time_to_request_ms": 85,
+  "first_content_frame_ms": 2195,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

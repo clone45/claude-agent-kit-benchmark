@@ -1,0 +1,5 @@
+$ test $(grep -ci accent docs/modules/euclid/user_manual.md) -ge 2
+rc=0 timed_out=False
+--- stdout
+
+--- stderr

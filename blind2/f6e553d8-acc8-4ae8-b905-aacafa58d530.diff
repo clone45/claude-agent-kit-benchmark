@@ -1,0 +1,527 @@
+diff --git a/src/modules/Euclid/EuclidEngine.hpp b/src/modules/Euclid/EuclidEngine.hpp
+index 07ee768..3c4910b 100644
+--- a/src/modules/Euclid/EuclidEngine.hpp
++++ b/src/modules/Euclid/EuclidEngine.hpp
+@@ -34,6 +34,21 @@
+ // vxsynth patches and the Groovebox Advanced module depend on this one;
+ // tests/euclid/pattern_test.cpp pins it. Do not "correct" it.
+ //
++// CHANCE. A per-step probability, 0..100 (clamped), decided once per LANDING:
++// whenever a clock edge or a reset puts the playhead on a step. A rest rolls
++// nothing. A hit at chance 100 plays and rolls nothing, a hit at chance 0 is
++// silent and rolls nothing, and any other hit makes exactly one
++// rng.percent() call and plays when the result is below `chance`. The verdict
++// holds for the whole stay: a hit that lost its roll is a rest until the
++// playhead moves (no strike, GATE low on every sample, so the gate gap of a
++// later reset sees it low too), and idle samples never re-roll. Nothing else
++// touches the generator — not load(), not idle samples, not rests — so a
++// seeded Rng replays the same verdicts for the same clock/reset sequence.
++// The pattern table is never changed by a lost roll. The six-argument
++// process() is chance 100 and never consumes the generator.
++//
++
++#include <stdint.h>
+ 
+ #include "vgLib-2.0/sequencer/ResetClockWindow.hpp"
+ 
+@@ -143,6 +158,46 @@ struct Pattern
+     }
+ };
+ 
++// ── Rng ──────────────────────────────────────────────────────────────────────
++//
++// xorshift32 (Marsaglia's 13 / 17 / 5), the generator behind CHANCE. Zero is
++// xorshift's one fixed point, so seed(0) falls back to the default state
++// rather than locking the generator at 0 forever.
++//
++struct Rng
++{
++    static const uint32_t DEFAULT_STATE = 0x9E3779B9u;
++
++    uint32_t state;
++
++    Rng() : state(DEFAULT_STATE) {}
++
++    void seed(uint32_t s)
++    {
++        // An if, not ?:, which would bind DEFAULT_STATE as an lvalue (an
++        // odr-use needing an out-of-class definition in C++11).
++        if (s == 0) s = DEFAULT_STATE;
++        state = s;
++    }
++
++    uint32_t next()
++    {
++        uint32_t x = state;
++        x ^= x << 13;
++        x ^= x >> 17;
++        x ^= x << 5;
++        state = x;
++        return x;
++    }
++
++    // 0..99. The modulo bias (2^32 is not a multiple of 100) is under one
++    // part in forty million; irrelevant to a step probability.
++    int percent()
++    {
++        return (int)(next() % 100u);
++    }
++};
++
+ // ── Sequencer ────────────────────────────────────────────────────────────────
+ //
+ // The playhead and the reset rule. `position` is the step index: 0 means
+@@ -152,11 +207,13 @@ struct Pattern
+ //
+ // What process() reports for one sample:
+ //
+-//   gate      step `position` is a hit: the GATE level for this sample
++//   gate      step `position` is a hit and did not lose its chance roll: the
++//             GATE level for this sample
+ //   struck    the playhead LANDED on a hit this sample (a clock edge onto a
+-//             hit, or a reset with step 1 a hit): the module starts a TRIG
+-//             pulse. False on every other sample, so consecutive hit steps
+-//             make one continuous GATE and one TRIG per step
++//             hit, or a reset with step 1 a hit) and the hit won its roll:
++//             the module starts a TRIG pulse. False on every other sample, so
++//             consecutive hit steps make one continuous GATE and one TRIG per
++//             step
+ //   gate_gap  GATE was high on the previous sample and a reset just moved the
+ //             playhead: the module forces ONE sample of 0 V before showing
+ //             step 1's gate so a downstream envelope sees a fresh edge
+@@ -171,6 +228,8 @@ struct Sequencer
+     int position;                    // step index; 0 = step 1 current after load and reset
+     vgLib_v2::ResetClockWindow window;
+     bool gate_high;                  // `gate` as reported by the last process() call
++    bool step_lost;                  // the current step lost its chance roll; silent until the playhead moves
++    Rng rng;                         // consumed only by a landing on a hit at chance 1..99
+ 
+     struct Out
+     {
+@@ -180,21 +239,30 @@ struct Sequencer
+         int position;
+     };
+ 
+-    Sequencer() : position(0), gate_high(false) {}
++    Sequencer() : position(0), gate_high(false), step_lost(false) {}
+ 
+     // The implicit reset at patch load (Impromptu: "the clock is also ignored
+     // during 1ms when the module is initialized or powered up"): step 1
+     // current, the window armed, nothing fires. gate_high stays false: there
+-    // was no output before this, so the first sample needs no gap.
++    // was no output before this, so the first sample needs no gap. Load is not
++    // a landing, so it rolls nothing and step 1's gate follows the pattern.
+     void load(int window_samples)
+     {
+         position = 0;
+         window.arm(window_samples);
+         gate_high = false;
++        step_lost = false;
++    }
++
++    // Chance 100: every hit plays and the generator is never consumed.
++    Out process(bool reset_edge, bool clock_edge, int window_samples, int hits, int steps, int rot)
++    {
++        return process(reset_edge, clock_edge, window_samples, hits, steps, rot, 100);
+     }
+ 
+     // One sample, in SEQ3's order (ResetClockWindow.hpp): the pattern, then
+-    // the reset, then the clock, then the window tick, then the outputs.
++    // the reset, then the clock, then the chance roll, then the window tick,
++    // then the outputs.
+     //
+     // A reset never counts as a clock and the window never blocks a reset. The
+     // clock check is an independent `if`, not an `else`: a same-sample reset
+@@ -203,23 +271,35 @@ struct Sequencer
+     // reset. A clock one sample BEFORE a reset is the standard's known
+     // limitation and plays step N+1 then step 1 (§4.1 table, row 3).
+     //
++    // The roll is made once, for the step the playhead ends the sample on, so
++    // a reset and an accepted clock on one sample (possible only with a
++    // window of 0 samples) still roll at most once. step_lost is decided at
++    // every landing and only there: a step that was a rest when the playhead
++    // landed on it and becomes a hit mid-stay (ROT moved) shows its gate at
++    // once, as without chance, but is never rolled.
++    //
+     // `window_samples` is whatever the caller passed: the module computes it
+     // from the sample rate when it arms, never caches it, so a rate change
+     // is the caller's business (§4.3).
+-    Out process(bool reset_edge, bool clock_edge, int window_samples, int hits, int steps, int rot)
++    Out process(bool reset_edge, bool clock_edge, int window_samples, int hits, int steps, int rot, int chance)
+     {
+         Out out;
+         out.struck = false;
+         out.gate_gap = false;
+ 
++        if (chance < 0) chance = 0;
++        if (chance > 100) chance = 100;
++
+         pattern.compute(hits, steps, rot);
+         const int length = pattern.steps;
++        bool landed = false;
+ 
+         if (reset_edge)
+         {
+             position = 0;
+-            out.struck = pattern.hit[0];
++            window.arm(window_samples);
+             out.gate_gap = gate_high;
++            landed = true;
+         }
+ 
+         if (clock_edge && !window.open())
+@@ -228,14 +308,25 @@ struct Sequencer
+             // STEPS that shrank below the playhead wraps here (§2).
+             position = position + 1;
+             if (position >= length) position = 0;
+-            out.struck = pattern.hit[position];
++            landed = true;
++        }
++
++        if (landed)
++        {
++            step_lost = false;
++            if (pattern.hit[position])
++            {
++                if (chance == 0) step_lost = true;
++                else if (chance < 100) step_lost = !(rng.percent() < chance);
++            }
++            out.struck = pattern.hit[position] && !step_lost;
+         }
+ 
+         window.tick();
+ 
+         // A playhead left beyond a shrunken STEPS reads a cleared slot until
+         // the next clock wraps it (§4.1 table, last row).
+-        out.gate = position < length && pattern.hit[position];
++        out.gate = position < length && pattern.hit[position] && !step_lost;
+         gate_high = out.gate;
+         out.position = position;
+         return out;
+diff --git a/tests/euclid/README.md b/tests/euclid/README.md
+index 18df203..6d15e37 100644
+--- a/tests/euclid/README.md
++++ b/tests/euclid/README.md
+@@ -34,7 +34,19 @@ the engine directly. `-I ../../src` is what resolves the engine's include of
+   between clocks is read on the next edge (and on the current step at once);
+   GATE holds across two consecutive hit steps with `struck` only on the edge
+   samples; `struck` is false on every non-edge, non-reset sample; and the
+-  window length is whatever the caller passed (45, 1, 96).
++  window length is whatever the caller passed (45, 1, 96). Then CHANCE, the
++  seven-argument `process`: `Rng`'s xorshift32 values pinned (default state
++  0x9E3779B9, `seed(0)` falls back to it, `percent()` is `next() % 100`); the
++  six-argument form agrees with chance 100 (and chance 250, clamped) on every
++  field of every sample over 100 000 randomized samples, and neither touches
++  the generator; chance 0 (and -20, clamped) never strikes or raises GATE,
++  rolls nothing, and still leaves step 1's gate up after load; two sequencers
++  with the same seed agree sample for sample, every verdict matches a
++  reference generator making one `percent()` call per landing on a hit and
++  none for rests or idle samples; and a lost roll strikes nothing and holds
++  GATE low through 500 idle samples (no re-roll, a ROT move does not revive
++  it), reports no gap to a following reset, and the next clock's winning roll
++  strikes and raises GATE; a reset is a landing too and can lose.
+ - **seq3_parity_test.cpp** — a float model of Fundamental SEQ3's reset/clock
+   logic (`dsp::SchmittTrigger`, `dsp::PulseGenerator`, `clock && !resetGate`)
+   and `euclid::Sequencer` behind the same Schmitts, driven by the same
+diff --git a/tests/euclid/engine_test.cpp b/tests/euclid/engine_test.cpp
+index 1f2634b..87077b0 100644
+--- a/tests/euclid/engine_test.cpp
++++ b/tests/euclid/engine_test.cpp
+@@ -478,6 +478,286 @@ static void windowLengthTests()
+     checkEq("(and closes at +96)", o.position, 1);
+ }
+ 
++// ── Chance ───────────────────────────────────────────────────────────────────
++//
++// The seven-argument process(). ChanceRig is Rig with a chance knob; the
++// tests above all go through Rig and so pin the six-argument form.
++
++struct ChanceRig
++{
++    Sequencer seq;
++    int hits, steps, rot, chance;
++
++    ChanceRig(int h, int s, int r, int c) : hits(h), steps(s), rot(r), chance(c)
++    {
++        seq.load(W);
++    }
++
++    Out idle()  { return seq.process(false, false, W, hits, steps, rot, chance); }
++    Out clock() { return seq.process(false, true,  W, hits, steps, rot, chance); }
++    Out reset() { return seq.process(true,  false, W, hits, steps, rot, chance); }
++
++    void settle() { for (int i = 0; i < W; i++) idle(); }
++};
++
++static bool sameOut(const Out &a, const Out &b)
++{
++    return a.gate == b.gate && a.struck == b.struck && a.gate_gap == b.gate_gap && a.position == b.position;
++}
++
++static void rngTests()
++{
++    std::printf("chance: the xorshift32 generator\n");
++    Rng rng;
++    checkEq("Rng starts at 0x9E3779B9", rng.state, 0x9E3779B9u);
++    checkEq("first next() from the default state", rng.next(), 1359758873u);
++    checkEq("and next() stores what it returns", rng.state, 1359758873u);
++    checkEq("second next()", rng.next(), 3761132862u);
++    checkEq("percent() is next() % 100", rng.percent(), 2075758394u % 100);
++
++    rng.seed(1);
++    checkEq("seed(1) stores 1", rng.state, 1);
++    checkEq("first next() after seed(1)", rng.next(), 270369u);
++    rng.seed(0);
++    checkEq("seed(0) falls back to 0x9E3779B9", rng.state, 0x9E3779B9u);
++
++    bool in_range = true;
++    for (int i = 0; i < 10000; i++)
++    {
++        int p = rng.percent();
++        if (p < 0 || p > 99) in_range = false;
++    }
++    check("percent() stays in 0..99", in_range);
++
++    Sequencer fresh;
++    checkEq("a fresh Sequencer's rng is at the default state", fresh.rng.state, 0x9E3779B9u);
++}
++
++static void chanceSixArgTests()
++{
++    std::printf("chance: the six-argument form is chance 100\n");
++
++    // Two sequencers in lockstep, one through each form, driven by the same
++    // pseudo-random resets, clocks and knob moves. Every Out field must agree
++    // on every sample and neither generator may move.
++    Rng drive;
++    drive.seed(0xC0FFEE42u);
++    Sequencer six, seven, over;
++    six.load(W);
++    seven.load(W);
++    over.load(W);
++
++    int h = 5, s = 8, r = 0;
++    bool agree = true, over_agrees = true;
++    int strikes = 0;
++    for (int i = 0; i < 100000; i++)
++    {
++        uint32_t x = drive.next();
++        bool reset = (x % 997) == 0;
++        bool clock = (x % 13) == 0;
++        if ((x % 5003) == 0) { h = (int)(x >> 8) % 33; s = 1 + (int)(x >> 16) % 32; r = (int)(x >> 4) % 40; }
++
++        Out a = six.process(reset, clock, W, h, s, r);
++        Out b = seven.process(reset, clock, W, h, s, r, 100);
++        Out c = over.process(reset, clock, W, h, s, r, 250);   // clamped to 100
++        if (!sameOut(a, b)) agree = false;
++        if (!sameOut(a, c)) over_agrees = false;
++        if (a.struck) strikes++;
++    }
++    check("six-argument and chance 100 agree on every sample", agree);
++    check("chance above 100 clamps to 100", over_agrees);
++    check("(the run struck something)", strikes > 100);
++    checkEq("the six-argument form never consumes the generator", six.rng.state, 0x9E3779B9u);
++    checkEq("chance 100 never consumes the generator", seven.rng.state, 0x9E3779B9u);
++    checkEq("chance 250 never consumes the generator", over.rng.state, 0x9E3779B9u);
++}
++
++static void chanceZeroTests()
++{
++    std::printf("chance: 0 silences every hit and rolls nothing\n");
++    ChanceRig r(16, 16, 0, 0);
++
++    // load is not a landing: step 1's gate follows the pattern.
++    Out o = r.idle();
++    check("after load step 1's gate follows the pattern, even at chance 0", o.gate);
++    check("(and nothing struck)", !o.struck);
++    r.settle();
++
++    bool silent = true;
++    for (int i = 0; i < 40; i++)
++    {
++        o = r.clock();
++        if (o.struck || o.gate) silent = false;
++        for (int j = 0; j < 20; j++)
++        {
++            o = r.idle();
++            if (o.struck || o.gate) silent = false;
++        }
++    }
++    check("40 clocks onto hits: no strike, GATE low throughout", silent);
++    checkEq("the playhead still advanced", r.seq.position, 40 % 16);
++
++    o = r.reset();
++    check("a reset onto a hit at chance 0 strikes nothing", !o.struck);
++    check("and GATE is low", !o.gate);
++    check("and GATE was low, so no gap", !o.gate_gap);
++    check("the pattern table is untouched", r.seq.pattern.count() == 16);
++    checkEq("chance 0 never consumes the generator", r.seq.rng.state, 0x9E3779B9u);
++
++    // A negative chance clamps to 0.
++    ChanceRig n(16, 16, 0, -20);
++    n.settle();
++    o = n.clock();
++    check("chance -20 behaves as 0", !o.struck && !o.gate);
++    checkEq("and rolls nothing", n.seq.rng.state, 0x9E3779B9u);
++}
++
++static void chanceDeterminismTests()
++{
++    std::printf("chance: a seeded generator replays the same verdicts\n");
++
++    // E(5,8) is x.x.xx.x: rests in between, so the test also shows that rests
++    // roll nothing. A reference Rng with the same seed predicts every verdict:
++    // one percent() per landing on a hit, none for rests or idle samples.
++    const uint32_t seed = 0x1234ABCDu;
++    ChanceRig a(5, 8, 0, 37), b(5, 8, 0, 37);
++    a.seq.rng.seed(seed);
++    b.seq.rng.seed(seed);
++    Rng ref;
++    ref.seed(seed);
++
++    a.settle();
++    b.settle();
++
++    bool replays = true, predicted = true;
++    int rolls = 0, wins = 0, landings = 0;
++    for (int i = 0; i < 400; i++)
++    {
++        bool reset = (i % 29) == 28;
++        Out oa = reset ? a.reset() : a.clock();
++        Out ob = reset ? b.reset() : b.clock();
++        landings++;
++        if (!sameOut(oa, ob)) replays = false;
++
++        if (a.seq.pattern.hit[oa.position])
++        {
++            bool plays = ref.percent() < 37;
++            rolls++;
++            if (plays) wins++;
++            if (oa.struck != plays || oa.gate != plays) predicted = false;
++        }
++        else if (oa.struck || oa.gate) predicted = false;
++
++        // A full window of idle samples after every landing (so the next
++        // reset's clock is never swallowed): the verdict holds, no re-roll.
++        for (int j = 0; j < W; j++)
++        {
++            Out ia = a.idle();
++            Out ib = b.idle();
++            if (!sameOut(ia, ib)) replays = false;
++            if (ia.struck || ia.gate != oa.gate) predicted = false;
++        }
++    }
++    check("two sequencers with the same seed agree on every sample", replays);
++    check("every verdict matches a reference generator: one roll per hit landing", predicted);
++    checkEq("the generator advanced exactly once per hit landing", a.seq.rng.state, ref.state);
++    check("(some rolls won and some lost)", wins > 0 && wins < rolls);
++    check("(rests were landed on too)", rolls < landings);
++
++    // A different seed gives a different run.
++    ChanceRig c(5, 8, 0, 37);
++    c.seq.rng.seed(seed + 1);
++    c.settle();
++    ChanceRig d(5, 8, 0, 37);
++    d.seq.rng.seed(seed);
++    d.settle();
++    bool differs = false;
++    for (int i = 0; i < 200; i++) if (!sameOut(c.clock(), d.clock())) differs = true;
++    check("a different seed gives a different run", differs);
++}
++
++// A seed whose first roll is >= 50 (loses at chance 50) and second < 50 (wins).
++static uint32_t loseThenWinSeed()
++{
++    for (uint32_t s = 1; s < 100000; s++)
++    {
++        Rng probe;
++        probe.seed(s);
++        int first = probe.percent();
++        int second = probe.percent();
++        if (first >= 50 && second < 50) return s;
++    }
++    return 0;
++}
++
++static void chanceLostRollTests()
++{
++    std::printf("chance: a lost roll holds GATE low until the playhead moves\n");
++    const uint32_t seed = loseThenWinSeed();
++    check("(found a lose-then-win seed)", seed != 0);
++
++    // All hits, so both landings below are rolled.
++    ChanceRig r(16, 16, 0, 50);
++    r.seq.rng.seed(seed);
++
++    // load did not roll, and step 1's gate follows the pattern.
++    Out o = r.idle();
++    check("after load step 1's gate is high", o.gate);
++    checkEq("and load rolled nothing", r.seq.rng.state, seed);
++    r.settle();
++
++    o = r.clock();
++    checkEq("(landed on step 2)", o.position, 1);
++    check("the lost roll strikes nothing", !o.struck);
++    check("and GATE is low on the landing sample", !o.gate);
++    const uint32_t after_roll = r.seq.rng.state;
++    check("(one roll was made)", after_roll != seed);
++
++    bool held_low = true;
++    for (int i = 0; i < 500; i++)
++    {
++        o = r.idle();
++        if (o.gate || o.struck || o.position != 1) held_low = false;
++    }
++    check("GATE stays low on every idle sample of the stay", held_low);
++    checkEq("idle samples never re-roll", r.seq.rng.state, after_roll);
++
++    // Moving ROT mid-stay keeps the current step a hit: still silent, no roll.
++    r.rot = 3;
++    o = r.idle();
++    check("a pattern change mid-stay does not revive the lost step", !o.gate && !o.struck);
++    checkEq("nor roll", r.seq.rng.state, after_roll);
++    check("the pattern table is not changed by a lost roll", r.seq.pattern.count() == 16);
++
++    o = r.clock();
++    checkEq("the next clock moves to step 3", o.position, 2);
++    check("its roll wins: it strikes", o.struck);
++    check("and GATE is high", o.gate);
++    check("no gap: a gap is a reset's", !o.gate_gap);
++
++    // A reset from a lost step: GATE was low, so no gap.
++    ChanceRig g(16, 16, 0, 50);
++    g.seq.rng.seed(seed);
++    g.settle();
++    g.clock();                                 // loses
++    g.idle();
++    o = g.reset();                             // wins
++    check("a reset from a lost step reports no gate gap", !o.gate_gap);
++    check("and strikes step 1 when its own roll wins", o.struck && o.gate);
++
++    // The reset onto step 1 is itself a landing and can lose.
++    ChanceRig z(16, 16, 0, 50);
++    z.seq.rng.seed(seed);
++    o = z.idle();
++    check("(GATE high on step 1 after load)", o.gate);
++    o = z.reset();                             // loses
++    check("a reset whose roll loses strikes nothing", !o.struck);
++    check("and holds GATE low", !o.gate);
++    check("but the gap still reflects the previous sample's GATE", o.gate_gap);
++    o = z.idle();
++    check("and GATE stays low after it", !o.gate);
++}
++
+ int main()
+ {
+     loadTests();
+@@ -492,5 +772,10 @@ int main()
+     consecutiveHitTests();
+     struckInvariantTests();
+     windowLengthTests();
++    rngTests();
++    chanceSixArgTests();
++    chanceZeroTests();
++    chanceDeterminismTests();
++    chanceLostRollTests();
+     return finish("engine_test");
+ }

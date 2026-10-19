@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 48745,
+  "stop_reason": "end_turn",
+  "session_id": "b04b4e6d-cbb5-412d-be8c-4125e84aa0b7",
+  "total_cost_usd": 0.3560162,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 28711,
+    "cache_read_input_tokens": 171421,
+    "output_tokens": 4599,
+    "output_tokens_details": {
+      "thinking_tokens": 1768
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 28711,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 4599,
+      "cacheReadInputTokens": 171421,
+      "cacheCreationInputTokens": 28711,
+      "webSearchRequests": 0,
+      "costUSD": 0.3560162,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1768,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed both problems in `_make_default_short_help`, and the full test suite passes.\n\n**Blocked on me**\nNothing.\n\n**Changed**\n- `src/click/utils.py` (`_make_default_short_help`): I replaced the old single loop with three simpler steps.\n  1. **Sentence end:** a word ending in `.` now ends the sentence only if the next word doesn't start with a lowercase letter. Before, any word ending in a period cut the text, so `vs.` did.\n  2. **Fit check:** if the trimmed text fits within `max_length`, it comes back unchanged. This check comes first, which is why `ab` with 2 gives `ab`.\n  3. **Shortening:** otherwise the function keeps leading whole words while they fit together with `...` (that is, within `max_length - 3`). Words are split on whitespace only, so a hyphenated word counts as one. If no word fits, or `max_length` is below 3 (including zero or negative), the result is just `...`. The old version mixed sentence detection and length counting in one pass and then removed words from the end, which is why it was unreliable.\n  - First-paragraph-only, whitespace collapsing and ignoring a leading `\\b` all work as before. The `\\b` check now runs before the empty check, so text containing only `\\b` still returns `\"\"`.\n- `tests/test_utils/test_make_default_short_help.py`:\n  - **Changed an existing case:** the old `\"123 567 9. aaaa bbb\"` case expected `123 567 9.`. Under your new rule the text continues past `9.`, so I changed it to expect `123 567...`.\n  - **Added cases** for all your examples, plus `max_length` 0 and -5. Every case also runs in the existing `\\b` no-rewrap form.\n  - **Loosened a check:** the test asserted that the expected output is never longer than `max_length`. That can't hold when the answer is `...` and `max_length` is under 3, so it now allows exactly `...` in that case.\n\n**Verified**\n- The short-help test file passes (34 tests).\n- Full suite: 2260 passed, 24 skipped, 1 xfailed.\n- `ruff check src tests` and `ruff format --check src tests` are clean (I ran `ruff format` once on the test file), and `mypy` reports no issues.\n\n**Found**\n- There is no changelog file in this tree (`CHANGES.rst` doesn't exist), so I didn't add a changelog entry.\n- For empty help text, the function still returns `\"\"` whatever `max_length` is, rather than `...`. That matches the old behavior.",
+  "ttft_ms": 2176,
+  "type": "result",
+  "duration_ms": 63291,
+  "uuid": "1bb3fb98-3d2f-4c86-b11c-e26271aa490a",
+  "ttft_stream_ms": 1838,
+  "time_to_request_ms": 86,
+  "first_content_frame_ms": 1838,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

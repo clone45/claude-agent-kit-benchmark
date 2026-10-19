@@ -1,0 +1,195 @@
+    void process(const ProcessArgs &args) override
+    {
+        if (expander_connected)
+            readFromExpander();
+
+        //
+        // If the user has pressed a memory slot button, switch memory slots and update the
+        // knob positions for the selected function.
+
+        if (inputs[MEM_INPUT].isConnected())
+        {
+            unsigned int memory_selection = (inputs[MEM_INPUT].getVoltage() / 10.0) * NUMBER_OF_MEMORY_SLOTS;
+            memory_selection = clamp(memory_selection, 0, NUMBER_OF_MEMORY_SLOTS - 1);
+            if (memory_selection != memory_slot_index)
+                switchMemory(memory_selection);
+        }
+        else
+        {
+            // Would it be more efficient to move this code into the memory button's
+            // onClick method, or something like that?
+            for (unsigned int i = 0; i < NUMBER_OF_MEMORY_SLOTS; i++)
+            {
+                if (memory_slot_button_triggers[i].process(params[MEMORY_SLOT_BUTTONS + i].getValue()))
+                {
+                    // If shift-clicking, then copy the current memory into the clicked memory slot
+                    // before switching to the new memory slot
+                    if (shift_key)
+                        copyMemory(memory_slot_index, i);
+
+                    switchMemory(i);
+                }
+            }
+        }
+
+        // COPY: If the user has pressed the copy button, then store the index of the
+        // current memory, which will be used when pasting.
+        if (copy_button_trigger.process(params[COPY_BUTTON].getValue()))
+        {
+            copyPulse.trigger(1e-3f);
+            copied_memory_index = memory_slot_index;
+        }
+
+        // PASTE: If the user has pressed the paste button, then copy previously
+        // copied memory to the current memory location.
+        if (paste_button_trigger.process(params[PASTE_BUTTON].getValue()))
+        {
+            pastePulse.trigger(1e-3f);
+            copyMemory(copied_memory_index, memory_slot_index);
+        }
+
+        // On incoming RESET, reset the sequencers
+        if (reset_trigger.process(inputs[RESET_INPUT].getVoltage(), constants::gate_low_trigger, constants::gate_high_trigger))
+        {
+            // Set up a (reverse) counter so that the clock input will ignore
+            // incoming clock pulses for 1 millisecond after a reset input. This
+            // is to comply with VCV Rack's standards.  See section "Timing" at
+            // https://vcvrack.com/manual/VoltageStandards
+
+            first_step = true;
+            clock_counter = clock_division;
+
+            for (unsigned int i = 0; i < NUMBER_OF_TRACKS; i++)
+            {
+                selected_memory_slot->tracks[i].reset();
+            }
+        }
+
+        //
+        // step button processing
+        //
+
+        for (unsigned int step_number = 0; step_number < NUMBER_OF_STEPS; step_number++)
+        {
+            // Process step key-buttons (awesome clackity clack!)
+            bool step_button_value = params[DRUM_PADS + step_number].getValue();
+
+            selected_track->setValue(step_number, step_button_value);
+            inner_light_booleans[step_number] = step_button_value;
+
+            // Show location
+            light_booleans[step_number] = (playback_step == step_number);
+        }
+
+        //  Process
+        for (unsigned int slot_id = 0; slot_id < NUMBER_OF_PARAMETER_LOCKS; slot_id++)
+        {
+            // parameter_slots keep track of this parameter is associated with which parameter slot
+            // parameter_slots is defined in defines.h
+            unsigned int parameter_id = parameter_slots[slot_id];
+
+            if (parameter_lock_button_triggers[slot_id].process(params[PARAMETER_LOCK_BUTTONS + parameter_id].getValue()))
+            {
+                selected_parameter_lock_id = parameter_id;
+                selected_parameter_slot_id = slot_id;
+                updatePanelControls();
+            }
+        }
+
+        // Process the knobs below the steps
+        for (unsigned int step_number = 0; step_number < NUMBER_OF_STEPS; step_number++)
+        {
+            float value = params[STEP_KNOBS + step_number].getValue();
+            selected_track->setParameter(selected_parameter_lock_id, step_number, value);
+        }
+
+        //
+        // Clock and step features
+        //
+        if (step_trigger.process(inputs[STEP_INPUT].getVoltage(), constants::gate_low_trigger, constants::gate_high_trigger))
+        {
+            if (clock_counter == clock_division)
+            {
+                if (first_step == false) // If not the first step
+                {
+                    // Step all of the tracks
+                    for (unsigned int i = 0; i < NUMBER_OF_TRACKS; i++)
+                    {
+                        selected_memory_slot->tracks[i].step();
+                    }
+                }
+                else
+                {
+                    first_step = false;
+                }
+
+                // Trigger the samples
+                // ===================
+                // This may or may not actually trigger based on the track button
+                // status and the probability parameter lock.
+                for (unsigned int i = 0; i < NUMBER_OF_TRACKS; i++)
+                {
+                    // track_triggers are used to send values to the expander
+                    this->track_triggers[i] = this->trigger(i);
+                }
+
+                // Step the visual playback indicator (led) as well
+                playback_step = selected_memory_slot->tracks[track_index].getPosition();
+
+                // Reset clock division counter
+                clock_counter = 0;
+            }
+            else
+            {
+                // Manage ratcheting
+                for (unsigned int i = 0; i < NUMBER_OF_TRACKS; i++)
+                {
+                    if (notMuted(i))
+                        this->track_triggers[i] = selected_memory_slot->tracks[i].ratchety();
+                }
+            }
+            clock_counter++;
+        }
+
+        float mix_left_output = 0;
+        float mix_right_output = 0;
+
+        for (unsigned int track_index = 0; track_index < NUMBER_OF_TRACKS; track_index++)
+        {
+            processTrack(track_index, &mix_left_output, &mix_right_output);
+        }
+
+        // Read master volume knob
+        float master_volume = params[MASTER_VOLUME].getValue() * 8.0;
+
+        // Summed output voltages at stereo outputs
+        outputs[AUDIO_OUTPUT_LEFT].setVoltage(mix_left_output * master_volume);
+        outputs[AUDIO_OUTPUT_RIGHT].setVoltage(mix_right_output * master_volume);
+
+        if (expander_connected)
+            writeToExpander();
+
+        // Update step lights
+        for (int i = 0; i < NUMBER_OF_STEPS; i++)
+        {
+            bool isActive = selected_track->getValue(i);
+            bool isCurrent = (playback_step == (unsigned int)i);
+            
+            // Set brightness based on step state
+            float brightness = isActive ? (isCurrent ? 1.0f : 0.5f) : 0.0f;
+            lights[STEP_LIGHTS + i].setBrightness(brightness);
+        }
+
+        // Update memory slot lights
+        for (int i = 0; i < NUMBER_OF_MEMORY_SLOTS; i++) {
+            lights[MEMORY_SLOT_LIGHTS + i].setBrightness(i == (int)memory_slot_index ? 1.0f : 0.0f);
+        }
+
+        // Button lights
+        bool copyGate = copyPulse.process(args.sampleTime);
+        lights[COPY_LIGHT].setSmoothBrightness(copyGate, args.sampleTime);
+
+        bool pasteGate = pastePulse.process(args.sampleTime);
+        lights[PASTE_LIGHT].setSmoothBrightness(pasteGate, args.sampleTime);
+    }
+

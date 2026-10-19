@@ -1,0 +1,14 @@
+ docs/api.md                       |   4 ++
+ docs/parameter-types.md           |   5 ++
+ src/click/__init__.py             |   1 +
+ src/click/types.py                |  62 +++++++++++++++++++++++
+ tests/test_info_dict.py           |   5 ++
+ tests/test_types/test_Duration.py | 103 ++++++++++++++++++++++++++++++++++++++
+ 6 files changed, 180 insertions(+)
+
+M	docs/api.md
+M	docs/parameter-types.md
+M	src/click/__init__.py
+M	src/click/types.py
+M	tests/test_info_dict.py
+A	tests/test_types/test_Duration.py

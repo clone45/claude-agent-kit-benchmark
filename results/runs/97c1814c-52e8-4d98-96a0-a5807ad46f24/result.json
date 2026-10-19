@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 45243,
+  "stop_reason": "end_turn",
+  "session_id": "a4712155-83e5-4c07-862c-d2fc4bbf3045",
+  "total_cost_usd": 0.20098860000000002,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 8259,
+    "cache_read_input_tokens": 170703,
+    "output_tokens": 5036,
+    "output_tokens_details": {
+      "thinking_tokens": 1368
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 8259,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 5036,
+      "cacheReadInputTokens": 170703,
+      "cacheCreationInputTokens": 8259,
+      "webSearchRequests": 0,
+      "costUSD": 0.20098860000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1368,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Blocked on me:** nothing. One part of the brief couldn't be met as written: `style` is now 115 lines, not under 60. Its docstring alone is 80 lines, and it's the published API documentation (docs are built from it), so I left it alone. The code part (signature plus body) is now about 35 lines. If you want the whole function under 60, the only way is to shorten or move that docstring. That's your call, not a refactor decision.\n\n**Changed** (`src/click/termui.py` only, not committed):\n- The color lookup and validation (named, bright, 256-color and RGB, plus the `ValueError` message) was already in its own private function, `_interpret_color`. I left it as it was.\n- I added two private helpers next to it:\n  - `_color_sequence(color, offset=0)` returns `\"\"` for `None`, otherwise the full escape code built by `_interpret_color`. The offset is 10 for background colors.\n  - `_toggle_sequence(value, on, off)` returns `\"\"` for `None`, otherwise the \"on\" or \"off\" code depending on whether the value is truthy (same as before).\n- The body of `style` is now one list of the parts in a fixed order (fg, bg, the eight attributes, text, optional reset), joined at the end. The ten `if \u2026 is not None: bits.append(...)` blocks are gone. A short comment notes that items run in order, so a bad `fg` is still reported before a bad `bg`. Following your no-names-as-keys rule, the on/off codes are passed straight to the helper rather than looked up by attribute name.\n\n**Verified:**\n- I compared the original `style` (taken from `HEAD`) with the new one on 31,401 inputs: valid and invalid colors, `bool` and `float` values, lists, short tuples, non-`str` text, every combination of the eight attributes, `reset` on and off, and 20k random combinations. Output, exception type and exception message were identical every time. The signature, type annotations and docstring are also identical. The script is `.claude/tmp/diffcheck.py`.\n- `ruff check src tests` and `ruff format --check src tests` both pass, and `mypy` reports no issues in 29 files.\n- Full test suite: 2262 passed, 24 skipped, 1 xfailed, 31000 deselected in 6.09s. The deselections come from the project's pytest setup; I didn't touch it.\n\n**Found:**\n- The brief assumed the color handling was inside `style`, but it had already been extracted, so the real work was the repeated per-attribute code.\n- The scratch files `.claude/tmp/termui_orig.py` and `diffcheck.py` are still there; that folder is gitignored, so they can stay or be deleted.",
+  "ttft_ms": 1719,
+  "type": "result",
+  "duration_ms": 55120,
+  "uuid": "a89cd138-5629-4c13-896f-007c0cd6a654",
+  "ttft_stream_ms": 944,
+  "time_to_request_ms": 85,
+  "first_content_frame_ms": 945,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

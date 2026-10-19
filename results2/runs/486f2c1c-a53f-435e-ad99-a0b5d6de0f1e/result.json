@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 235820,
+  "stop_reason": "end_turn",
+  "session_id": "7e68b882-0a15-4ff6-b2bb-f2a357f68afc",
+  "total_cost_usd": 1.3847265999999998,
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 6542,
+    "cache_read_input_tokens": 250949,
+    "output_tokens": 2575,
+    "output_tokens_details": {
+      "thinking_tokens": 1044
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 6542,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 76,
+      "outputTokens": 18408,
+      "thinkingTokens": 6239,
+      "cacheReadInputTokens": 2032713,
+      "cacheCreationInputTokens": 76215,
+      "webSearchRequests": 0,
+      "costUSD": 1.3847265999999998,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 3,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The per-step chance is already in the tree exactly as you specified, so I changed nothing. It came in with an earlier checkpoint, `bd9d877` (F1). The compile check and all tests pass.\n\n**Blocked on me**\nNothing.\n\n**Changed**\nNothing. `git status` is clean.\n\n**Verified**\nEach spec item against `src/modules/Euclid/EuclidEngine.hpp`:\n- **`struct Rng`** (lines 172\u2013192): starts at `0x9E3779B9`; `seed(0)` falls back to that value; `next()` is the 13/17/5 xorshift and stores its result; `percent()` is `next() % 100`.\n- **`Sequencer::rng`** (228) is a public member.\n- **Six-argument `process`** (275\u2013278) just calls the seven-argument one with chance 100.\n- **Seven-argument `process`** (283\u2013335):\n  - It clamps `chance` to 0..100 and works out the outcome once per sample, only when the playhead landed on a step through a reset or an accepted clock.\n  - The roll is `lost = hit && chance < 100 && (chance == 0 || rng.percent() >= chance)`. Because of short-circuiting, a rest and chance 100 never roll, chance 0 loses without rolling, and anything in between makes exactly one `percent()` call.\n  - `lost` lasts for the whole stay and idle samples never re-roll, so `gate = \u2026 && !lost` stays low until the playhead moves.\n  - `gate_gap` still comes from `gate_high`, and the pattern table is never written.\n- **`load()`** (248\u2013254) clears `lost` and doesn't roll.\n- **Header comment:** the CHANCE paragraph (lines 37\u201345) describes this rule.\n- **Tests:** `chanceTests` in `tests/euclid/engine_test.cpp` (521\u2013733) covers all four cases you asked for:\n  - six-argument form unchanged: 542\u2013544;\n  - chance 0: 562\u2013576;\n  - seeded determinism, checked against a replica generator: 617\u2013622;\n  - a lost roll holding the gate low until the next clock, which then re-rolls: 659\u2013677.\n\n  It also covers the clamping, a reset onto a lost step 1, landing on a rest, the table being left alone, and `load()`.\n\nChecks run:\n- `bash scripts/vg_check.sh compile Euclid` passes. That covers the engine, though no file was edited.\n- `bash scripts/vg_check.sh tests` exits 0: `pattern_test` 63/63, `engine_test` 202/202, `seq3_parity_test` 36/36, and all the timeline suites pass.\n\n**Found**\nTwo behaviours your spec doesn't decide, both already written down in the engine's comments:\n- **Two landings in one sample:** with a 0-sample window, a reset and a clock can both land in the same sample. The engine rolls once, for the step it ends on.\n- **Pattern changes during a stay:** if a ROT change turns the current step from a rest into a hit, GATE goes high without a roll. A stay that lost its roll stays low whatever the pattern does.",
+  "ttft_ms": 7562,
+  "type": "result",
+  "duration_ms": 39030,
+  "uuid": "8dde31f7-6b34-4168-9235-f1b4e43b8742",
+  "ttft_stream_ms": 2648,
+  "time_to_request_ms": 106,
+  "first_content_frame_ms": 2648,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

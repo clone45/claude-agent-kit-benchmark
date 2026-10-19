@@ -1,0 +1,207 @@
+{
+  "run_id": "11514f3e-3e9e-49d9-85b7-e4853ed4a749",
+  "blind_id": "83e48f3e-650a-4840-b8fa-fe06f0a60a09",
+  "session_id": "79cf4d9d-bb00-44d8-b6e8-acb13dd895ce",
+  "task_id": "5391cc70-e2f5-4574-9845-96914d95eb34",
+  "task_label": "B1",
+  "task_type": "bugfix",
+  "task_length": "short",
+  "condition_id": "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9",
+  "condition_label": "B",
+  "rep_index": 0,
+  "session_mode": "fresh",
+  "session_mode_id": "dc3d4fc2-05ef-4260-af89-c52ea56ecd02",
+  "chain_id": null,
+  "chain_step": null,
+  "branch": "t-5391cc70-e2f5-4574-9845-96914d95eb34-b",
+  "base_commit": "cb21aabf460b7da5f636b1d7df834b34dbca9b9c",
+  "checkpoint_commit": "4048be4d46bc4b163797b503e0ce236b45576427",
+  "status": "completed",
+  "process": {
+    "rc": 0,
+    "wall_s": 64.0,
+    "timed_out": false,
+    "started_at": "2026-10-19T03:16:01.584041+00:00",
+    "ended_at": "2026-10-19T03:17:05.605306+00:00"
+  },
+  "exit_code": 0,
+  "result_subtype": "success",
+  "is_error": false,
+  "num_turns": 10,
+  "duration_ms": 60369,
+  "duration_api_ms": 38786,
+  "claude_total_cost_usd": 0.2956942,
+  "claude_cost_cumulative": false,
+  "usage_is_cumulative": true,
+  "cost": {
+    "by_model": {
+      "claude-opus-5-5": {
+        "input_tokens": 18,
+        "cache_read_tokens": 249351,
+        "cache_create_tokens": 23834,
+        "output_tokens": 2754,
+        "thinking_tokens": 626,
+        "cost_input_side_usd": 0.240614,
+        "cost_output_usd": 0.05508,
+        "cost_usd": 0.295694,
+        "claude_cost_usd": 0.2956942,
+        "basis": "stream_per_call",
+        "context_window": 1000000
+      }
+    },
+    "total_usd": 0.295694,
+    "unpriced_models": []
+  },
+  "model_usage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 2754,
+      "cacheReadInputTokens": 249351,
+      "cacheCreationInputTokens": 23834,
+      "webSearchRequests": 0,
+      "costUSD": 0.2956942,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 626,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "model_usage_cumulative": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 2754,
+      "cacheReadInputTokens": 249351,
+      "cacheCreationInputTokens": 23834,
+      "webSearchRequests": 0,
+      "costUSD": 0.2956942,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 626,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "stream": {
+    "per_model": {
+      "claude-opus-5-5": {
+        "calls": 9,
+        "input": 18,
+        "cache_read": 249351,
+        "cache_create": 23834,
+        "cache_create_5m": 0,
+        "cache_create_1h": 23834,
+        "main_calls": 9,
+        "sub_calls": 0
+      }
+    },
+    "main_api_calls": 9,
+    "sub_api_calls": 0,
+    "sub_calls_by_type": {},
+    "context_end_tokens": 35290,
+    "context_max_tokens": 35290,
+    "shunt_denials": 0,
+    "tool_errors": 0,
+    "permission_denied_events": 0,
+    "api_retries": 0,
+    "api_retry_errors": []
+  },
+  "context_window": 1000000,
+  "context_end_ratio": 0.03529,
+  "transcript": {
+    "records": 98,
+    "compactions": 0,
+    "compaction_meta": [],
+    "main_api_calls": 9,
+    "main_output_tokens": 2754,
+    "models": {
+      "claude-opus-5-5": 9
+    }
+  },
+  "transcripts_found": {
+    "main": true,
+    "subagents": 0
+  },
+  "subagents": [],
+  "rework": {
+    "refuter_runs": 0,
+    "refuter_fail": 0,
+    "builder_runs": 0,
+    "refuter_verdicts": []
+  },
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "init_plugins": [
+    "agent-kit",
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring"
+  ],
+  "init_agents": [
+    "agent-kit:builder",
+    "agent-kit:bulk-reader",
+    "agent-kit:code-writer",
+    "agent-kit:debugger",
+    "agent-kit:refuter",
+    "agent-kit:researcher",
+    "agent-kit:scout",
+    "claude",
+    "Explore",
+    "general-purpose",
+    "Plan",
+    "statusline-setup"
+  ],
+  "init_model": "claude-opus-5-5",
+  "init_permission_mode": "bypassPermissions",
+  "diff": {
+    "diff_bytes": 425,
+    "files_changed": [
+      "src/modules/Euclid/EuclidEngine.hpp"
+    ]
+  },
+  "checks": {
+    "hidden": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "ALL PASS (0 failures)"
+    },
+    "tests": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "ALL PASS (0 failures)"
+    },
+    "compile_euclid": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "ok   Euclid.cpp"
+    },
+    "all_pass": true
+  },
+  "final_text_chars": 1984
+}

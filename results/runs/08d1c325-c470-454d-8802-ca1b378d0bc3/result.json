@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 70561,
+  "stop_reason": "end_turn",
+  "session_id": "3b0fe429-f042-4d01-af0e-ff221b9feb42",
+  "total_cost_usd": 0.4188236,
+  "usage": {
+    "input_tokens": 20,
+    "cache_creation_input_tokens": 27180,
+    "cache_read_input_tokens": 275118,
+    "output_tokens": 7314,
+    "output_tokens_details": {
+      "thinking_tokens": 1392
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 27180,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 20,
+      "outputTokens": 7314,
+      "cacheReadInputTokens": 275118,
+      "cacheCreationInputTokens": 27180,
+      "webSearchRequests": 0,
+      "costUSD": 0.4188236,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1392,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've added `click.Duration`. It turns strings like `1h30m` into a `datetime.timedelta`, and every case in your spec behaves as written. The full test suite passes (2309 passed, 24 skipped, 1 xfailed; the 31000 deselected are stress tests the project config excludes by default). ruff and mypy both pass.\n\n**What changed**\n- **`src/click/types.py`**: new `Duration` class, placed right after `DateTime`.\n  - A `timedelta` is returned unchanged, and an `int` counts as seconds.\n  - A string is either a bare whole number (seconds) or matched against one pattern with optional `d`, `h`, `m`, `s` groups in that order. Because the order is fixed and each group is optional, out-of-order and repeated units like `30m1h` and `1h1h` are rejected without extra code.\n  - There's a separate check for when no group matched, so `\"\"` and whitespace-only input are rejected too.\n  - All failures go through `self.fail`, which raises `BadParameter` with the offending value in the message.\n  - The name, `to_info_dict()` output, `repr` and help metavar all match the spec. The metavar comes from Click's existing default (the type name in upper case), so it needed no code of its own.\n- **`src/click/__init__.py`**: exports `Duration`.\n- **Docs**: added `Duration` next to `DateTime` in `docs/parameter-types.md` and `docs/api.md`.\n- **Tests**: new `tests/test_types/test_Duration.py` covers every accepted and rejected example in your spec. It also covers a command using `--timeout` (valid value, invalid value with exit code 2, a default, and `--timeout DURATION` in help), an argument's metavar, and checks that failures go through `fail`. I also added a `Duration` case to `tests/test_info_dict.py`.\n\n**Decisions your spec didn't cover**\n- **`True` and `False` are rejected.** Python treats them as `int`, but taking `True` to mean \"1 second\" would be surprising.\n- **Only plain ASCII digits and unit letters are accepted.** This stops look-alikes from matching, such as Arabic-Indic digits or `\u017f` (a character that ignore-case matching treats as `s`).\n- **Values too big for `timedelta` fail with a clear message** (e.g. `'9999999999d' is too large a duration.`) rather than crashing with an `OverflowError`.\n- **No space is allowed between a number and its unit**, so `1 h` is rejected. Spaces between groups (`1h 30m`) are fine.\n- **A trailing number with no unit is rejected**, so `1h30` fails. Only a string that is just a number means seconds.\n- **The docstring says `.. versionadded:: 8.6`**, based on the version in `pyproject.toml` (`8.6.0.dev`).\n\nThere's no changelog file in this tree, so I didn't add a changelog entry. Nothing is committed; the changes are in the working tree.",
+  "ttft_ms": 2616,
+  "type": "result",
+  "duration_ms": 79163,
+  "uuid": "e9cd289e-286b-4f26-b1c5-3eee2a29e8bd",
+  "ttft_stream_ms": 1604,
+  "time_to_request_ms": 63,
+  "first_content_frame_ms": 1604,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

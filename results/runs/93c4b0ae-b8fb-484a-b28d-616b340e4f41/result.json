@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 19100,
+  "stop_reason": "end_turn",
+  "session_id": "2720d85f-6945-4518-93fc-24ccd926199c",
+  "total_cost_usd": 0.0825006,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 4157,
+    "cache_read_input_tokens": 89423,
+    "output_tokens": 1566,
+    "output_tokens_details": {
+      "thinking_tokens": 215
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 4157,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 1566,
+      "cacheReadInputTokens": 89423,
+      "cacheCreationInputTokens": 4157,
+      "webSearchRequests": 0,
+      "costUSD": 0.0825006,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 215,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "It's decided during argument parsing, before the callback ever gets a chance to run. All references are in `src/click/core.py` unless noted.\n\n1. **The default is set in `Group.__init__` (lines 1785\u20131789).** If you don't pass `no_args_is_help`, it is set to `not invoke_without_command`. A plain `@click.group()` has `invoke_without_command=False`, so it ends up with `no_args_is_help=True`.\n2. **The decision is made in `Group.parse_args` (lines 2038\u20132040).** If there are no args, `no_args_is_help` is true and `ctx.resilient_parsing` is off (it's on during shell completion), it raises `NoArgsIsHelpError(ctx)`. `Command.parse_args` (lines 1396\u20131398) has the same check for plain commands, where the default is `False`.\n3. **It happens before the callback.** `Command.main` (line 1591) calls `make_context`, which calls `parse_args` (line 1393). So the exception fires before `self.invoke(ctx)` on line 1592, and the callback never runs.\n4. **The help text comes from the exception.** In `src/click/exceptions.py`, `NoArgsIsHelpError.__init__` (around lines 332\u2013336) uses `ctx.get_help()` as its message. It is a subclass of `UsageError`, so the exit code is 2.\n5. **`main` displays it.** `Command.main` catches it as a `ClickException` (lines 1629\u20131633) and calls `e.show()`, which prints the help to stderr without the usual \"Error:\" prefix. In non-standalone mode the exception is re-raised instead.\n6. **How the two flags combine.** If `invoke_without_command=True` (so `no_args_is_help` defaults to `False`), parsing succeeds. Then `Group.invoke` (lines 2058\u20132063) sees there's no subcommand and runs the group's callback through `super().invoke`.\n7. **If both are false** (passed explicitly), `Group.invoke` calls `ctx.fail(\"Missing command.\")` (line 2064) and you get a usage error instead of help.\n8. **If both are true** (passed explicitly), `no_args_is_help` wins, because `parse_args` runs before `invoke`. You get help even though the callback is allowed to run without a subcommand.",
+  "ttft_ms": 4148,
+  "type": "result",
+  "duration_ms": 19338,
+  "uuid": "86eb8d6b-3fd8-4858-9540-1c7bddc20310",
+  "ttft_stream_ms": 3059,
+  "time_to_request_ms": 66,
+  "first_content_frame_ms": 3059,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

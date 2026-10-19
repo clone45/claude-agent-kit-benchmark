@@ -1,0 +1,443 @@
+diff --git a/src/modules/VXDrumSequencer/VXDrumSequencerEngine.hpp b/src/modules/VXDrumSequencer/VXDrumSequencerEngine.hpp
+index 93f11e1..54f27a0 100644
+--- a/src/modules/VXDrumSequencer/VXDrumSequencerEngine.hpp
++++ b/src/modules/VXDrumSequencer/VXDrumSequencerEngine.hpp
+@@ -38,6 +38,13 @@
+ // keeps its -1-then-advance shape: the next member's step 1 is played by the
+ // next clock, not by the hand-off.
+ //
++// DIRECTION (2026-10-18): the playhead runs FORWARD (the default, the
++// source's only direction), BACKWARD, or PENDULUM (out to the last step and
++// back to step 1, the end steps not repeated). Only Playhead::advance() reads
++// it; step 1 stays the reset step and the hand-off landing in every
++// direction, so the reset rule above is unchanged. Sequencer::setDirection()
++// is the setter; out-of-range values are FORWARD.
++//
+ // Timing rules carried over from the module unchanged (brief-clock-reset §5-§7
+ // and rack-port-design.md): the period is measured only from a valid anchor
+ // inside the (1 sample, 4 s) window and survives a reset, ratchets need a
+@@ -122,24 +129,81 @@ struct ClockFollower
+ // purpose, the chain hand-off (chain-foundations.md §2): rewind() to -1 and
+ // the next clock's advance lands on the next member's step 1.
+ //
++// DIRECTION: which way advance() moves. The hand-off (-1) lands on step 1 in
++// every direction. A position at or beyond a shrunken length goes to step 1
++// FORWARD (the wrap) and to the last step BACKWARD and PENDULUM. PENDULUM
++// turns AT the end steps, so each is played once per pass: length 4 from
++// step 1 runs 1 2 3 4 3 2 1 2 3 4 3 ... (positions 0 1 2 3 2 1 0 1 ...).
++//
++enum Direction { FORWARD = 0, BACKWARD = 1, PENDULUM = 2 };
++
+ struct Playhead
+ {
+     int position = 0;                // the current step; -1 only between a hand-off and the next clock
++    int direction = FORWARD;         // a Direction; anything else advances FORWARD
++    bool moving_back = false;        // PENDULUM: the next move from an inner step is backward
+ 
+     // Advance one step (source: vxd_step + vxd_step_at, vxdrums.c:399-421,
+-    // minus swing). From -1 (a hand-off) this lands on step 0. A length that
+-    // shrank below the position wraps.
++    // minus swing). From -1 (a hand-off) this lands on step 0.
+     int advance(int length)
+     {
+         length = std::max(1, std::min(length, STEPS));
+-        int next = position + 1;
+-        if (next < 0 || next >= length) next = 0;
+-        position = next;
++
++        if (position < 0)
++        {
++            position = 0;
++            moving_back = false;
++            return position;
++        }
++
++        switch (direction)
++        {
++            case BACKWARD:
++                position = (position == 0 || position >= length) ? length - 1 : position - 1;
++                moving_back = true;
++                break;
++
++            case PENDULUM:
++                if (length == 1)
++                {
++                    position = 0;
++                    moving_back = false;
++                }
++                else if (position >= length)
++                {
++                    position = length - 1;
++                    moving_back = true;
++                }
++                else
++                {
++                    // Turn at the ends; between them keep the current heading
++                    // (which FORWARD / BACKWARD also keep, so a switch to
++                    // PENDULUM carries on the way the playhead was going).
++                    if (position == length - 1) moving_back = true;
++                    else if (position == 0) moving_back = false;
++                    position += moving_back ? -1 : 1;
++                }
++                break;
++
++            default:                 // FORWARD
++            {
++                int next = position + 1;
++                if (next >= length) next = 0;
++                position = next;
++                moving_back = false;
++                break;
++            }
++        }
+         return position;
+     }
+ 
+-    // Reset, implicit or explicit: step 1 is current.
+-    void reset() { position = 0; }
++    // Reset, implicit or explicit: step 1 is current, and a PENDULUM's next
++    // move is forward.
++    void reset()
++    {
++        position = 0;
++        moving_back = false;
++    }
+ 
+     // Hand-off only: the next advance lands on step 0.
+     void rewind() { position = -1; }
+@@ -420,6 +484,16 @@ struct Sequencer
+     Rng rng;                         // the chance rolls
+     vgLib_v2::ResetClockWindow window;   // the standard's 1 ms clock-ignore window after a reset
+ 
++    // Playback direction, on the playhead. Values outside FORWARD..PENDULUM
++    // are stored as FORWARD. Takes effect on the next advance; the position
++    // is not moved.
++    void setDirection(int d)
++    {
++        head.direction = (d >= FORWARD && d <= PENDULUM) ? d : FORWARD;
++    }
++
++    int direction() const { return head.direction; }
++
+     // True after process() when a step fired on that sample: a clocked
+     // advance, or a reset() the caller made earlier on the same sample.
+     bool fired_this_sample = false;
+diff --git a/tests/vx_drum_sequencer/.gitignore b/tests/vx_drum_sequencer/.gitignore
+index 3bb2a12..a38a378 100644
+--- a/tests/vx_drum_sequencer/.gitignore
++++ b/tests/vx_drum_sequencer/.gitignore
+@@ -6,3 +6,4 @@ types_test
+ tweak_ladder
+ tweak_test
+ seq3_parity_test
++direction_test
+diff --git a/tests/vx_drum_sequencer/README.md b/tests/vx_drum_sequencer/README.md
+index 00b5510..4db3abc 100644
+--- a/tests/vx_drum_sequencer/README.md
++++ b/tests/vx_drum_sequencer/README.md
+@@ -13,6 +13,7 @@ one `-I` below is still enough.
+     g++ -std=c++11 -O2 -I ../../src/modules/VXDrumSequencer -o chain_test  chain_test.cpp  && ./chain_test
+     g++ -std=c++11 -O2 -I ../../src/modules/VXDrumSequencer -o tweak_test  tweak_test.cpp  && ./tweak_test
+     g++ -std=c++11 -O2 -I ../../src/modules/VXDrumSequencer -o seq3_parity_test seq3_parity_test.cpp && ./seq3_parity_test
++    g++ -std=c++11 -O2 -I ../../src/modules/VXDrumSequencer -o direction_test direction_test.cpp && ./direction_test
+     g++ -std=c++11 -O2 -I ../../src/modules/VXDrumSequencer -o tweak_ladder tweak_ladder.cpp && ./tweak_ladder   # not a test: prints the ladders
+ 
+ - **types_test.cpp** — the per-pad model (`Step`, `Memory`, `Bank`): the
+@@ -78,6 +79,18 @@ one `-I` below is still enough.
+   Impromptu-Clocked-at-defaults scenarios the sync report was about: stop /
+   reset / run (no edge at run start, beat 2 is step 2), a reset in the
+   clock's high half while running, and a same-sample reset + clock.
++- **direction_test.cpp** — the playback direction (`Direction`,
++  `Playhead::direction`, `Sequencer::setDirection` / `direction()`).
++  FORWARD unchanged (wrap, a shrunken length wraps to step 1, the clamps);
++  BACKWARD (step 1 wraps to the last step, a position at or beyond a
++  shrunken length goes to the last step); PENDULUM at lengths 1-4 (1 2 3 2 1
++  0 1 ... for length 4, ends not repeated, length 1 always 0), a position at
++  or beyond a shrunken length going to the last step then backward, and a
++  shrink mid-run; the hand-off (-1) landing on step 1 in every direction and
++  PENDULUM moving forward after it; `reset()` making PENDULUM's next move
++  forward; `setDirection` storing on the playhead and turning anything
++  outside 0..2 into FORWARD; and each direction end to end through
++  `process()` after a reset, a rewind and a hand-off.
+ - **tweak_test.cpp** — `tweakMemory` invariants (level 0 is the base, one
+   pad per level per lane, lanes outside the mask and steps past the length
+   untouched, the kick on the 1 survives, soft adds carry the soft chance) and
+diff --git a/tests/vx_drum_sequencer/direction_test.cpp b/tests/vx_drum_sequencer/direction_test.cpp
+new file mode 100644
+index 0000000..4c1df13
+--- /dev/null
++++ b/tests/vx_drum_sequencer/direction_test.cpp
+@@ -0,0 +1,273 @@
++// VX Drum Sequencer engine: the playback direction. Playhead::advance() under
++// FORWARD, BACKWARD and PENDULUM, the hand-off (-1) landing on step 1 in every
++// direction, a length shrunk below the playhead, reset() making PENDULUM's
++// next move forward, and Sequencer::setDirection() / direction() with its
++// clamp, end to end through process().
++//
++//   g++ -std=c++11 -O2 -I ../../src/modules/VXDrumSequencer -o direction_test direction_test.cpp && ./direction_test
++
++#include <string>
++
++#include "VXDrumSequencerEngine.hpp"
++#include "check.hpp"
++
++using namespace vx_drum_sequencer;
++
++// Advance `p` once per expected position, checking each return value and the
++// stored position.
++static void expectRun(const char* what, Playhead& p, int length, const int* want, int n)
++{
++    for (int i = 0; i < n; i++)
++    {
++        const std::string label = std::string(what) + " #" + std::to_string(i);
++        const int got = p.advance(length);
++        checkEq(label.c_str(), got, want[i]);
++        checkEq((label + " position").c_str(), p.position, want[i]);
++    }
++}
++
++static Playhead at(int direction, int position)
++{
++    Playhead p;
++    p.direction = direction;
++    p.position = position;
++    return p;
++}
++
++static void testDefaults()
++{
++    std::printf("defaults\n");
++    Playhead p;
++    checkEq("Playhead direction defaults to FORWARD", p.direction, FORWARD);
++    checkEq("enum FORWARD", FORWARD, 0);
++    checkEq("enum BACKWARD", BACKWARD, 1);
++    checkEq("enum PENDULUM", PENDULUM, 2);
++    Sequencer s;
++    checkEq("Sequencer direction defaults to FORWARD", s.direction(), FORWARD);
++}
++
++static void testForward()
++{
++    std::printf("FORWARD\n");
++    Playhead p = at(FORWARD, 0);
++    const int w[] = { 1, 2, 3, 0, 1, 2, 3, 0 };
++    expectRun("forward length 4", p, 4, w, 8);
++
++    Playhead one = at(FORWARD, 0);
++    const int w1[] = { 0, 0, 0 };
++    expectRun("forward length 1", one, 1, w1, 3);
++
++    Playhead shrunk = at(FORWARD, 10);
++    checkEq("forward shrink wraps to step 1", shrunk.advance(4), 0);
++
++    Playhead clamp = at(FORWARD, STEPS - 1);
++    checkEq("forward length above STEPS clamps", clamp.advance(STEPS + 5), 0);
++    Playhead clamp0 = at(FORWARD, 0);
++    checkEq("forward length 0 clamps to 1", clamp0.advance(0), 0);
++
++    Playhead bogus = at(7, 1);
++    checkEq("an out-of-range direction on the Playhead advances forward", bogus.advance(4), 2);
++    checkEq("... and wraps forward", bogus.advance(3), 0);
++}
++
++static void testBackward()
++{
++    std::printf("BACKWARD\n");
++    Playhead p = at(BACKWARD, 0);
++    const int w[] = { 3, 2, 1, 0, 3, 2, 1, 0 };
++    expectRun("backward length 4 from step 1 wraps to the last step", p, 4, w, 8);
++
++    Playhead one = at(BACKWARD, 0);
++    const int w1[] = { 0, 0, 0 };
++    expectRun("backward length 1", one, 1, w1, 3);
++
++    Playhead atLen = at(BACKWARD, 4);
++    checkEq("backward position == length goes to the last step", atLen.advance(4), 3);
++    Playhead beyond = at(BACKWARD, 12);
++    checkEq("backward position beyond length goes to the last step", beyond.advance(4), 3);
++    checkEq("... then steps back", beyond.advance(4), 2);
++
++    Playhead clamp = at(BACKWARD, 0);
++    checkEq("backward length above STEPS wraps to STEPS - 1", clamp.advance(STEPS + 5), STEPS - 1);
++}
++
++static void testPendulum()
++{
++    std::printf("PENDULUM\n");
++    Playhead p = at(PENDULUM, 0);
++    const int w[] = { 1, 2, 3, 2, 1, 0, 1, 2, 3, 2, 1, 0, 1 };
++    expectRun("pendulum length 4 (the spec's sequence)", p, 4, w, 13);
++
++    Playhead two = at(PENDULUM, 0);
++    const int w2[] = { 1, 0, 1, 0, 1 };
++    expectRun("pendulum length 2", two, 2, w2, 5);
++
++    Playhead three = at(PENDULUM, 0);
++    const int w3[] = { 1, 2, 1, 0, 1, 2, 1, 0 };
++    expectRun("pendulum length 3", three, 3, w3, 8);
++
++    Playhead one = at(PENDULUM, 0);
++    const int w1[] = { 0, 0, 0, 0 };
++    expectRun("pendulum length 1 always 0", one, 1, w1, 4);
++
++    Playhead atLen = at(PENDULUM, 4);
++    const int ws[] = { 3, 2, 1, 0, 1 };
++    expectRun("pendulum position == length: last step, then backward", atLen, 4, ws, 5);
++
++    Playhead beyond = at(PENDULUM, 20);
++    const int wb[] = { 5, 4, 3 };
++    expectRun("pendulum position beyond length: last step, then backward", beyond, 6, wb, 3);
++
++    // Mid-run shrink while moving forward: position 5 on a now 4-step length.
++    Playhead mid = at(PENDULUM, 0);
++    const int wm[] = { 1, 2, 3, 4, 5 };
++    expectRun("pendulum length 8 up to step 6", mid, 8, wm, 5);
++    const int wm2[] = { 3, 2, 1, 0, 1 };
++    expectRun("pendulum shrink to 4 under the playhead", mid, 4, wm2, 5);
++
++    // Length shrinking to exactly the playhead's next-to-last: turns there.
++    Playhead edge = at(PENDULUM, 0);
++    const int we[] = { 1, 2 };
++    expectRun("pendulum length 8 to step 3", edge, 8, we, 2);
++    const int we2[] = { 1, 0, 1 };
++    expectRun("pendulum length shrunk to 3 with the playhead on the last step turns", edge, 3, we2, 3);
++}
++
++static void testHandOff()
++{
++    std::printf("hand-off\n");
++    const int dirs[] = { FORWARD, BACKWARD, PENDULUM };
++    const char* names[] = { "FORWARD", "BACKWARD", "PENDULUM" };
++    for (int i = 0; i < 3; i++)
++    {
++        Playhead p = at(dirs[i], 2);
++        p.rewind();
++        checkEq((std::string("rewind() is -1 under ") + names[i]).c_str(), p.position, -1);
++        checkEq((std::string("hand-off lands on step 1 under ") + names[i]).c_str(), p.advance(4), 0);
++        checkEq((std::string("hand-off lands on step 1 under ") + names[i] + ", length 1").c_str(),
++                at(dirs[i], -1).advance(1), 0);
++    }
++
++    // PENDULUM: after the hand-off the next move is forward, even when the
++    // playhead was heading backward when it was handed off.
++    Playhead p = at(PENDULUM, 0);
++    const int w[] = { 1, 2, 3, 2 };
++    expectRun("pendulum heading back before the hand-off", p, 4, w, 4);
++    p.rewind();
++    const int wh[] = { 0, 1, 2, 3, 2 };
++    expectRun("pendulum after the hand-off: step 1, then forward", p, 4, wh, 5);
++}
++
++static void testReset()
++{
++    std::printf("reset\n");
++    // PENDULUM heading backward from an inner step; reset() makes the next
++    // move forward.
++    Playhead p = at(PENDULUM, 0);
++    const int w[] = { 1, 2, 3, 2 };
++    expectRun("pendulum heading back before reset", p, 4, w, 4);
++    p.reset();
++    checkEq("reset puts step 1 current", p.position, 0);
++    const int wr[] = { 1, 2, 3, 2 };
++    expectRun("pendulum after reset moves forward", p, 4, wr, 4);
++
++    Playhead b = at(BACKWARD, 2);
++    b.reset();
++    checkEq("reset under BACKWARD puts step 1 current", b.position, 0);
++    checkEq("... and BACKWARD from step 1 wraps to the last step", b.advance(4), 3);
++    checkEq("reset keeps the direction", b.direction, BACKWARD);
++
++    // A playhead that was heading back (via BACKWARD) switched to PENDULUM
++    // then reset: still forward from step 1.
++    Playhead s = at(BACKWARD, 0);
++    s.advance(8);                       // 7, heading back
++    s.advance(8);                       // 6
++    s.direction = PENDULUM;
++    checkEq("switch to PENDULUM keeps the heading", s.advance(8), 5);
++    s.reset();
++    checkEq("reset then PENDULUM goes forward", s.advance(8), 1);
++}
++
++// Sequencer::setDirection() and the end-to-end path through process():
++// a reset plays step 1, each clock then advances in the chosen direction.
++static void testSequencer()
++{
++    std::printf("Sequencer\n");
++    Sequencer s;
++    s.setDirection(BACKWARD);
++    checkEq("setDirection(BACKWARD)", s.direction(), BACKWARD);
++    checkEq("... stored on the playhead", s.head.direction, BACKWARD);
++    s.setDirection(PENDULUM);
++    checkEq("setDirection(PENDULUM)", s.direction(), PENDULUM);
++    s.setDirection(FORWARD);
++    checkEq("setDirection(FORWARD)", s.direction(), FORWARD);
++    s.setDirection(PENDULUM);
++    s.setDirection(3);
++    checkEq("setDirection(3) is FORWARD", s.direction(), FORWARD);
++    s.setDirection(PENDULUM);
++    s.setDirection(-1);
++    checkEq("setDirection(-1) is FORWARD", s.direction(), FORWARD);
++    s.setDirection(1000);
++    checkEq("setDirection(1000) is FORWARD", s.direction(), FORWARD);
++
++    const float SR = 48000.f;
++    const int WINDOW = 48;
++    float out[LANES];
++    Memory m;
++    m.length = 4;
++    PlaySource src;
++    src.memory = &m;
++
++    struct Case { int dir; int want[8]; const char* name; };
++    const Case cases[] = {
++        { FORWARD,  { 1, 2, 3, 0, 1, 2, 3, 0 }, "process FORWARD" },
++        { BACKWARD, { 3, 2, 1, 0, 3, 2, 1, 0 }, "process BACKWARD" },
++        { PENDULUM, { 1, 2, 3, 2, 1, 0, 1, 2 }, "process PENDULUM" },
++    };
++    for (const Case& c : cases)
++    {
++        Sequencer q;
++        q.setDirection(c.dir);
++        q.reset(src, WINDOW);
++        q.process(false, src, SR, 48, out);
++        checkEq((std::string(c.name) + " reset plays step 1").c_str(), q.report.position, 0);
++        for (int i = 0; i < 8; i++)
++        {
++            for (int k = 0; k < WINDOW + 10; k++) q.process(false, src, SR, 48, out);
++            q.process(true, src, SR, 48, out);
++            const std::string label = std::string(c.name) + " clock " + std::to_string(i + 1);
++            check((label + " fired").c_str(), q.fired_this_sample);
++            checkEq(label.c_str(), q.report.position, c.want[i]);
++        }
++
++        // An implicit reset (rewind) mid-run: step 1 current, PENDULUM forward.
++        q.rewind(WINDOW);
++        checkEq((std::string(c.name) + " rewind puts step 1 current").c_str(), q.head.position, 0);
++        checkEq((std::string(c.name) + " rewind keeps the direction").c_str(), q.direction(), c.dir);
++        for (int k = 0; k < WINDOW + 10; k++) q.process(false, src, SR, 48, out);
++        q.process(true, src, SR, 48, out);
++        checkEq((std::string(c.name) + " first clock after rewind").c_str(), q.report.position,
++                c.dir == BACKWARD ? 3 : 1);
++
++        // A hand-off: the next clock plays step 1.
++        q.handOff();
++        for (int k = 0; k < 10; k++) q.process(false, src, SR, 48, out);
++        q.process(true, src, SR, 48, out);
++        checkEq((std::string(c.name) + " clock after hand-off plays step 1").c_str(), q.report.position, 0);
++        q.process(true, src, SR, 48, out);
++        checkEq((std::string(c.name) + " clock after that").c_str(), q.report.position,
++                c.dir == BACKWARD ? 3 : 1);
++    }
++}
++
++int main()
++{
++    testDefaults();
++    testForward();
++    testBackward();
++    testPendulum();
++    testHandOff();
++    testReset();
++    testSequencer();
++    return finish("direction_test");
++}

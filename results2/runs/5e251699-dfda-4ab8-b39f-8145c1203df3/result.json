@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 86816,
+  "stop_reason": "end_turn",
+  "session_id": "26dbc92f-15a0-4b55-941d-d0dc8a3278f9",
+  "total_cost_usd": 0.443806,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 8509,
+    "cache_read_input_tokens": 152480,
+    "output_tokens": 1683,
+    "output_tokens_details": {
+      "thinking_tokens": 568
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 8509,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 24,
+      "outputTokens": 6059,
+      "thinkingTokens": 1694,
+      "cacheReadInputTokens": 335570,
+      "cacheCreationInputTokens": 31927,
+      "webSearchRequests": 0,
+      "costUSD": 0.443806,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "All overrides are in `src/modules/VXDrums/VXDrumVoices.hpp` and are reached through `Voices::setShape` (line 2149). There are 18 models: 6 recompute, 7 only store, 3 clamp only, and 2 do something else.\n\n**1. Recompute coefficients (6):**\n- `Clap::setShape` (488) stores without clamping, then calls `updateCoeffs()`, which derives the burst `spacing` from shape (lines 476\u2013478).\n- `SnareSweep::setShape` (1247), `SnareGate::setShape` (1341), `Clap909::setShape` (1454), `ClapLoFi::setShape` (1656) and `ClapGate::setShape` (1756) clamp to 0..1, then call `updateCoeffs()`.\n\n**2. Store only, `shape = v;` (7):**\n- `Ping808` (346), `Snare909` (417), `SineKick` (653), `KickFm` (732), `Snare808` (922), `SnareLayered` (1009), `SnareRing` (1089).\n- Four of these clamp later, when the value is used, instead of in the setter: `KickFm` (760), `Snare808` (961), `SnareRing` (1104, range 1..4) and `KickDist` (851, in group 4).\n\n**3. Clamp to 0..1 without recomputing (3):**\n- `Hat::setShape` (562), `Snare606::setShape` (1168), `ClapTrap::setShape` (1551).\n- `ClapTrap` reads the stored value in `strike()` to randomize each hit's click gaps and levels (lines 1561\u20131563).\n\n**4. Different from all three (2):**\n- `KickDist::setShape` (826) stores shape without clamping and computes its derived `fold = max(0, (shape \u2212 0.6)/0.4)` right there (line 829). It does not call `updateCoeffs()`, so it updates one derived value but isn't a full coefficient recompute.\n- `SampleModel::setShape` (1945) has no `shape` field at all. It writes `start = clamp01(v)`, so SHAPE sets the sample's start position, and nothing is recomputed.",
+  "ttft_ms": 5569,
+  "type": "result",
+  "duration_ms": 24907,
+  "uuid": "96f43bff-3ca8-4e33-b59c-c7b643a01e8a",
+  "ttft_stream_ms": 4818,
+  "time_to_request_ms": 85,
+  "first_content_frame_ms": 4818,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

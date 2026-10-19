@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 76342,
+  "stop_reason": "end_turn",
+  "session_id": "42945aa0-b8c2-453b-bd26-10eee3e1b624",
+  "total_cost_usd": 0.40203600000000006,
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 4337,
+    "cache_read_input_tokens": 113693,
+    "output_tokens": 1162,
+    "output_tokens_details": {
+      "thinking_tokens": 242
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 4337,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 22,
+      "outputTokens": 5282,
+      "thinkingTokens": 946,
+      "cacheReadInputTokens": 318620,
+      "cacheCreationInputTokens": 29073,
+      "webSearchRequests": 0,
+      "costUSD": 0.40203600000000006,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 3,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "All 18 models in `src/modules/VXDrums/VXDrumVoices.hpp` override `setShape`, because `Model::setShape` is pure virtual (line 299). `Voices::setShape` (2149-2153) and line 2217 pass in a value already scaled by `knobNatural` (204).\n\n**1. Recomputes coefficients (calls `updateCoeffs()`)** \u2014 6 models:\n- `Clap::setShape` at 488 stores the value and recomputes without clamping. It is the only member of this group with no clamp.\n- These five clamp to [0,1] with `clampd` and then recompute: `SnareSweep` 1247, `SnareGate` 1341, `Clap909` 1454, `ClapLoFi` 1656, `ClapGate` 1756.\n\n**2. Only stores the value (`shape = v`)** \u2014 7 models: `Ping808` 346, `Snare909` 417, `SineKick` 653, `KickFm` 732, `Snare808` 922, `SnareLayered` 1009, `SnareRing` 1089.\n\n**3. Clamps to [0,1] without recomputing** \u2014 3 models: `Hat` 562, `Snare606` 1168, `ClapTrap` 1551.\n\n**Different from all three:**\n- `KickDist::setShape` (826-830) stores the value without clamping and also derives one field inline, `fold = fastMax(0, (shape \u2212 0.6)/0.4)`. It does not call `updateCoeffs()`, even though its `setDecay` (825) does.\n- `SampleModel::setShape` (1945) never touches a `shape` field. It writes `start = clamp01(v)`, so on this model SHAPE sets the sample start point.",
+  "ttft_ms": 2959,
+  "type": "result",
+  "duration_ms": 17087,
+  "uuid": "34224c68-44fa-4b43-b624-ba47da673152",
+  "ttft_stream_ms": 1993,
+  "time_to_request_ms": 95,
+  "first_content_frame_ms": 1993,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

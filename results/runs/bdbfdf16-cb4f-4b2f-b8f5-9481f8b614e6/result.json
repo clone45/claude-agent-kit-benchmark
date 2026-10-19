@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 93346,
+  "stop_reason": "end_turn",
+  "session_id": "3d303d0e-1062-40c7-ab41-c8b96750971b",
+  "total_cost_usd": 0.419607,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 22571,
+    "cache_read_input_tokens": 196875,
+    "output_tokens": 9980,
+    "output_tokens_details": {
+      "thinking_tokens": 4547
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 22571,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 9980,
+      "cacheReadInputTokens": 196875,
+      "cacheCreationInputTokens": 22571,
+      "webSearchRequests": 0,
+      "costUSD": 0.419607,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 4547,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I split `CliRunner.isolation` into private helpers, and the method is now 55 lines including its docstring, down from about 195. The full test suite passes (2262 passed, 24 skipped, 1 xfailed), and `ruff check`, `ruff format --check` and `mypy` are all clean. Nothing is committed.\n\n**What changed (all in `src/click/testing.py`):**\n\n- **`_IsolatedStreams`**: builds everything `isolation` swaps in. That's the `StreamMixer`, the optional `EchoingStdin` wrapper, the `<stdin>`/`<stdout>`/`<stderr>` text wrappers (same encodings, `errors=\"backslashreplace\"` on stderr, single-character reads when echoing), and the `visible_input`, `hidden_input`, `_getchar` and `should_strip_ansi` replacements. These are the original closures moved over unchanged, so they still look up `sys.stdout`/`sys.stdin` when called.\n- **`_SavedGlobals`**: records every global `isolation` replaces when it is created. `install(streams)` puts the replacements in place; `restore()` puts the originals back in the same order as before (stdout, stderr, stdin, the prompt functions, `_getchar`, both `should_strip_ansi`, `FORCED_WIDTH`, then `pdb.Pdb.__init__`).\n- **`_make_pdb_init(original)`**: the pdb patch that makes the debugger use the real terminal, moved out to module level with its docstring kept.\n- **`_set_environ(key, value)`**: the \"set it, or delete it if `None`\" logic, which was written out twice before (once to apply the env overrides, once to undo them).\n\n`isolation` now does the steps in the same order as before: make the input stream, record the globals, set `FORCED_WIDTH = 80`, call `make_env`, build and install the streams, then apply the env, yield, and in `finally` undo the env and restore the globals.\n\n**Behaviour:** the signature, docstring, annotations and yielded tuple are unchanged, and so is which steps fall inside the `try`. That includes keeping a quirk of the original: if `make_env` raises, `FORCED_WIDTH` stays at 80 and isn't restored. One small difference: the original globals are now recorded a little earlier, before the standard streams are replaced rather than after. Nothing in between touches the termui, utils, compat or pdb globals, so the recorded values are the same.\n\n**Typing:** the four replacement functions aren't annotated at class level on purpose. mypy infers their exact types from the assignments in `__init__`, and plain `Callable[...]` annotations wouldn't type-check against `termui.hidden_prompt_func` and `_compat.should_strip_ansi`. The `# type: ignore` comments from the original are kept where they are still needed.",
+  "ttft_ms": 2617,
+  "type": "result",
+  "duration_ms": 99671,
+  "uuid": "14dad037-6fc6-49b4-9d70-5168451b68d4",
+  "ttft_stream_ms": 1908,
+  "time_to_request_ms": 68,
+  "first_content_frame_ms": 1908,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

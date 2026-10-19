@@ -1,0 +1,91 @@
+diff --git a/src/click/_utils.py b/src/click/_utils.py
+index 05ee2e9..7900b40 100644
+--- a/src/click/_utils.py
++++ b/src/click/_utils.py
+@@ -18,6 +18,21 @@ class Sentinel(enum.Enum):
+     def __repr__(self) -> str:
+         return f"{self.__class__.__name__}.{self.name}"
+ 
++    # Sentinels are singletons, so duplicating one must return the same member.
++    # The default ``Enum`` reduction rebuilds the member from its value, which
++    # is a bare ``object()`` that does not survive copying or pickling.
++
++    def __copy__(self) -> Sentinel:
++        return self
++
++    def __deepcopy__(self, memo: dict[int, t.Any]) -> Sentinel:
++        return self
++
++    def __reduce_ex__(self, protocol: object) -> tuple[t.Any, ...]:
++        # Look the member up on its class when unpickling, like
++        # ``enum.pickle_by_enum_name`` (Python 3.12+).
++        return getattr, (self.__class__, self.name)
++
+ 
+ UNSET: t.Literal[Sentinel.UNSET] = Sentinel.UNSET
+ """Sentinel used to indicate that a value is not set."""
+diff --git a/tests/test_utils/test_sentinel.py b/tests/test_utils/test_sentinel.py
+index 1dd5b15..e3e4c45 100644
+--- a/tests/test_utils/test_sentinel.py
++++ b/tests/test_utils/test_sentinel.py
+@@ -1,6 +1,12 @@
++import copy
++import pickle
+ from decimal import Decimal
+ from fractions import Fraction
+ 
++import pytest
++
++import click
++from click._utils import Sentinel
+ from click._utils import UNSET
+ 
+ 
+@@ -50,3 +56,47 @@ def test_unset_sentinel():
+         assert value is not real_value
+ 
+     assert value not in real_values
++
++
++def _pickle_round_trip(value):
++    return pickle.loads(pickle.dumps(value))
++
++
++DUPLICATORS = pytest.mark.parametrize(
++    "duplicate",
++    (copy.copy, copy.deepcopy, _pickle_round_trip),
++    ids=("copy", "deepcopy", "pickle"),
++)
++
++
++@pytest.mark.parametrize("sentinel", tuple(Sentinel))
++@DUPLICATORS
++def test_sentinel_duplication_preserves_identity(sentinel, duplicate):
++    """Sentinels are singletons: copying or pickling one returns the member."""
++    assert duplicate(sentinel) is sentinel
++
++
++@pytest.mark.parametrize("sentinel", tuple(Sentinel))
++@pytest.mark.parametrize("protocol", range(pickle.HIGHEST_PROTOCOL + 1))
++def test_sentinel_pickle_all_protocols(sentinel, protocol):
++    assert pickle.loads(pickle.dumps(sentinel, protocol=protocol)) is sentinel
++
++
++@DUPLICATORS
++def test_sentinel_duplication_in_container(duplicate):
++    """Identity is preserved when sentinels are nested in other objects."""
++    value = {"members": list(Sentinel), "unset": UNSET}
++    duplicated = duplicate(value)
++    assert duplicated["unset"] is UNSET
++    assert all(a is b for a, b in zip(duplicated["members"], Sentinel, strict=True))
++
++
++@DUPLICATORS
++def test_parameter_duplication(duplicate):
++    """A parameter's default is ``UNSET`` unless given, and survives copies."""
++    option = click.Option(["--name"])
++    assert option.default is UNSET
++
++    duplicated = duplicate(option)
++    assert duplicated.default is UNSET
++    assert duplicated.name == "name"

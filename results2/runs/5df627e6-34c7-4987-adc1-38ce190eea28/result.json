@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 59762,
+  "stop_reason": "end_turn",
+  "session_id": "42945aa0-b8c2-453b-bd26-10eee3e1b624",
+  "total_cost_usd": 0.32133740000000005,
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 7002,
+    "cache_read_input_tokens": 93008,
+    "output_tokens": 1932,
+    "output_tokens_details": {
+      "thinking_tokens": 472
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 7002,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 4120,
+      "thinkingTokens": 704,
+      "cacheReadInputTokens": 204927,
+      "cacheCreationInputTokens": 24736,
+      "webSearchRequests": 0,
+      "costUSD": 0.32133740000000005,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 3,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The step path and the ratchet path split in `GrooveBox::process`, `src/modules/GrooveBox/GrooveBox.hpp:1085-1128`. Each pulse on `STEP_INPUT` bumps `clock_counter`. When it equals `clock_division` (8), the pulse is a step; on the other 7 pulses it is a ratchet tick. `clock_counter = clock_division` at 1036 makes the next pulse a step.\n\n**Step path** (GrooveBox.hpp:1087-1117):\n- Every track first calls `Track::step()` (`Track.hpp:83-89`), except on the very first pulse. That moves `playback_position` forward, wrapping within `range_start..range_end`, and sets `ratchet_counter` back to 0.\n- Then `GrooveBox::trigger(i)` (GrooveBox.hpp:450-456) runs. **Mute/solo enter here**: it calls `Track::trigger()` only if `notMuted(i)` is true.\n- `Track::trigger()` (`Track.hpp:91-150`) makes the actual decision. It clears any fade-out, then rolls `PROBABILITY` (it always fires when the value is \u2265 0.98) and records `m.skipped`. If the step is on (`m.steps[playback_position]`), it copies that step's parameter locks into `m.local_parameter_lock_settings`, snaps `SAMPLE_START` to the grid, sets the ADSR gate and triggers the sample.\n\n**Ratchet path** (GrooveBox.hpp:1118-1126):\n- **Mute/solo enter here** as an inline `if (notMuted(i))` check before `Track::ratchety()` (`Track.hpp:160-183`).\n- `ratchety()` fires only if the current step is on and `m.skipped` is false, so a step lost to the probability roll gets no ratchets. It picks a pattern from the `RATCHET` lock (167) and indexes it by `ratchet_counter`, which wraps at 8. When the pattern bit is set it re-triggers the sample and the ADSR.\n\n**How a ratchet differs from a step sample:** a ratchet does no probability roll and no fade reset, and it never re-reads the step's locks; it reuses the ones `trigger()` cached in `local_parameter_lock_settings`. One quirk: the step trigger plays `sample_start` from before the snap (`Track.hpp:128` \u2192 144), while ratchets play the snapped value (170).\n\n**Where mute/solo come from:** `notMuted` (GrooveBox.hpp:458-463) returns `solos[i]` when `any_track_soloed` is set, and `!mutes[i]` otherwise. The expander fills those arrays (1244-1253, 1294-1295) and fades out tracks that are already playing (1280-1290). Without the expander, everything is cleared (1336-1341).\n\nWhen a track is muted, the ratchet path leaves `track_triggers[i]` untouched, so the expander keeps seeing the step's last value. The step path writes `false` instead.",
+  "ttft_ms": 5372,
+  "type": "result",
+  "duration_ms": 25069,
+  "uuid": "9f62e644-d67c-4757-81dc-33140ca412f1",
+  "ttft_stream_ms": 3631,
+  "time_to_request_ms": 90,
+  "first_content_frame_ms": 3632,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

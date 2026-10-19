@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 17207,
+  "stop_reason": "end_turn",
+  "session_id": "2952b004-558a-49a9-9938-e5b735ada7df",
+  "total_cost_usd": 0.0663368,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 2712,
+    "cache_read_input_tokens": 85544,
+    "output_tokens": 1375,
+    "output_tokens_details": {
+      "thinking_tokens": 157
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 2712,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1375,
+      "cacheReadInputTokens": 85544,
+      "cacheCreationInputTokens": 2712,
+      "webSearchRequests": 0,
+      "costUSD": 0.0663368,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 157,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The decision happens in one place: `src/click/utils.py`, `echo()`, lines 328\u2013331. That branch only runs when the message is a `str`. Bytes go to the binary stream untouched (lines 320\u2013326), and empty output just gets a flush.\n\n**What feeds it:**\n1. **The `color` argument to `echo()`.** It goes through `resolve_color_default()` in `src/click/globals.py:54`. If `color` is not `None`, it is returned as is. Otherwise the function returns `ctx.color` from the current Context, or `None` when there is no context.\n2. **Context color.** It is set in `Context.__init__` (`src/click/core.py:523\u2013527`). If `color` isn't given, the context inherits `parent.color`.\n\n**The rule:** `should_strip_ansi(stream, color)` in `src/click/_compat.py:502\u2013514` decides.\n- If `color` is set, it returns `not color`. `True` keeps the codes and `False` strips them, whatever the stream is.\n- If `color` is `None`, it looks at the stream:\n  - A stream of `None` falls back to `sys.stdin`.\n  - A stream with a `color` attribute (the pager's `_PagerWriter`, which handles stripping itself) returns `False`, so nothing is stripped.\n  - Otherwise it strips unless the stream is a TTY or is Jupyter kernel output.\n- The TTY check is `isatty()` (`_compat.py:540`): it calls `stream.isatty()`, and any exception counts as \"not a TTY\".\n- The Jupyter check is `_is_jupyter_kernel_output()` (`_compat.py:495`). It unwraps `_FixupStream` and `_NonClosingTextIOWrapper`, then tests whether the stream class's module starts with `ipykernel.`.\n\n**The stripping:** `strip_ansi()` (`_compat.py:491`) removes the codes with the `_ansi_re` regex.\n\nIn short, an explicit `color` (from the call, or else inherited through the Context chain) wins. Without one, codes are kept only for a TTY, a Jupyter kernel, or the pager writer.",
+  "ttft_ms": 2881,
+  "type": "result",
+  "duration_ms": 17768,
+  "uuid": "6def9645-33b8-432a-bc20-a995ae39cba5",
+  "ttft_stream_ms": 1654,
+  "time_to_request_ms": 78,
+  "first_content_frame_ms": 1654,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

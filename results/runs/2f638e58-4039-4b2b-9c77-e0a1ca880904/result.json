@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 79609,
+  "stop_reason": "end_turn",
+  "session_id": "2e53bbad-23c1-4f4b-9ff4-91950411d292",
+  "total_cost_usd": 0.4129111999999999,
+  "usage": {
+    "input_tokens": 30,
+    "cache_creation_input_tokens": 20845,
+    "cache_read_input_tokens": 434656,
+    "output_tokens": 7955,
+    "output_tokens_details": {
+      "thinking_tokens": 2204
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 20845,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 30,
+      "outputTokens": 7955,
+      "cacheReadInputTokens": 434656,
+      "cacheCreationInputTokens": 20845,
+      "webSearchRequests": 0,
+      "costUSD": 0.4129111999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2204,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 16,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "A parameter named `help` now works alongside the automatic help option. The full test suite passes (2269 passed, 24 skipped, 1 xfailed), and ruff check, ruff format and mypy are all clean.\n\n**What changed in `src/click/core.py`**\n\n1. **Reserved name.** I added the private constant `_HELP_OPTION_STORAGE_NAME = \"_click_default_help\"`. `get_help_option` now passes it to the help option as its explicit name, so the help option stores its value under that name instead of `help`. That leaves `help` free for user parameters.\n   - Help names that aren't valid Python identifiers, like `/?`, no longer trigger a warning: the option's name no longer comes from them, so the deprecation warning about a bad name doesn't fire.\n   - I updated the docstring to mention the reserved name and added a `versionchanged:: 8.6.0` note.\n2. **Collision warnings in `get_params`.** These run next to the existing duplicate-flag check and raise `UserWarning` in two cases:\n   - any parameter other than the automatic help option uses `_click_default_help` (this also fires when `add_help_option=False`);\n   - an `Argument` shares its storage name with another parameter. The message says the two will overwrite each other's value during parsing.\n\n   Options sharing a name with each other, like `--upper`/`--lower` both writing to `transformation`, don't warn. Parameters with no name (empty string) are skipped.\n3. **Reusing `--help` itself.** No code change was needed: `get_help_option_names` already drops `--help` when a user option declares it, so `get_help_option` returns `None` and the user's option gets its default or the passed value. A new test now covers this.\n\n**Tests**\n- **`tests/test_basic.py`:**\n  - the help option's name is `_click_default_help`;\n  - `Argument([\"help\"])` and `Option([\"--assist\", \"help\"])` receive their values, and `--help` still prints the help text and exits 0;\n  - custom help names `--man`, `/?` and `-h`/`/?` work;\n  - the `@click.option(\"--help\", default=...)` case;\n  - both kinds of collision warning;\n  - feature switches don't warn.\n- **`tests/test_info_dict.py`:** the expected help-option info dict now uses `_click_default_help`. A new test checks the info dict of a command that has both an argument named `help` and the automatic help option.\n\nOne behaviour to know about: two arguments declared with exactly the same spelling also trip the older \"used more than once\" warning, so one of my test cases uses `Argument([\"value\"])` with `Argument([\"VALUE\"])` to test only the new warning.\n\nNothing is committed; all changes are in the working tree.",
+  "ttft_ms": 1588,
+  "type": "result",
+  "duration_ms": 93654,
+  "uuid": "1c4faf97-24d2-40db-875c-e7e094e4ab6e",
+  "ttft_stream_ms": 1312,
+  "time_to_request_ms": 71,
+  "first_content_frame_ms": 1313,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

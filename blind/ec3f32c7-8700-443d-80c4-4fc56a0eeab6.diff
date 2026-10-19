@@ -1,0 +1,122 @@
+diff --git a/src/click/core.py b/src/click/core.py
+index 71839df..50be932 100644
+--- a/src/click/core.py
++++ b/src/click/core.py
+@@ -3891,6 +3891,23 @@ class Option(Parameter):
+         return super().process_value(ctx, value)
+ 
+ 
++def _is_bracketed(value: str) -> bool:
++    """Whether ``value`` is entirely enclosed by one pair of square brackets,
++    so the leading ``[`` pairs with the trailing ``]``. ``[a]|[b]`` is not.
++    """
++    if not (value.startswith("[") and value.endswith("]")):
++        return False
++    depth = 0
++    for i, char in enumerate(value):
++        if char == "[":
++            depth += 1
++        elif char == "]":
++            depth -= 1
++            if depth == 0:
++                return i == len(value) - 1
++    return False
++
++
+ class Argument(Parameter):
+     """Arguments are positional parameters to a command.  They generally
+     provide fewer features than options but can have infinite ``nargs``
+@@ -3947,9 +3964,14 @@ class Argument(Parameter):
+         var = self.type.get_metavar(param=self, ctx=ctx)
+         if not var:
+             var = self.name.upper()
++        # Types like ``Choice`` and ``DateTime`` already wrap their metavar in
++        # square brackets to enumerate the allowed values. Those brackets also
++        # serve as the optional marker, rather than adding a second pair and
++        # producing ``[[a|b|c]]``.
++        already_bracketed = _is_bracketed(var)
+         if self.deprecated:
+             var += "!"
+-        if not self.required:
++        if not self.required and not already_bracketed:
+             var = f"[{var}]"
+         if self.nargs != 1:
+             var += "..."
+diff --git a/tests/test_basic.py b/tests/test_basic.py
+index 825fdbd..c8f6584 100644
+--- a/tests/test_basic.py
++++ b/tests/test_basic.py
+@@ -648,6 +648,73 @@ def test_choice_argument_none(runner):
+     assert result.output.startswith("Usage: cli [OPTIONS] {not-none|none}\n")
+ 
+ 
++@pytest.mark.parametrize(
++    ("type", "kwargs", "expected"),
++    [
++        (click.Choice(["foo", "bar", "baz"]), {"nargs": -1}, "[foo|bar|baz]..."),
++        (click.Choice(["foo", "bar", "baz"]), {"required": False}, "[foo|bar|baz]"),
++        (click.Choice(["foo", "bar", "baz"]), {"required": True}, "{foo|bar|baz}"),
++        (
++            click.Choice(["foo", "bar", "baz"]),
++            {"nargs": -1, "required": True},
++            "{foo|bar|baz}...",
++        ),
++        (
++            click.Choice(["foo", "bar", "baz"]),
++            {"required": False, "deprecated": True},
++            "[foo|bar|baz]!",
++        ),
++        (click.DateTime(formats=["%Y-%m-%d"]), {"required": False}, "[%Y-%m-%d]"),
++        (click.DateTime(formats=["%Y-%m-%d"]), {"nargs": -1}, "[%Y-%m-%d]..."),
++        (click.DateTime(formats=["%Y-%m-%d"]), {"required": True}, "[%Y-%m-%d]"),
++        (click.DateTime(formats=["%Y-%m-%d"]), {"nargs": 2}, "[%Y-%m-%d]..."),
++    ],
++)
++def test_bracketed_type_argument_usage(runner, type, kwargs, expected):
++    """A type that already brackets its metavar, like ``Choice`` or
++    ``DateTime``, supplies the optional marker itself instead of getting a
++    second pair, which used to render as ``[[foo|bar|baz]]``.
++    """
++
++    @click.command()
++    @click.argument("value", type=type, **kwargs)
++    def cli(value):
++        pass
++
++    result = runner.invoke(cli, ["--help"])
++    assert result.output.startswith(f"Usage: cli [OPTIONS] {expected}\n")
++    assert "[[" not in result.output
++
++
++class _PairedBracketsType(click.ParamType):
++    name = "paired"
++
++    def get_metavar(self, param, ctx):
++        return "[a]|[b]"
++
++
++@pytest.mark.parametrize(
++    ("kwargs", "expected"),
++    [
++        ({"required": False}, "[[a]|[b]]"),
++        ({"nargs": -1}, "[[a]|[b]]..."),
++        ({"required": True}, "[a]|[b]"),
++    ],
++)
++def test_partially_bracketed_type_argument_usage(runner, kwargs, expected):
++    """A metavar that starts and ends with brackets that are not one enclosing
++    pair still gets the optional marker.
++    """
++
++    @click.command()
++    @click.argument("value", type=_PairedBracketsType(), **kwargs)
++    def cli(value):
++        pass
++
++    result = runner.invoke(cli, ["--help"])
++    assert result.output.startswith(f"Usage: cli [OPTIONS] {expected}\n")
++
++
+ def test_datetime_option_default(runner):
+     @click.command()
+     @click.option("--start_date", type=click.DateTime())

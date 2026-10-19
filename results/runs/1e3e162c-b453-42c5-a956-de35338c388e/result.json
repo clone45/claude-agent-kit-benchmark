@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 16105,
+  "stop_reason": "end_turn",
+  "session_id": "5a60375f-ae66-4801-8530-c13b8f6a1448",
+  "total_cost_usd": 0.07927040000000002,
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 5087,
+    "cache_read_input_tokens": 63452,
+    "output_tokens": 1293,
+    "output_tokens_details": {
+      "thinking_tokens": 91
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 5087,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 6,
+      "outputTokens": 1293,
+      "cacheReadInputTokens": 63452,
+      "cacheCreationInputTokens": 5087,
+      "webSearchRequests": 0,
+      "costUSD": 0.07927040000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 91,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 3,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "- **Lookup code:** `Option.resolve_envvar_value` (`src/click/core.py:3748-3770`) first calls `Parameter.resolve_envvar_value` (`core.py:2868-2911`). That checks the explicit `envvar` (one string, or a list where the first non-empty one wins) using `os.environ.get`. Empty strings count as unset.\n- **Auto-envvar fallback:** If nothing was found, `allow_from_autoenv` is true, `ctx.auto_envvar_prefix` is set and the option has a `name`, it looks up `f\"{ctx.auto_envvar_prefix}_{self.name.upper()}\"` (`core.py:3763-3764`). So `--max-count` (name `max_count`) with prefix `MYAPP` becomes `MYAPP_MAX_COUNT`.\n- **How the prefix is built:** In `Context.__init__` (`core.py:503-521`), an explicit prefix is uppercased. With no explicit prefix, a subcommand inherits `f\"{parent.auto_envvar_prefix}_{self.info_name.upper()}\"`, so a `run` subcommand gets `MYAPP_RUN`. Every `-` is then replaced with `_`.\n- **Turning the string into a value:** `Option.value_from_envvar` (`core.py:3772+`) handles non-bool flags and `multiple`. `Parameter.value_from_envvar` (`core.py:2913-2926`) splits the string with `type.split_envvar_value` when `nargs != 1`.\n- **Resolution order:** `Parameter.consume_value` (`core.py:2680-2726`) tries each source in turn and stops at the first one that gives a value:\n  1. Command line: `opts.get(self.name)` \u2192 `COMMANDLINE`\n  2. Environment: `value_from_envvar` \u2192 `ENVIRONMENT` (`2703-2707`)\n  3. Default map: `ctx.lookup_default` \u2192 `DEFAULT_MAP` (`2709-2717`)\n  4. Default: `get_default` \u2192 `DEFAULT` (`2719-2724`)\n- **Prompt:** `Option.consume_value` (`core.py:3820-3875`) then may prompt, but only when the value is still unset or came from the default map or default (`source >= DEFAULT_MAP`). That makes the prompt last in line, after the environment.",
+  "ttft_ms": 4037,
+  "type": "result",
+  "duration_ms": 16613,
+  "uuid": "8efcf4af-c20e-4ee7-81d8-d1ec7474374e",
+  "ttft_stream_ms": 2848,
+  "time_to_request_ms": 74,
+  "first_content_frame_ms": 2848,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

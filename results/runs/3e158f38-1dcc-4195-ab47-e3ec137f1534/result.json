@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 51417,
+  "stop_reason": "end_turn",
+  "session_id": "b83ff88c-84cd-4acd-9eba-07aa6b9eba3d",
+  "total_cost_usd": 0.317606,
+  "usage": {
+    "input_tokens": 22,
+    "cache_creation_input_tokens": 19343,
+    "cache_read_input_tokens": 268970,
+    "output_tokens": 5449,
+    "output_tokens_details": {
+      "thinking_tokens": 1465
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 19343,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 22,
+      "outputTokens": 5449,
+      "cacheReadInputTokens": 268970,
+      "cacheCreationInputTokens": 19343,
+      "webSearchRequests": 0,
+      "costUSD": 0.317606,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1465,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 12,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`copy.copy`, `copy.deepcopy` and a `pickle` round trip now return the very same `Sentinel` member, and a copied or pickled `click.Option([\"--name\"])` keeps `default is UNSET` and `name == \"name\"`. The full test suite passes.\n\n**Blocked on me**\nNothing.\n\n**Changed** (not committed)\n- `src/click/_utils.py`: three methods added to `Sentinel`:\n  - `__copy__` and `__deepcopy__` return `self`. Python 3.13's `Enum` already does this, but `requires-python` is `>=3.10`, so now it doesn't depend on the Python version.\n  - `__reduce_ex__` returns `(getattr, (Sentinel, member_name))`, so unpickling looks the member up on its class. Before, pickle rebuilt the member from its value, a bare `object()`, which comes back as a new object and raised `ValueError: ... is not a valid Sentinel`.\n  - I also added a `typing_extensions as te` import under `TYPE_CHECKING`, the same way `utils.py` does it.\n- `tests/test_utils/test_sentinel.py`: 30 new test cases, each run through `copy.copy`, `copy.deepcopy` and pickle at every protocol from 0 to 5:\n  - every `Sentinel` member comes back as the same object;\n  - members inside nested containers come back as the same objects;\n  - a copied or pickled `click.Option([\"--name\"])` is a new object with `default is UNSET` and `name == \"name\"`.\n\n**Verified**\n- Against the original `_utils.py`, 24 of the new tests fail; with the fix, all 33 tests in the file pass.\n- Full suite: 2285 passed, 24 skipped, 1 xfailed.\n- `ruff check` and `ruff format --check` are clean on both files, and `mypy` reports no issues. Its first run flagged the `__reduce_ex__` argument type, which I changed to `object` to match `enum.Enum`.\n\n**Found**\n- The pickle stores the member's name (for example `\"UNSET\"`). Your CLAUDE.md rule says not to use names as persisted identifiers, but this is the member's Python name, which is how pickle already finds classes and functions. The member's value is a bare `object()`, which can't be found again in another process, so there is no other stable handle. No follow-up needed unless members get renamed, which would break old pickles just as renaming a class would.",
+  "ttft_ms": 1643,
+  "type": "result",
+  "duration_ms": 62205,
+  "uuid": "2cee87ed-bae3-4db9-b58a-e77680a25515",
+  "ttft_stream_ms": 871,
+  "time_to_request_ms": 76,
+  "first_content_frame_ms": 872,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

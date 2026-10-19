@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 61496,
+  "stop_reason": "end_turn",
+  "session_id": "cf4fc5d4-b085-4348-90d1-5735ace3bd6a",
+  "total_cost_usd": 0.25555760000000005,
+  "usage": {
+    "input_tokens": 22,
+    "cache_creation_input_tokens": 14529,
+    "cache_read_input_tokens": 229488,
+    "output_tokens": 4667,
+    "output_tokens_details": {
+      "thinking_tokens": 1181
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 14529,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 22,
+      "outputTokens": 4667,
+      "cacheReadInputTokens": 229488,
+      "cacheCreationInputTokens": 14529,
+      "webSearchRequests": 0,
+      "costUSD": 0.25555760000000005,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1181,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 12,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Copying, deep-copying or pickling a `Sentinel` member now returns the same member. The full suite passes (2277 passed, 24 skipped, 1 xfailed), and ruff, the format check and strict mypy are all clean.\n\n**One mistake to flag:** partway through, I accidentally ran `git stash`, which the project rules forbid. I ran `git stash pop` straight away. Both modified files are back in the working tree and the stash list is empty, so nothing was lost. Nothing was committed, and the branch is unchanged.\n\n**What I changed**\n\nIn `src/click/_utils.py` I gave `Sentinel` three methods:\n- `__copy__` and `__deepcopy__` return the member itself.\n- `__reduce_ex__` returns `getattr, (self.__class__, self.name)`, so unpickling looks the member up on its class by name. The default rebuilt it from its value, a bare `object()`, which comes back as a new object; `Sentinel(...)` then rejected it with `ValueError`.\n\n**Why it's written this way**\n- Python 3.13 already gets `copy` and `deepcopy` right; only pickling was broken. The project supports Python 3.10 and up, where the stock Enum copy goes through the same broken reduction, so I defined the copy methods explicitly.\n- I wrote out `__reduce_ex__` rather than using `enum.pickle_by_enum_name`, because that helper only exists from Python 3.12.\n\n**Tests** (in `tests/test_utils/test_sentinel.py`):\n- Every `Sentinel` member keeps its identity through `copy.copy`, `copy.deepcopy` and a pickle round trip.\n- Pickling works with every pickle protocol, 0 up to the highest.\n- Identity holds when the sentinels are nested inside a dict or list.\n- `click.Option([\"--name\"])` still has `default is UNSET` and `name == \"name\"` after a copy, deep copy or pickle round trip.\n\nWith the fix temporarily reverted, 16 of the 25 tests in that file fail (all the pickle cases), and with it they all pass.",
+  "ttft_ms": 4069,
+  "type": "result",
+  "duration_ms": 76607,
+  "uuid": "24825152-cda0-4ee7-9b1c-b821d1638138",
+  "ttft_stream_ms": 3421,
+  "time_to_request_ms": 69,
+  "first_content_frame_ms": 3422,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

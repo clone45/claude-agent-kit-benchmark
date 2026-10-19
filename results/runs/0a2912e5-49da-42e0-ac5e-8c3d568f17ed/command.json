@@ -1,0 +1,28 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "In the usage synopsis, an optional `Argument` (one with `required=False` or `nargs=-1`) is wrapped in square brackets. When the argument's type already brackets its metavar to enumerate the allowed values, as `click.Choice` and `click.DateTime` do, the brackets are doubled: `Usage: cli [OPTIONS] [[foo|bar|baz]]...`.\n\nFix `Argument.get_usage_pieces` in `src/click/core.py` so the type's own brackets serve as the optional marker. A `Choice(['foo', 'bar', 'baz'])` argument with `nargs=-1` renders as `[foo|bar|baz]...`, with `required=False` as `[foo|bar|baz]`, and a `DateTime(formats=['%Y-%m-%d'])` argument with `required=False` as `[%Y-%m-%d]`. Required arguments, the `!` deprecation marker, and the `...` suffix for `nargs != 1` keep their current behavior. Add tests.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "15",
+    "--session-id",
+    "31ece36a-2c1b-4fb6-b8ef-b2f5bd95d24d",
+    "--plugin-dir",
+    "/mnt/c/Code/routing_test/plugin"
+  ],
+  "cwd": "/home/clone45/routing_test_work/click"
+}

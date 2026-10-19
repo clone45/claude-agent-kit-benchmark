@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 62536,
+  "stop_reason": "end_turn",
+  "session_id": "26dbc92f-15a0-4b55-941d-d0dc8a3278f9",
+  "total_cost_usd": 0.311546,
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 8443,
+    "cache_read_input_tokens": 85587,
+    "output_tokens": 2209,
+    "output_tokens_details": {
+      "thinking_tokens": 634
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 8443,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 4376,
+      "thinkingTokens": 1126,
+      "cacheReadInputTokens": 183090,
+      "cacheCreationInputTokens": 23418,
+      "webSearchRequests": 0,
+      "costUSD": 0.311546,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 3,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "A step trigger and a ratchet are decided in two separate branches of the same clock-input handler in `GrooveBox::process`. Mute and solo are checked separately on each path, through the same helper.\n\n1. **Clock divider:** `GrooveBox::process` (`src/modules/GrooveBox/GrooveBox.hpp:1085`) watches the clock input with `step_trigger`, which is meant to run at 32 pulses per step. When `clock_counter == clock_division` (8, line 55), the pulse is a real step (lines 1087\u20131117). Every other pulse goes to the ratchet branch (lines 1118\u20131126).\n2. **Step path:** each track first advances with `Track::step()` (`src/modules/GrooveBox/Track.hpp:83`). This moves `playback_position` forward, wrapping within the track's range, and resets `ratchet_counter`. The very first step after start is not advanced. Then `GrooveBox::trigger(i)` (`GrooveBox.hpp:450`) calls `Track::trigger()` (`Track.hpp:91`).\n3. **`Track::trigger`:** it rolls the per-step `PROBABILITY` lock and stores the result in `m.skipped`. If the step is on (`m.steps[pos]`), it copies all of that step's parameter locks into `m.local_parameter_lock_settings`, quantizes the sample start to the snap value, gates the ADSR, and calls `sample_player->trigger`.\n4. **Ratchet path:** `Track::ratchety()` (`Track.hpp:160`) fires only if the current step is on and was not skipped by probability. It picks a pattern from the `RATCHET` lock (`ratchet_patterns` in `src/modules/GrooveBox/defines.h:138`, 16 patterns \u00d7 7 slots) and indexes it with `ratchet_counter`, which advances on every off-step pulse. Each slot that is true re-triggers the sample and the ADSR.\n5. **How a ratchet differs from a step:** a ratchet does no probability roll, doesn't reset the fade-out and doesn't reload parameter locks. It replays whatever `Track::trigger` last stored in the local settings.\n   - **Possible bug:** the step path passes the pre-quantized local `sample_start` (`Track.hpp:126, 144`), while ratchets read the snapped `SAMPLE_START` from the local settings (line 170). With snap on, a ratchet can start at a different point than its step did.\n6. **Mute/solo on the step path:** `GrooveBox::trigger` checks `notMuted(track_id)` (`GrooveBox.hpp:458`) before calling `Track::trigger`. If any track is soloed, only soloed tracks play; otherwise any track that isn't muted plays.\n7. **Mute/solo on the ratchet path:** the same `notMuted(i)` check sits at the call site (`GrooveBox.hpp:1123`). A muted track's `Track::trigger` is never called, so `m.skipped` and its local locks keep their values from before the mute.\n8. **Where mute/solo come from:** the `mutes`/`solos` arrays and `any_track_soloed` are filled from the expander message (`GrooveBox.hpp:1244\u20131295`). That code also calls `Track::fadeOut()` on a track that is still playing when it becomes muted or un-soloed. Both paths store their result in `track_triggers[i]`, which is sent to the expander (lines 1325\u20131327).",
+  "ttft_ms": 3876,
+  "type": "result",
+  "duration_ms": 28846,
+  "uuid": "5434454d-9248-4b3f-8da3-7975af28142f",
+  "ttft_stream_ms": 2653,
+  "time_to_request_ms": 80,
+  "first_content_frame_ms": 2653,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

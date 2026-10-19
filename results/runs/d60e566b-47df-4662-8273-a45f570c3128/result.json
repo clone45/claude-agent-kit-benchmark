@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 19842,
+  "stop_reason": "end_turn",
+  "session_id": "69f82d2c-6c0f-4a8d-97c0-aeb9ce447446",
+  "total_cost_usd": 0.1019442,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 4374,
+    "cache_read_input_tokens": 110461,
+    "output_tokens": 2241,
+    "output_tokens_details": {
+      "thinking_tokens": 301
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 4374,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2241,
+      "cacheReadInputTokens": 110461,
+      "cacheCreationInputTokens": 4374,
+      "webSearchRequests": 0,
+      "costUSD": 0.1019442,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 301,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 6,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`get_help_option_names` now returns the help names in the order you declared them. Duplicates are dropped, keeping the first one, and any name another parameter already uses is removed. I made the change directly instead of handing it to a subagent, because it was smaller than a brief would have been.\n\n**Blocked on me:** nothing.\n\n**Changed**\n- `src/click/core.py:1207`: `get_help_option_names` first collects every name in the other parameters' `opts` and `secondary_opts`, which covers both halves of a flag like `--shout/--no-shout`. It then goes through `dict.fromkeys(ctx.help_option_names)`, which keeps the declared order and the first copy of each name, and leaves out the names already taken. The old code built a `set`, which is why the order was arbitrary. I also expanded the docstring to describe this.\n- `tests/test_commands.py`: added `test_get_help_option_names`, a test that runs once per case you listed: plain order, an unsorted order (`--help, -h, -?`), duplicates dropped, `--help` taken by another option, `--no-shout` taken by a `--shout/--no-shout` flag, and every name taken so the result is `[]`.\n\n**Verified**\n- New tests: 6 passed.\n- Full suite: 2255 passed, 24 skipped, 1 xfailed (the run also listed 31000 tests as deselected).\n- `ruff check` and `ruff format --check` on both files I touched: clean. `mypy`: no issues.\n- Not done: I didn't run the new tests against the old code to show they would have failed, because that needs a stash and the project rules forbid it.\n\n**Found:** nothing left open.",
+  "ttft_ms": 1526,
+  "type": "result",
+  "duration_ms": 27144,
+  "uuid": "1b78a4b9-7e31-49a6-9fde-dc6b8f1de4f5",
+  "ttft_stream_ms": 694,
+  "time_to_request_ms": 69,
+  "first_content_frame_ms": 694,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

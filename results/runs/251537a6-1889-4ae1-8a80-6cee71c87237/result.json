@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 20001,
+  "stop_reason": "end_turn",
+  "session_id": "4052edd0-6a19-43d9-bfac-0dbe8e829169",
+  "total_cost_usd": 0.106855,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 8608,
+    "cache_read_input_tokens": 64595,
+    "output_tokens": 1252,
+    "output_tokens_details": {
+      "thinking_tokens": 35
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 8608,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1252,
+      "cacheReadInputTokens": 64595,
+      "cacheCreationInputTokens": 8608,
+      "webSearchRequests": 0,
+      "costUSD": 0.106855,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 35,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The decision is made while the arguments are parsed, before the group's callback is ever considered.\n\n1. **Default is set in `Group.__init__`** (`src/click/core.py:1785-1789`): if `no_args_is_help` isn't passed, it becomes `not invoke_without_command`. A plain `@click.group()` therefore gets `invoke_without_command=False` and `no_args_is_help=True`.\n2. **The check is in `Group.parse_args`** (`core.py:2038-2040`): `if not args and self.no_args_is_help and not ctx.resilient_parsing: raise NoArgsIsHelpError(ctx)`. `Command.make_context` calls it at `core.py:1393`, so this happens before any callback or subcommand runs. `Command.parse_args` has the same check (`core.py:1397`), but there the default is `False`.\n3. **The help comes from `NoArgsIsHelpError`** (`src/click/exceptions.py:332-339`): it's a `UsageError` whose message is `ctx.get_help()`, and its `show()` prints that text to stderr. `Command.main` catches it as a `ClickException`, calls `e.show()`, then calls `sys.exit` with exit code 2 (`core.py:1630-1644`).\n4. **`Group.invoke` handles the other cases** (`core.py:2058-2064`): it only runs if parsing didn't raise. With no subcommand (`ctx._protected_args` empty):\n   - if `invoke_without_command` is set, it runs the group callback via `super().invoke(ctx)`;\n   - otherwise it calls `ctx.fail(\"Missing command.\")`.\n\nHow the two flags combine:\n- **Default** (`invoke_without_command=False`, `no_args_is_help=True`): an empty command line shows help (step 2).\n- **`invoke_without_command=True`**: `no_args_is_help` defaults to `False`, so parsing doesn't raise and the callback runs.\n- **Both flags `True` explicitly**: help still wins, because the `parse_args` check runs first.\n- **`no_args_is_help=False`, `invoke_without_command=False`**: you get \"Missing command.\" instead of help. The same happens when options are given but no subcommand, since `args` isn't empty.",
+  "ttft_ms": 3426,
+  "type": "result",
+  "duration_ms": 20188,
+  "uuid": "b4e51cda-f619-4471-914b-fb46e78f6c47",
+  "ttft_stream_ms": 2201,
+  "time_to_request_ms": 62,
+  "first_content_frame_ms": 2201,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

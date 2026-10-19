@@ -1,0 +1,103 @@
+{
+  "duration_api_ms": 283222,
+  "stop_reason": "end_turn",
+  "session_id": "aeaefb46-efe2-40f2-8ec8-14b340fe4fd1",
+  "total_cost_usd": 1.1810616,
+  "usage": {
+    "input_tokens": 34,
+    "cache_creation_input_tokens": 37253,
+    "cache_read_input_tokens": 888246,
+    "output_tokens": 12515,
+    "output_tokens_details": {
+      "thinking_tokens": 5035
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 37253,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 46,
+      "outputTokens": 15105,
+      "thinkingTokens": 5518,
+      "cacheReadInputTokens": 1030540,
+      "cacheCreationInputTokens": 56676,
+      "webSearchRequests": 0,
+      "costUSD": 0.9618,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    },
+    "claude-sonnet-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 11968,
+      "cacheReadInputTokens": 164121,
+      "cacheCreationInputTokens": 33255,
+      "webSearchRequests": 0,
+      "costUSD": 0.2192616,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2761,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 1,
+    "requested": {
+      "background": 0,
+      "foreground": 1,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 1,
+    "spawned_by_subagents": 0,
+    "completed": 1,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {
+      "agent-kit:builder": 1
+    }
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 20,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Per-step chance is in the engine, the Euclid compile check prints `ok   Euclid.cpp`, and every standalone test passes. I also restored one line that was missing from the engine, because the existing tests were already failing before I started.\n\n**Blocked on me:** nothing.\n\n**Changed** (working tree only, nothing committed; module and widget untouched):\n- **The missing line** (`src/modules/Euclid/EuclidEngine.hpp`): commit `2fe66e0` had removed `window.arm(window_samples);` from the reset branch of `Sequencer::process`. Before any change, `engine_test` had 18 failures and `seq3_parity_test` had 10. The file's own comments and `ResetClockWindow.hpp` both describe the reset arming the window, so I put the line back where it was.\n- **`struct Rng`** (same file): xorshift32 with `seed`, `next` and `percent`, exactly as specified.\n- **`Sequencer`** (same file):\n  - It now has `Rng rng;` and one new flag, `lost`, meaning \"this stay lost its roll\". `load()` and the constructor clear it.\n  - The six-argument `process` now just calls the new seven-argument one with chance 100.\n  - The roll happens at most once per sample, after the reset and clock checks, on the step the playhead ended up on. Rests, chance 0 and chance 100 never roll.\n  - `struck` and `gate` are now false whenever `lost` is set. `gate_gap` still reads the previous sample's gate.\n  - The pattern table is never changed.\n- **One behaviour to know about:** a stay that wasn't lost still follows the live pattern, exactly as today. So if ROT changes and turns the current rest into a hit, the gate goes high without a roll.\n- **Comments** (same file): a new CHANCE paragraph in the header block, plus updated notes on `gate`, `struck`, `gate_gap`, `load` and `process`.\n- **Tests** (`tests/euclid/engine_test.cpp`): a new `chanceTests()` section. It covers:\n  - the six-argument form matching chance 100 on every sample of a 3000-sample run, with the generator untouched;\n  - chance 0, and out-of-range values clamped (150 acts as 100, -5 as 0);\n  - two sequencers with the same seed giving identical output, also checked against a separate copy of the generator advanced once per hit landing;\n  - a lost roll keeping the gate low until the next clock, which rolls again;\n  - a reset onto a lost step 1 still reporting `gate_gap`;\n  - rests not rolling and the pattern staying intact;\n  - `load()` not rolling.\n- `tests/euclid/README.md`: the description of `engine_test` now mentions these cases.\n\n**Verified:**\n- `bash scripts/vg_check.sh compile Euclid` prints `ok   Euclid.cpp`.\n- `bash scripts/vg_check.sh tests` exits 0:\n  - pattern_test: 63 checks, 0 failures\n  - engine_test: 159 checks, 0 failures\n  - seq3_parity_test: 36 checks, 0 failures\n  - all six timeline suites: ALL PASS\n- On the first run, one new check failed because of a wrong count in the test, not an engine bug. I replaced its bound with the exact hand-counted number, 13.\n- I didn't run the separate reviewer agent; I read the engine diff myself instead.\n\n**Found:**\n- When a reset and an accepted clock fall on the same sample, only the final step is rolled. That can only happen if the window is 0 samples, so no test covers it.\n- The module still calls the six-argument `process`, so the new chance does nothing in the plugin. Making it usable needs a module change (a parameter or CV input, plus seeding), which this task excluded.",
+  "ttft_ms": 3320,
+  "type": "result",
+  "duration_ms": 292358,
+  "uuid": "92540ae0-e5dd-4ce8-b997-f20055be8422",
+  "ttft_stream_ms": 3091,
+  "time_to_request_ms": 109,
+  "first_content_frame_ms": 3091,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

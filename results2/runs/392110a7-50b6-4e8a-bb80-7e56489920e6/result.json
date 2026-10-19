@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 60006,
+  "stop_reason": "end_turn",
+  "session_id": "69451712-8634-407c-a026-4b1b3b4876d8",
+  "total_cost_usd": 0.4632244000000001,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 7513,
+    "cache_read_input_tokens": 158148,
+    "output_tokens": 1666,
+    "output_tokens_details": {
+      "thinking_tokens": 507
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 7513,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 26,
+      "outputTokens": 6202,
+      "thinkingTokens": 1596,
+      "cacheReadInputTokens": 383682,
+      "cacheCreationInputTokens": 32793,
+      "webSearchRequests": 0,
+      "costUSD": 0.4632244000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "All 18 models override `Model::setShape` (pure virtual, `src/modules/VXDrums/VXDrumVoices.hpp:299`), and SHAPE reaches them through `Voices::setShape` (2149\u20132153), which converts the knob position to a natural value with `knobNatural`. Every line below is in `VXDrumVoices.hpp`.\n\n1. **Recompute coefficients (6):** each override calls `updateCoeffs()`, and each `updateCoeffs` does read `shape`.\n   - Clap (488) stores without clamping; its `updateCoeffs` turns `shape` in ms into the burst `spacing` (472\u2013478).\n   - Clamp to 0..1 and then recompute: SnareSweep (1247, sweep time, 1234), SnareGate (1341, tail t60, 1320), Clap909 (1454, burst count and spacing, 1439), ClapLoFi (1656, `holdRate`, 1640), ClapGate (1756, tail t60, 1737).\n2. **Store only, `shape = v;` (7):** Ping808 (346), Snare909 (417), SineKick (653), KickFm (732), Snare808 (922), SnareLayered (1009), SnareRing (1089).\n   - These read `shape` live during `tick`.\n   - KickFm (760), Snare808 (961) and SnareRing (1104, range 1..4) clamp it there instead of in the setter.\n3. **Clamp to 0..1 without recomputing (3):** Hat (562, read in `tick` at 578), Snare606 (1168, read at 1201), ClapTrap (1551, read in `strike` at 1561\u20131563 for humanize).\n4. **Different from all three:**\n   - **KickDist (826\u2013830):** stores the value without clamping and derives `fold = max(0, (shape-0.6)/0.4)` right there. `updateCoeffs` is not called; drive is clamped later in `tick` (851).\n   - **SampleModel (1945):** has no `shape` member. It writes `start = clamp01(v)`, the playback start point, which `strike` uses through `data->startFrame(start)` (1955).\n   - **Ping808 (346):** a store-only model, but SHAPE means two things. It is punch for the bass drum with drive fixed at 0.25, and drive for the rimshot with no punch (362\u2013363).",
+  "ttft_ms": 1965,
+  "type": "result",
+  "duration_ms": 15664,
+  "uuid": "0abdfb20-8304-4d8e-8c46-c640d170afba",
+  "ttft_stream_ms": 817,
+  "time_to_request_ms": 76,
+  "first_content_frame_ms": 817,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

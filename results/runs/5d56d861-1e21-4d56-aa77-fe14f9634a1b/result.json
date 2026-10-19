@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 93975,
+  "stop_reason": "end_turn",
+  "session_id": "37093a52-a2a1-4e1b-8d3f-58c891638382",
+  "total_cost_usd": 0.5019896,
+  "usage": {
+    "input_tokens": 28,
+    "cache_creation_input_tokens": 23396,
+    "cache_read_input_tokens": 479048,
+    "output_tokens": 10945,
+    "output_tokens_details": {
+      "thinking_tokens": 3966
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 23396,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 28,
+      "outputTokens": 10945,
+      "cacheReadInputTokens": 479048,
+      "cacheCreationInputTokens": 23396,
+      "webSearchRequests": 0,
+      "costUSD": 0.5019896,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3966,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 18,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I made `click.Path` generic over the value it converts to, so `path_type` now sets the return type that type checkers see. Runtime behavior is unchanged, and mypy, ruff and the full test suite all pass.\n\n**Blocked on me:** nothing.\n\n**Changed**\n- `src/click/types.py`:\n  - **Type variable:** added `_PathT_co`, defaulting to `str | bytes | os.PathLike[str]`. It follows the existing `_InputT_contra` pattern: `typing_extensions.TypeVar` under `TYPE_CHECKING`, `typing.TypeVar(default=...)` on Python 3.13 and later, and a plain TypeVar before that. No runtime default is needed on older Pythons, because `Path` has one type parameter and you always pass it when you write `Path[...]`.\n  - **Class:** `Path(ParamType[_PathT_co], t.Generic[_PathT_co])`. The input type still defaults to `Any`, so passing a `PurePosixPath` to the instance is accepted.\n  - **`__init__` overloads:** these decide what `click.Path(...)` is typed as:\n    - no `path_type`, or `None`: `Path[str | bytes | os.PathLike[str]]`\n    - `path_type=X` by keyword: `Path[X]`\n    - `path_type` passed as the 8th positional argument: also `Path[X]` (needs its own overload because of argument order)\n    - a value typed `type | None`: falls back to the default, so existing callers that pass one still type-check.\n  - **Return types:** `convert` and `coerce_path_result` now return `_PathT_co`. `coerce_path_result` works out the same value as before and casts it once at the end.\n  - **Docstring:** added a `versionchanged:: 8.5.0` note to the class docstring, matching the 8.5.0 note on `ParamType`.\n- `tests/typing/typing_path.py` (new): `assert_type` checks for every case in the request. That covers `pathlib.Path`, `str` and `bytes`, the default, the explicit `click.Path[pathlib.Path]` annotation, assigning to `ParamType[...]`, calling the instance with a `PurePosixPath` or with `None`, `coerce_path_result`, and `click.prompt(type=...)`. It also covers the positional and dynamic `path_type` forms.\n- `tests/test_types/test_Path.py`: added `test_class_getitem`, which asserts `t.get_args(click.Path[pathlib.Path]) == (pathlib.Path,)`.\n\n**Verified**\n- `.venv/bin/mypy` (strict, `src` and `tests/typing`): no issues in 29 files.\n- `ruff check` and `ruff format --check` on the three touched files: clean.\n- Full suite, `.venv/bin/python -m pytest -q`: 2262 passed, 24 skipped, 1 xfailed.\n- To confirm the new assertions can actually fail, I ran mypy on a scratch file with deliberately wrong ones (wrong narrowed type, wrong default, `Path(path_type=pathlib.Path)` assigned to `ParamType[int]`). All three were reported as errors; I deleted the file afterwards.\n- Not covered:\n  - The tests ran only on the venv's Python 3.13, so the pre-3.13 fallback was not run.\n  - I didn't check with pyright; the project only configures mypy.\n  - Because the change was small, I wrote it myself and skipped the separate review pass.\n\n**Found**\n- The repo has no `CHANGES.rst`, so the docstring note is the only record of the change.\n- When a `Path` is assigned to an incompatible `ParamType[...]`, mypy's error message names the fallback type (`Path[str | bytes | PathLike[str]]`) rather than `Path[pathlib.Path]`. The error is still raised; only the message is less helpful. No follow-up needed.",
+  "ttft_ms": 3459,
+  "type": "result",
+  "duration_ms": 104080,
+  "uuid": "1f6c913c-d219-4803-95b2-72691260b5bc",
+  "ttft_stream_ms": 1069,
+  "time_to_request_ms": 75,
+  "first_content_frame_ms": 1069,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

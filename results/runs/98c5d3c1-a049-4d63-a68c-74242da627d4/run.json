@@ -1,0 +1,190 @@
+{
+  "run_id": "98c5d3c1-a049-4d63-a68c-74242da627d4",
+  "blind_id": "fc942547-b0af-42c9-b11d-5ad83864b2f2",
+  "session_id": "a2348cad-b191-4bb7-ad0d-861529eb3186",
+  "task_id": "1afc7462-1dfe-443f-baf1-bf833156338e",
+  "task_label": "F2",
+  "task_type": "feature",
+  "task_length": "short",
+  "condition_id": "59b253d3-f1a3-4642-bcd3-6a2c9fae721e",
+  "condition_label": "A",
+  "rep_index": 1,
+  "branch": "t-1afc7462-1dfe-443f-baf1-bf833156338e-a",
+  "base_commit": "a8dfdc0214369a5da85b9f2ace5371d410698982",
+  "status": "completed",
+  "process": {
+    "rc": 0,
+    "wall_s": 99.7,
+    "timed_out": false,
+    "started_at": "2026-10-19T03:41:54.996523+00:00",
+    "ended_at": "2026-10-19T03:43:34.661007+00:00"
+  },
+  "exit_code": 0,
+  "result_subtype": "success",
+  "is_error": false,
+  "num_turns": 9,
+  "duration_ms": 94153,
+  "duration_api_ms": 85587,
+  "claude_total_cost_usd": 0.3512988,
+  "cost": {
+    "by_model": {
+      "claude-opus-5-5": {
+        "input_tokens": 16,
+        "cache_read_tokens": 213154,
+        "cache_create_tokens": 18473,
+        "output_tokens": 8041,
+        "thinking_tokens": 2811,
+        "cost_input_side_usd": 0.190479,
+        "cost_output_usd": 0.16082,
+        "cost_usd": 0.351299,
+        "claude_cost_usd": 0.3512988,
+        "basis": "stream_per_call",
+        "context_window": 1000000
+      }
+    },
+    "total_usd": 0.351299,
+    "unpriced_models": []
+  },
+  "model_usage": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 8041,
+      "cacheReadInputTokens": 213154,
+      "cacheCreationInputTokens": 18473,
+      "webSearchRequests": 0,
+      "costUSD": 0.3512988,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2811,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "stream": {
+    "per_model": {
+      "claude-opus-5-5": {
+        "calls": 8,
+        "input": 16,
+        "cache_read": 213154,
+        "cache_create": 18473,
+        "cache_create_5m": 0,
+        "cache_create_1h": 18473,
+        "main_calls": 8,
+        "sub_calls": 0
+      }
+    },
+    "main_api_calls": 8,
+    "sub_api_calls": 0,
+    "sub_calls_by_type": {},
+    "context_end_tokens": 35456,
+    "context_max_tokens": 35456,
+    "shunt_denials": 0,
+    "tool_errors": 0,
+    "permission_denied_events": 0,
+    "api_retries": 0,
+    "api_retry_errors": []
+  },
+  "context_window": 1000000,
+  "context_end_ratio": 0.035456,
+  "transcript": {
+    "records": 90,
+    "compactions": 0,
+    "compaction_meta": [],
+    "main_api_calls": 8,
+    "main_output_tokens": 8041,
+    "models": {
+      "claude-opus-5-5": 8
+    }
+  },
+  "transcripts_found": {
+    "main": true,
+    "subagents": 0
+  },
+  "subagents": [],
+  "rework": {
+    "refuter_runs": 0,
+    "refuter_fail": 0,
+    "builder_runs": 0,
+    "refuter_verdicts": []
+  },
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "init_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring"
+  ],
+  "init_agents": [
+    "claude",
+    "Explore",
+    "general-purpose",
+    "Plan",
+    "statusline-setup"
+  ],
+  "init_model": "claude-opus-5-5",
+  "init_permission_mode": "bypassPermissions",
+  "diff": {
+    "diff_bytes": 7703,
+    "files_changed": [
+      "src/click/types.py",
+      "tests/test_types/test_Path.py",
+      "tests/typing/typing_path.py"
+    ]
+  },
+  "checks": {
+    "hidden": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "9 passed in 0.08s"
+    },
+    "full": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "2262 passed, 24 skipped, 31000 deselected, 1 xfailed in 4.73s"
+    },
+    "ruff": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "All checks passed!"
+    },
+    "format": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "76 files already formatted"
+    },
+    "mypy": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "Success: no issues found in 29 source files"
+    },
+    "all_pass": true
+  },
+  "final_text_chars": 2529
+}

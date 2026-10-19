@@ -1,0 +1,92 @@
+{
+  "duration_api_ms": 205167,
+  "stop_reason": "end_turn",
+  "session_id": "42945aa0-b8c2-453b-bd26-10eee3e1b624",
+  "total_cost_usd": 1.1543322,
+  "usage": {
+    "input_tokens": 4,
+    "cache_creation_input_tokens": 2527,
+    "cache_read_input_tokens": 147956,
+    "output_tokens": 416,
+    "output_tokens_details": {
+      "thinking_tokens": 48
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 2527,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 70,
+      "outputTokens": 14786,
+      "thinkingTokens": 4044,
+      "cacheReadInputTokens": 1713141,
+      "cacheCreationInputTokens": 64463,
+      "webSearchRequests": 0,
+      "costUSD": 1.1543322,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "origin": {
+    "kind": "task-notification",
+    "producer": "session-task",
+    "runId": "0mvepmrbc-eeb62546"
+  },
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 2,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The disk-wide search for other copies of `ResetClockWindow.hpp` has finished, and nothing changes.\n\nIt found copies outside this repo: in `voxglitch-upstream`, `/mnt/c/Code/voxglitch`, and scratch directories under `/tmp`. None of them are used here. The compile check and every test add only this repo's `src/` to the include path (`scripts/vg_check.sh:20,31`), and Euclid includes this repo's header.\n\nSo the answer stands: the missing `window.arm` in the reset branch was already fixed by the F1 checkpoint, and the current tree passes the Euclid compile check and all standalone tests.",
+  "ttft_ms": 3048,
+  "type": "result",
+  "duration_ms": 7334,
+  "uuid": "90e4fe63-94ec-436b-a177-5cf2b046e319",
+  "ttft_stream_ms": 2046,
+  "time_to_request_ms": 30,
+  "first_content_frame_ms": 2047,
+  "queued_turn_count": 0,
+  "result_index": 1
+}

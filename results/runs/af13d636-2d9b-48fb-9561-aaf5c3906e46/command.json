@@ -1,0 +1,26 @@
+{
+  "cmd": [
+    "claude",
+    "-p",
+    "`Sentinel` in `src/click/_utils.py` is an `enum.Enum` whose members, such as `UNSET`, are meant to be singletons. Copying a member with `copy.copy` or `copy.deepcopy`, or round-tripping it through `pickle`, must return the very same member object. Today the default Enum reduction uses the member's value, which is a bare `object()`, so the round trip either fails or yields a different object.\n\nMake `copy.copy(s) is s`, `copy.deepcopy(s) is s`, and `pickle.loads(pickle.dumps(s)) is s` hold for every `Sentinel` member. A consequence that must also hold: a `click.Option([\"--name\"])`, whose `default` is `UNSET`, still has `default is UNSET` and `name == \"name\"` after being copied, deep-copied, or pickled and unpickled. Add tests.\n\nNotes: CLAUDE.md lists the test and lint commands. Work autonomously; nobody will answer questions. Do not commit. When you are done, run the full test suite, then end with a short summary of what you changed and why.",
+    "--model",
+    "opus",
+    "--effort",
+    "high",
+    "--permission-mode",
+    "bypassPermissions",
+    "--setting-sources",
+    "project,local",
+    "--strict-mcp-config",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    "--forward-subagent-text",
+    "--include-hook-events",
+    "--max-budget-usd",
+    "15",
+    "--session-id",
+    "a2debe61-8e07-420e-b995-c1fdd3ad2fb5"
+  ],
+  "cwd": "/home/clone45/routing_test_work/click"
+}

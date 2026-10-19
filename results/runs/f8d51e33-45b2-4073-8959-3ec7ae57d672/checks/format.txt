@@ -1,0 +1,5 @@
+rc=0 timed_out=False
+--- stdout
+76 files already formatted
+
+--- stderr

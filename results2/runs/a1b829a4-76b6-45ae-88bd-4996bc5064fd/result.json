@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 24139,
+  "stop_reason": "end_turn",
+  "session_id": "2d766f09-5e11-4771-8fa6-a469144118ba",
+  "total_cost_usd": 0.1623718,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 13774,
+    "cache_read_input_tokens": 70639,
+    "output_tokens": 1901,
+    "output_tokens_details": {
+      "thinking_tokens": 246
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 13774,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1901,
+      "cacheReadInputTokens": 70639,
+      "cacheCreationInputTokens": 13774,
+      "webSearchRequests": 0,
+      "costUSD": 0.1623718,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 246,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Everything below is in `src/modules/PianoRoll/PianoRollEditorWidget.hpp` unless another file is named.\n\n1. **Entry.** `onButton` (l.1624) sends a left press to `beginDrag(pos, mods)` (l.1889). That calls `zoneAt` (l.1387), and if the result is `ZONE_GRID` it calls `beginGridDrag(position, shift)` (l.2032).\n2. **Order in `beginGridDrag`.** It first gets the note under the pointer from `noteIndexAt(stepAtX, pitchAtY)` (l.1405). It then tries each step in turn:\n   - (A) Shift held: adds or removes the note from the selection, or starts a marquee.\n   - (B) Press inside the multi-note selection box from `selectionBounds` (l.1453): moves the group. Edges are never tested here, so notes in a group can't be resized (l.2060\u20132074).\n   - (C) `edgeGrabAt(position, grab)` (l.1422) finds an edge: `DRAG_RESIZE` starts, and `drag_left_edge = grab.left_edge` picks which edge (l.2077\u20132091).\n   - (D) A note body was hit: `selectOnly` + `beginMove`. (E) Clears the selection. (F) Paints a new note.\n   - `onHover` (l.1590\u20131601) runs the same box \u2192 edge \u2192 body order to choose the cursor.\n3. **The grab zone (`edgeGrabAt`, l.1422\u20131451).** It walks the active track's notes at the pointer's pitch, newest first, and works in pixels: `x0 = xOfStep(start)`, `x1 = xOfStep(end())`. The zone is `min(EDGE_GRAB_W, max(1, (x1-x0)/3))` (l.1439), measured on both sides of each edge. `EDGE_GRAB_W` is 4 px (`PianoRollGeometry.hpp:127`). So notes 12 px or wider get the full \u00b14 px. Narrower notes get a third of their width, at least 1 px, so the zones never cover the whole note and the body can still be grabbed to move it.\n4. **Right edge first.** The right edge is tested first (l.1441). Because the zone reaches past `x1`, the end can be grabbed even though `noteIndexAt` uses a half-open span that leaves the end step outside the note (comment at l.1400\u20131404).\n5. **Why a short note's left edge can't be grabbed.** The left-edge test (l.1445) also needs `(x1-x0) > EDGE_GRAB_MIN_NOTE_W`. That constant is `EDGE_GRAB_W * 2.5` = 10 px (`PianoRollGeometry.hpp:128`). On a note 10 px wide or less, a left-edge grab could be mistaken for a right-edge grab, so it is turned off. A press there falls through to (D) and moves the note. Only the right edge can resize it.",
+  "ttft_ms": 2745,
+  "type": "result",
+  "duration_ms": 24423,
+  "uuid": "40e0dbb8-e130-4924-b3a6-93119aee3b2c",
+  "ttft_stream_ms": 1850,
+  "time_to_request_ms": 69,
+  "first_content_frame_ms": 1851,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

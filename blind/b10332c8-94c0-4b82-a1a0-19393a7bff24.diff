@@ -1,0 +1,96 @@
+diff --git a/src/click/_utils.py b/src/click/_utils.py
+index 05ee2e9..abaa235 100644
+--- a/src/click/_utils.py
++++ b/src/click/_utils.py
+@@ -4,20 +4,35 @@ import enum
+ import typing as t
+ 
+ 
++@enum.unique
+ class Sentinel(enum.Enum):
+     """Enum used to define sentinel values.
+ 
++    Each member's value is an opaque UUID, minted once and never changed. It
++    is the member's persistent identity: pickling stores it, and unpickling
++    looks the existing member up by it. Copying and unpickling always return
++    the very same member object, so ``is`` checks keep working.
++
+     .. seealso::
+ 
+         `PEP 661 - Sentinel Values <https://peps.python.org/pep-0661/>`_.
+     """
+ 
+-    UNSET = object()
+-    FLAG_NEEDS_VALUE = object()
++    UNSET = "01012911-6591-427b-850d-e61b746dcb14"
++    FLAG_NEEDS_VALUE = "e6f0c775-c720-49ab-841f-a2ff3e03a2a2"
+ 
+     def __repr__(self) -> str:
+         return f"{self.__class__.__name__}.{self.name}"
+ 
++    def __copy__(self) -> Sentinel:
++        return self
++
++    def __deepcopy__(self, memo: dict[int, t.Any]) -> Sentinel:
++        return self
++
++    def __reduce_ex__(self, protocol: object) -> tuple[t.Any, ...]:
++        return self.__class__, (self._value_,)
++
+ 
+ UNSET: t.Literal[Sentinel.UNSET] = Sentinel.UNSET
+ """Sentinel used to indicate that a value is not set."""
+diff --git a/tests/test_utils/test_sentinel.py b/tests/test_utils/test_sentinel.py
+index 1dd5b15..d17ea05 100644
+--- a/tests/test_utils/test_sentinel.py
++++ b/tests/test_utils/test_sentinel.py
+@@ -1,6 +1,12 @@
++import copy
++import pickle
+ from decimal import Decimal
+ from fractions import Fraction
+ 
++import pytest
++
++import click
++from click._utils import Sentinel
+ from click._utils import UNSET
+ 
+ 
+@@ -50,3 +56,36 @@ def test_unset_sentinel():
+         assert value is not real_value
+ 
+     assert value not in real_values
++
++
++@pytest.mark.parametrize("sentinel", list(Sentinel))
++@pytest.mark.parametrize(
++    "roundtrip",
++    [
++        copy.copy,
++        copy.deepcopy,
++        *(
++            (lambda v, p=p: pickle.loads(pickle.dumps(v, protocol=p)))
++            for p in range(pickle.HIGHEST_PROTOCOL + 1)
++        ),
++    ],
++)
++def test_sentinel_roundtrip_is_identity(sentinel, roundtrip):
++    assert roundtrip(sentinel) is sentinel
++    # Inside a container, the member must still be the same object.
++    assert roundtrip([sentinel])[0] is sentinel
++
++
++@pytest.mark.parametrize(
++    "roundtrip",
++    [copy.copy, copy.deepcopy, lambda v: pickle.loads(pickle.dumps(v))],
++)
++def test_option_roundtrip_keeps_unset_default(roundtrip):
++    option = click.Option(["--name"])
++    assert option.default is UNSET
++
++    result = roundtrip(option)
++
++    assert result is not option
++    assert result.default is UNSET
++    assert result.name == "name"

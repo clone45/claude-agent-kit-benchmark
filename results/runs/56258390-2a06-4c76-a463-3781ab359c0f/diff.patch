@@ -1,0 +1,75 @@
+diff --git a/src/click/_termui_impl.py b/src/click/_termui_impl.py
+index fa26601..1a3f76a 100644
+--- a/src/click/_termui_impl.py
++++ b/src/click/_termui_impl.py
+@@ -123,6 +123,9 @@ class ProgressBar(t.Generic[V]):
+         exc_value: BaseException | None,
+         tb: TracebackType | None,
+     ) -> None:
++        if self._completed_intervals:
++            self._apply_pending_steps()
++            self.render_progress()
+         self.render_finish()
+ 
+     def __iter__(self) -> cabc.Iterator[V]:
+@@ -333,7 +336,16 @@ class ProgressBar(t.Generic[V]):
+             self.render_progress()
+             self._completed_intervals = 0
+ 
++    def _apply_pending_steps(self) -> None:
++        """Advance by any steps held back by ``update_min_steps`` so the
++        position reflects all completed work.
++        """
++        if self._completed_intervals:
++            self.make_step(self._completed_intervals)
++            self._completed_intervals = 0
++
+     def finish(self) -> None:
++        self._apply_pending_steps()
+         self.eta_known = False
+         self.current_item = None
+         self.finished = True
+diff --git a/tests/test_termui.py b/tests/test_termui.py
+index 627c2aa..a2fe16e 100644
+--- a/tests/test_termui.py
++++ b/tests/test_termui.py
+@@ -353,6 +353,39 @@ def test_progress_bar_update_min_steps(runner):
+     assert bar.pos == 5
+ 
+ 
++@pytest.mark.parametrize("update_min_steps", [1, 3, 7, 19, 20, 21, 100])
++@pytest.mark.parametrize("drive", ["iterate", "update"])
++def test_progress_bar_update_min_steps_applies_remainder(
++    runner, monkeypatch, update_min_steps, drive
++):
++    """Steps left pending by ``update_min_steps`` are applied when the bar
++    finishes, so the final position is reached and rendered.
++    """
++    bar = None
++
++    @click.command()
++    def cli():
++        nonlocal bar
++
++        with click.progressbar(
++            range(20), show_pos=True, update_min_steps=update_min_steps
++        ) as bar:
++            if drive == "iterate":
++                for _ in bar:
++                    pass
++            else:
++                for _ in range(20):
++                    bar.update(1)
++
++    monkeypatch.setattr(click._termui_impl, "isatty", lambda _: True)
++    output = runner.invoke(cli, [], catch_exceptions=False).output
++
++    assert bar.pos == 20
++    assert bar.finished
++    assert bar._completed_intervals == 0
++    assert "20/20" in output
++
++
+ @pytest.mark.parametrize("key_char", ("h", "H", "é", "À", " ", "字", "àH", "àR"))
+ @pytest.mark.parametrize("echo", [True, False])
+ @pytest.mark.skipif(not WIN, reason="Tests user-input using the msvcrt module.")

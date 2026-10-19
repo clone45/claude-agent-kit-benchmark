@@ -1,0 +1,108 @@
+diff --git a/src/click/utils.py b/src/click/utils.py
+index b529eb0..0b60273 100644
+--- a/src/click/utils.py
++++ b/src/click/utils.py
+@@ -73,43 +73,40 @@ def _make_default_short_help(help: str, max_length: int = 45) -> str:
+     # Collapse newlines, tabs, and spaces.
+     words = help.split()
+ 
+-    if not words:
+-        return ""
+-
+     # The first paragraph started with a "no rewrap" marker, ignore it.
+-    if words[0] == "\b":
++    if words and words[0] == "\b":
+         words = words[1:]
+ 
+-    total_length = 0
+-    last_index = len(words) - 1
+-
+-    for i, word in enumerate(words):
+-        total_length += len(word) + (i > 0)
++    if not words:
++        return ""
+ 
+-        if total_length > max_length:  # too long, truncate
++    # A period ends the first sentence unless the next word starts with a
++    # lowercase letter, as in "apples vs. pears".
++    for i, word in enumerate(words[:-1]):
++        if word[-1] == "." and not words[i + 1][0].islower():
++            words = words[: i + 1]
+             break
+ 
+-        if word[-1] == ".":  # sentence end, truncate without "..."
+-            return " ".join(words[: i + 1])
++    text = " ".join(words)
+ 
+-        if total_length == max_length and i != last_index:
+-            break  # not at sentence end, truncate with "..."
+-    else:
+-        return " ".join(words)  # no truncation needed
++    if len(text) <= max_length:
++        return text
+ 
+-    # Account for the length of the suffix.
+-    total_length += len("...")
++    # Keep as many whole words as fit together with the suffix.
++    suffix = "..."
++    budget = max_length - len(suffix)
++    total_length = -1  # no space before the first word
++    count = 0
+ 
+-    # remove words until the length is short enough
+-    while i > 0:
+-        total_length -= len(words[i]) + (i > 0)
++    for word in words:
++        total_length += len(word) + 1
+ 
+-        if total_length <= max_length:
++        if total_length > budget:
+             break
+ 
+-        i -= 1
++        count += 1
+ 
+-    return " ".join(words[:i]) + "..."
++    return " ".join(words[:count]) + suffix
+ 
+ 
+ class _LazyFile:
+diff --git a/tests/test_utils/test_make_default_short_help.py b/tests/test_utils/test_make_default_short_help.py
+index c2a1f8e..66341be 100644
+--- a/tests/test_utils/test_make_default_short_help.py
++++ b/tests/test_utils/test_make_default_short_help.py
+@@ -8,7 +8,24 @@ import click
+     [
+         pytest.param("", 10, "", id="empty"),
+         pytest.param("123 567 90", 10, "123 567 90", id="equal length, no dot"),
+-        pytest.param("123 567 9. aaaa bbb", 10, "123 567 9.", id="sentence < max"),
++        pytest.param("123 567 9. aaaa bbb", 10, "123 567...", id="lowercase after dot"),
++        pytest.param("Pick a fruit. 3 remain.", 45, "Pick a fruit.", id="sentence"),
++        pytest.param(
++            "Weigh apples vs. pears.", 45, "Weigh apples vs. pears.", id="abbreviation"
++        ),
++        pytest.param(
++            "Weigh apples vs. pears and plums.",
++            20,
++            "Weigh apples vs....",
++            id="truncate after abbreviation",
++        ),
++        pytest.param("well-behaved.", 8, "...", id="hyphenated word too long"),
++        pytest.param("supercalifragilistic", 10, "...", id="first word too long"),
++        pytest.param("ab cd", 3, "...", id="max equals suffix"),
++        pytest.param("ab cd", 2, "...", id="max < suffix"),
++        pytest.param("ab cd", 0, "...", id="zero max"),
++        pytest.param("ab cd", -5, "...", id="negative max"),
++        pytest.param("ab", 2, "ab", id="fits in max < suffix"),
+         pytest.param("123 567\n\n 9. aaaa bbb", 10, "123 567", id="paragraph < max"),
+         pytest.param("123 567 90123.", 10, "123 567...", id="truncate"),
+         pytest.param("123 5678 xxxxxx", 10, "123...", id="length includes suffix"),
+@@ -30,7 +47,7 @@ import click
+     ],
+ )
+ def test_make_default_short_help(value, max_length, alter, expect):
+-    assert len(expect) <= max_length
++    assert len(expect) <= max_length or expect == "..."
+ 
+     if alter:
+         value = alter(value)

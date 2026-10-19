@@ -1,0 +1,94 @@
+{
+  "duration_api_ms": 207359,
+  "stop_reason": "end_turn",
+  "session_id": "3198e5c2-cd70-4eb5-8c9a-707a06cf378b",
+  "total_cost_usd": 1.0048990000000002,
+  "usage": {
+    "input_tokens": 4,
+    "cache_creation_input_tokens": 3277,
+    "cache_read_input_tokens": 101665,
+    "output_tokens": 2774,
+    "output_tokens_details": {
+      "thinking_tokens": 641
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 3277,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 42,
+      "outputTokens": 21130,
+      "cacheReadInputTokens": 728795,
+      "cacheCreationInputTokens": 62048,
+      "webSearchRequests": 0,
+      "costUSD": 1.0048990000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 5025,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "origin": {
+    "kind": "task-notification",
+    "producer": "session-task",
+    "runId": "0mveo1ah6-26ac6484"
+  },
+  "subagent_stats": {
+    "spawned": 1,
+    "requested": {
+      "background": 1,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 1,
+    "max_depth": 1,
+    "spawned_by_subagents": 0,
+    "completed": 1,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {
+      "agent-kit:refuter": 1
+    }
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 2,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've added per-step chance to the Euclid engine. The compile check and all the standalone tests pass, and the six-argument `process` behaves exactly as before.\n\n## Blocked on me\nNothing.\n\n## Changed\nNothing is committed.\n\n- **`src/modules/Euclid/EuclidEngine.hpp`**\n  - Added `struct Rng`, the xorshift32 generator as specified.\n  - `Sequencer` has a public `Rng rng` and a new flag `skipped`, which records that the current step lost its roll. `load()` clears it.\n  - New seven-argument `process` with the chance rule. The six-argument form now just calls it with chance 100, so it never rolls and gives the same output as before.\n  - `chance` is decided once, at the moment the playhead lands on a step:\n    - A rest rolls nothing.\n    - A hit at chance 100 plays and a hit at chance 0 is skipped, neither rolling.\n    - Any other chance makes exactly one `rng.percent()` call.\n    - A skipped step has no `struck` and its `gate` stays low until the playhead moves.\n    - The pattern table and `gate_gap` work as before.\n  - The comments at the top describe the chance rule.\n- **`tests/euclid/engine_test.cpp`**: five new groups of tests:\n  - `Rng` checked against known xorshift32 values.\n  - The six-argument form matches chance 100, and an out-of-range 150, on every sample of a 20,000-sample run, and never touches the generator.\n  - Chance 0: nothing strikes, gate stays low, nothing is rolled, and load still shows step 1's gate.\n  - A seeded generator gives the same result on every run. Checked against a reference model, it rolls exactly once per hit landed on and never for rests or idle samples.\n  - A lost roll holds the gate low through 3000 idle samples and through a ROT change, until the next clock rolls again.\n- **`tests/euclid/README.md`**: describes the new tests.\n\n## Verified\n- **Compile check:** `bash scripts/vg_check.sh compile Euclid` passes. Euclid is the only module touched.\n- **Tests:** `bash scripts/vg_check.sh tests` exits 0.\n  - Euclid tests: pattern_test 63/0, engine_test 163/0 (checks/failures), seq3_parity_test 36/0.\n  - All the timeline tests pass.\n- **The tests catch mistakes:** I broke the engine on purpose three ways (rolling on rests, re-rolling on idle samples, skipping a lost step for only its first sample). Each version failed the new tests.\n- **Independent review:** a separate review of the diff against the spec found no blocking defects. It flagged two weak tests, which I fixed: the ROT-change check now uses a pattern where changing ROT really changes the table.\n\n## Found\nTwo cases the spec doesn't settle; here is what I chose:\n- **Reset and clock on the same sample with a zero-length window.** Both would land, but only one step sounds, so I roll at most once per sample, for the clock's step. This matches the old behaviour, where the clock's `struck` replaced the reset's.\n- **The playhead lands on a rest, then a ROT change makes that step a hit.** Nothing is rolled (the spec forbids rolling on idle samples), so the gate follows the pattern as it does today.",
+  "ttft_ms": 6072,
+  "type": "result",
+  "duration_ms": 34896,
+  "uuid": "c54e7a9e-2d33-4df2-852c-1f6f724985ea",
+  "ttft_stream_ms": 1199,
+  "time_to_request_ms": 20,
+  "first_content_frame_ms": 1199,
+  "queued_turn_count": 0,
+  "result_index": 1
+}

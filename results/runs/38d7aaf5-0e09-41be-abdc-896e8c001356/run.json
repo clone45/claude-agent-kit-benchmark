@@ -1,0 +1,193 @@
+{
+  "run_id": "38d7aaf5-0e09-41be-abdc-896e8c001356",
+  "blind_id": "819fe042-19fb-4903-b550-66ed375fa617",
+  "session_id": "d465310d-d0f9-47d6-b659-b7265a0e73b6",
+  "task_id": "9ccbb480-9b13-46ab-b51c-de86eb274e70",
+  "task_label": "R3",
+  "task_type": "refactor",
+  "task_length": "short",
+  "condition_id": "7a20c7e4-5704-405d-b7fc-2bf0e8ac1ed9",
+  "condition_label": "B",
+  "rep_index": 0,
+  "branch": "t-9ccbb480-9b13-46ab-b51c-de86eb274e70-b",
+  "base_commit": "771772d6478c16c0e68d2c2faf0af553fde4edca",
+  "status": "completed",
+  "process": {
+    "rc": 0,
+    "wall_s": 174.7,
+    "timed_out": false,
+    "started_at": "2026-10-19T03:10:23.282732+00:00",
+    "ended_at": "2026-10-19T03:13:17.935011+00:00"
+  },
+  "exit_code": 0,
+  "result_subtype": "success",
+  "is_error": false,
+  "num_turns": 13,
+  "duration_ms": 167118,
+  "duration_api_ms": 159799,
+  "claude_total_cost_usd": 0.7159399999999999,
+  "cost": {
+    "by_model": {
+      "claude-opus-5-5": {
+        "input_tokens": 20,
+        "cache_read_tokens": 358760,
+        "cache_create_tokens": 37431,
+        "output_tokens": 17233,
+        "thinking_tokens": 9014,
+        "cost_input_side_usd": 0.37128,
+        "cost_output_usd": 0.34466,
+        "cost_usd": 0.71594,
+        "claude_cost_usd": 0.7159399999999999,
+        "basis": "stream_per_call",
+        "context_window": 1000000
+      }
+    },
+    "total_usd": 0.71594,
+    "unpriced_models": []
+  },
+  "model_usage": {
+    "claude-opus-5-5": {
+      "inputTokens": 20,
+      "outputTokens": 17233,
+      "cacheReadInputTokens": 358760,
+      "cacheCreationInputTokens": 37431,
+      "webSearchRequests": 0,
+      "costUSD": 0.7159399999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 9014,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "stream": {
+    "per_model": {
+      "claude-opus-5-5": {
+        "calls": 10,
+        "input": 20,
+        "cache_read": 358760,
+        "cache_create": 37431,
+        "cache_create_5m": 0,
+        "cache_create_1h": 37431,
+        "main_calls": 10,
+        "sub_calls": 0
+      }
+    },
+    "main_api_calls": 10,
+    "sub_api_calls": 0,
+    "sub_calls_by_type": {},
+    "context_end_tokens": 48887,
+    "context_max_tokens": 48887,
+    "shunt_denials": 0,
+    "tool_errors": 0,
+    "permission_denied_events": 0,
+    "api_retries": 0,
+    "api_retry_errors": []
+  },
+  "context_window": 1000000,
+  "context_end_ratio": 0.048887,
+  "transcript": {
+    "records": 115,
+    "compactions": 0,
+    "compaction_meta": [],
+    "main_api_calls": 10,
+    "main_output_tokens": 17233,
+    "models": {
+      "claude-opus-5-5": 10
+    }
+  },
+  "transcripts_found": {
+    "main": true,
+    "subagents": 0
+  },
+  "subagents": [],
+  "rework": {
+    "refuter_runs": 0,
+    "refuter_fail": 0,
+    "builder_runs": 0,
+    "refuter_verdicts": []
+  },
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "init_plugins": [
+    "agent-kit",
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring"
+  ],
+  "init_agents": [
+    "agent-kit:builder",
+    "agent-kit:bulk-reader",
+    "agent-kit:code-writer",
+    "agent-kit:debugger",
+    "agent-kit:refuter",
+    "agent-kit:researcher",
+    "agent-kit:scout",
+    "claude",
+    "Explore",
+    "general-purpose",
+    "Plan",
+    "statusline-setup"
+  ],
+  "init_model": "claude-opus-5-5",
+  "init_permission_mode": "bypassPermissions",
+  "diff": {
+    "diff_bytes": 13936,
+    "files_changed": [
+      "src/click/testing.py"
+    ]
+  },
+  "checks": {
+    "function_lengths": {
+      "src/click/testing.py:isolation": 59
+    },
+    "full": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "2262 passed, 24 skipped, 31000 deselected, 1 xfailed in 3.54s"
+    },
+    "ruff": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "All checks passed!"
+    },
+    "format": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "76 files already formatted"
+    },
+    "mypy": {
+      "pass": true,
+      "rc": 0,
+      "timed_out": false,
+      "tail": "Success: no issues found in 29 source files"
+    },
+    "all_pass": true
+  },
+  "final_text_chars": 2522
+}

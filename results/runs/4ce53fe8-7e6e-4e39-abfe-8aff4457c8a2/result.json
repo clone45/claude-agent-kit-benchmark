@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 38557,
+  "stop_reason": "end_turn",
+  "session_id": "16299d0a-6951-45ad-a97c-514aecb12850",
+  "total_cost_usd": 0.2164634,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 12794,
+    "cache_read_input_tokens": 134877,
+    "output_tokens": 4354,
+    "output_tokens_details": {
+      "thinking_tokens": 1203
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 12794,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 4354,
+      "cacheReadInputTokens": 134877,
+      "cacheCreationInputTokens": 12794,
+      "webSearchRequests": 0,
+      "costUSD": 0.2164634,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1203,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've refactored `style`, but it's still 114 lines, so I didn't meet the \"under 60 lines\" target. The 80-line docstring alone is over the limit, and the code after it is now 20 lines. Getting under 60 would mean cutting the docstring, which feeds the published API docs, so I left it alone. If you want that cut, the list of color names is the obvious part to shorten.\n\nYour premise was also partly out of date: the color lookup and validation (named, bright, 256-color and RGB) was already in a private helper, `_interpret_color`. I left that helper unchanged and pulled the remaining repeated code out into two new private helpers in `src/click/termui.py`:\n\n- **`_color_code(color, offset=0)`** returns the escape sequence for a foreground or background color (background uses `offset=10`). It returns an empty string when the color is `None` and leaves the checking to `_interpret_color`.\n- **`_attribute_code(enabled, on, off)`** replaces the eight copy-pasted `if x is not None:` blocks. It returns the \"on\" or \"off\" code, or an empty string when the value is `None`.\n\n`style` now builds one list (fg, bg, the eight attributes, then the text), adds the reset code if asked, and joins it. The order of the codes is the same, `fg` is still checked before `bg`, and the empty strings vanish when joined, so the output is identical.\n\n**Checks:**\n- **Same output:** before the change I saved `style`'s output for about 13,600 inputs, including invalid colors, booleans, out-of-range values, wrong-length tuples and every attribute combination with and without reset. The output after the change, including exception messages, is byte-for-byte identical.\n- **Final runs:** the full test suite passed (2262 passed, 24 skipped, 1 xfailed), and `ruff check`, `ruff format --check` and `mypy` are all clean.\n- **Public surface:** `style`'s signature, type annotations and docstring are unchanged, and no other public function was touched.\n\nNothing is committed.",
+  "ttft_ms": 1766,
+  "type": "result",
+  "duration_ms": 50467,
+  "uuid": "9d3d0e91-0ed9-40af-95ac-7ce30d1a3088",
+  "ttft_stream_ms": 740,
+  "time_to_request_ms": 59,
+  "first_content_frame_ms": 741,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

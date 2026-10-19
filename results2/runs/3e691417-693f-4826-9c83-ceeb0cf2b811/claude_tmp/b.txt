@@ -1,0 +1,210 @@
+//
+//
+//
+//
+//
+// ===================
+// Button lights
+// COPY: If the user has pressed the copy button, then store the index of the
+// Clock and step features: every clock_division-th clock edge is a step,
+// If shift-clicking, then copy the current memory into the clicked memory slot
+// If the user has pressed a memory slot button, switch memory slots and update the
+// Manage ratcheting
+// On incoming RESET, reset the sequencers
+// PASTE: If the user has pressed the paste button, then copy previously
+// Process step key-buttons (awesome clackity clack!)
+// Process the knobs below the steps
+// Read master volume knob
+// Reset clock division counter
+// Set brightness based on step state
+// Set up a (reverse) counter so that the clock input will ignore
+// Show location
+// Step all of the tracks
+// Step the visual playback indicator (led) as well
+// Summed output voltages at stereo outputs
+// This may or may not actually trigger based on the track button
+// Trigger the samples
+// Update memory slot lights
+// Update step lights
+// Would it be more efficient to move this code into the memory button's
+// before switching to the new memory slot
+// copied memory to the current memory location.
+// current memory, which will be used when pasting.
+// https://vcvrack.com/manual/VoltageStandards
+// incoming clock pulses for 1 millisecond after a reset input. This
+// is to comply with VCV Rack's standards.  See section "Timing" at
+// knob positions for the selected function.
+// onClick method, or something like that?
+// parameter_slots is defined in defines.h
+// parameter_slots keep track of this parameter is associated with which parameter slot
+// status and the probability parameter lock.
+// step button processing
+// the edges in between are ratchet ticks.
+// track_triggers are used to send values to the expander
+bool copyGate = copyPulse.process(sample_time);
+bool isActive = selected_track->getValue(i);
+bool isCurrent = (playback_step == (unsigned int)i);
+bool pasteGate = pastePulse.process(sample_time);
+bool step_button_value = params[DRUM_PADS + step_number].getValue();
+clock_counter = 0;
+clock_counter = clock_division;
+clock_counter++;
+copied_memory_index = memory_slot_index;
+copyMemory(copied_memory_index, memory_slot_index);
+copyMemory(memory_slot_index, i);
+copyPulse.trigger(1e-3f);
+else
+else
+else
+fireStep();
+first_step = false;
+first_step = true;
+float brightness = isActive ? (isCurrent ? 1.0f : 0.5f) : 0.0f;
+float master_volume = params[MASTER_VOLUME].getValue() * 8.0;
+float mix_left_output = 0;
+float mix_right_output = 0;
+float value = params[STEP_KNOBS + step_number].getValue();
+for (int i = 0; i < NUMBER_OF_MEMORY_SLOTS; i++) {
+for (int i = 0; i < NUMBER_OF_STEPS; i++)
+for (unsigned int i = 0; i < NUMBER_OF_MEMORY_SLOTS; i++)
+for (unsigned int i = 0; i < NUMBER_OF_TRACKS; i++)
+for (unsigned int i = 0; i < NUMBER_OF_TRACKS; i++)
+for (unsigned int i = 0; i < NUMBER_OF_TRACKS; i++)
+for (unsigned int i = 0; i < NUMBER_OF_TRACKS; i++)
+for (unsigned int slot_id = 0; slot_id < NUMBER_OF_PARAMETER_LOCKS; slot_id++)
+for (unsigned int step_number = 0; step_number < NUMBER_OF_STEPS; step_number++)
+for (unsigned int step_number = 0; step_number < NUMBER_OF_STEPS; step_number++)
+for (unsigned int track_index = 0; track_index < NUMBER_OF_TRACKS; track_index++)
+if (clock_counter == clock_division)
+if (copy_button_trigger.process(params[COPY_BUTTON].getValue()))
+if (expander_connected)
+if (expander_connected)
+if (first_step == false) // If not the first step
+if (inputs[MEM_INPUT].isConnected())
+if (memory_selection != memory_slot_index)
+if (memory_slot_button_triggers[i].process(params[MEMORY_SLOT_BUTTONS + i].getValue()))
+if (notMuted(i))
+if (parameter_lock_button_triggers[slot_id].process(params[PARAMETER_LOCK_BUTTONS + parameter_id].getValue()))
+if (paste_button_trigger.process(params[PASTE_BUTTON].getValue()))
+if (reset_trigger.process(inputs[RESET_INPUT].getVoltage(), constants::gate_low_trigger, constants::gate_high_trigger))
+if (shift_key)
+if (step_trigger.process(inputs[STEP_INPUT].getVoltage(), constants::gate_low_trigger, constants::gate_high_trigger))
+inner_light_booleans[step_number] = step_button_value;
+light_booleans[step_number] = (playback_step == step_number);
+lights[COPY_LIGHT].setSmoothBrightness(copyGate, sample_time);
+lights[MEMORY_SLOT_LIGHTS + i].setBrightness(i == (int)memory_slot_index ? 1.0f : 0.0f);
+lights[PASTE_LIGHT].setSmoothBrightness(pasteGate, sample_time);
+lights[STEP_LIGHTS + i].setBrightness(brightness);
+memory_selection = clamp(memory_selection, 0, NUMBER_OF_MEMORY_SLOTS - 1);
+outputs[AUDIO_OUTPUT_LEFT].setVoltage(mix_left_output * master_volume);
+outputs[AUDIO_OUTPUT_RIGHT].setVoltage(mix_right_output * master_volume);
+pastePulse.trigger(1e-3f);
+playback_step = selected_memory_slot->tracks[track_index].getPosition();
+private:
+processClockInput();
+processCopyPasteButtons();
+processMemorySlotInputs();
+processOutputs();
+processParameterLockButtons();
+processRatchets();
+processResetInput();
+processStepButtons();
+processStepKnobs();
+processTrack(track_index, &mix_left_output, &mix_right_output);
+readFromExpander();
+selected_memory_slot->tracks[i].reset();
+selected_memory_slot->tracks[i].step();
+selected_parameter_lock_id = parameter_id;
+selected_parameter_slot_id = slot_id;
+selected_track->setParameter(selected_parameter_lock_id, step_number, value);
+selected_track->setValue(step_number, step_button_value);
+switchMemory(i);
+switchMemory(memory_selection);
+this->track_triggers[i] = selected_memory_slot->tracks[i].ratchety();
+this->track_triggers[i] = this->trigger(i);
+unsigned int memory_selection = (inputs[MEM_INPUT].getVoltage() / 10.0) * NUMBER_OF_MEMORY_SLOTS;
+unsigned int parameter_id = parameter_slots[slot_id];
+updateLights(args.sampleTime);
+updatePanelControls();
+void fireStep()
+void process(const ProcessArgs &args) override
+void processClockInput()
+void processCopyPasteButtons()
+void processMemorySlotInputs()
+void processOutputs()
+void processParameterLockButtons()
+void processRatchets()
+void processResetInput()
+void processStepButtons()
+void processStepKnobs()
+void updateLights(float sample_time)
+writeToExpander();
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+{
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}

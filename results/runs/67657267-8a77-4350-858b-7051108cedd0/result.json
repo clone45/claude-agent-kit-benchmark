@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 59704,
+  "stop_reason": "end_turn",
+  "session_id": "69a51e61-2936-4d0d-a9fd-6c0236ef3aa7",
+  "total_cost_usd": 0.25050600000000006,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 11075,
+    "cache_read_input_tokens": 229670,
+    "output_tokens": 5795,
+    "output_tokens_details": {
+      "thinking_tokens": 1925
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 11075,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 5795,
+      "cacheReadInputTokens": 229670,
+      "cacheCreationInputTokens": 11075,
+      "webSearchRequests": 0,
+      "costUSD": 0.25050600000000006,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1925,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 11,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I refactored `style` and the output is byte-for-byte unchanged. One target wasn't met as worded: `style` is now 114 lines, not under 60, because 80 of those lines are its public docstring. The code itself, signature included, is 34 lines.\n\n**Blocked on me**\nNothing. One call is yours if you disagree with it: I left the docstring as it is. It's the published API documentation, so shortening it to hit the line count would change the public docs. Moving its text elsewhere and attaching it at runtime would only game the number and make the code harder to read.\n\n**Changed** (`src/click/termui.py` only, not committed)\n- **Color handling:** the lookup and validation (named, bright, 256-color and RGB colors, plus the error messages) was already in a private helper, `_interpret_color`, before I started. I left it unchanged. The new helper `_color_code(color, offset=0)` handles `None` and wraps the result in the escape sequence, so foreground and background now share one code path.\n- **Per-attribute code:** the eight repeated `if x is not None:` blocks are now one helper, `_toggle_code(value, on, off)`. It returns the \"on\" or \"off\" code based on whether the value is truthy, the same as before, or an empty string for `None`.\n- **`style` body:** it is now a single list of the color and attribute codes in the original order, joined at the end. Empty strings add nothing to the output. The list is built in order, so an invalid `fg` is still reported before an invalid `bg`.\n- The signature, type annotations and docstring of `style` are unchanged, and no other public function was touched.\n\n**Verified**\n- **Same output:** I recorded what `style` returned or raised for 14,426 input combinations before and after the change. They included every named color, 256-color integers, RGB tuples and lists, invalid values such as `True`, `3.0` and `(1, 2, 256)`, all 3\u2078 combinations of the attribute flags with `reset` on and off, non-boolean flag values, and text that isn't a string. The two results are identical.\n- **Tests:** the full suite passed (2262 passed, 24 skipped, 1 xfailed).\n- **Checks:** `ruff check src tests`, `ruff format --check src tests` and `mypy` all pass.\n\n**Found**\n- The task described the color handling as still inside `style`, but it had already been extracted into `_interpret_color`, so the remaining work was the repeated attribute code.\n- The comparison script and its two output files are in `.claude/tmp/`, which git ignores.",
+  "ttft_ms": 1607,
+  "type": "result",
+  "duration_ms": 68940,
+  "uuid": "5b0340a8-d411-421b-8577-49182a7a1b6f",
+  "ttft_stream_ms": 895,
+  "time_to_request_ms": 92,
+  "first_content_frame_ms": 895,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

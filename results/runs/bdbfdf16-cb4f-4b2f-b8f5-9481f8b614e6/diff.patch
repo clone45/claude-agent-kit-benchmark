@@ -1,0 +1,389 @@
+diff --git a/src/click/testing.py b/src/click/testing.py
+index cc123d4..04d3d1f 100644
+--- a/src/click/testing.py
++++ b/src/click/testing.py
+@@ -314,6 +314,203 @@ class Result:
+         return f"<{type(self).__name__} {exc_str}>"
+ 
+ 
++def _set_environ(key: str, value: str | None) -> None:
++    """Set ``os.environ[key]`` to *value*, or remove it if *value* is
++    ``None``.
++    """
++    if value is None:
++        try:
++            del os.environ[key]
++        except Exception:
++            pass
++    else:
++        os.environ[key] = value
++
++
++def _make_pdb_init(
++    original: cabc.Callable[..., None],
++) -> cabc.Callable[..., None]:
++    """Wrap *original* (``pdb.Pdb.__init__``) so the debugger defaults to
++    the real terminal streams during :meth:`CliRunner.isolation`.
++    """
++
++    def _patched_pdb_init(
++        self: pdb.Pdb,
++        completekey: str = "tab",
++        stdin: t.IO[str] | None = None,
++        stdout: t.IO[str] | None = None,
++        **kwargs: t.Any,
++    ) -> None:
++        """Default ``pdb.Pdb`` to real terminal streams during
++        ``CliRunner`` isolation.
++
++        Without this patch, ``pdb.Pdb.__init__`` inherits from
++        ``cmd.Cmd`` which falls back to ``sys.stdin``/``sys.stdout``
++        when no explicit streams are provided. During isolation
++        those are ``BytesIO``-backed wrappers, so the debugger
++        reads from an empty buffer and writes to captured output,
++        making interactive debugging impossible.
++
++        By defaulting to ``sys.__stdin__``/``sys.__stdout__`` (the
++        original terminal streams Python preserves regardless of
++        redirection), debuggers can interact with the user while
++        ``click.echo`` output is still captured normally.
++
++        This covers ``pdb.set_trace()``, ``breakpoint()``,
++        ``pdb.post_mortem()``, and debuggers that subclass
++        ``pdb.Pdb`` (ipdb, pdbpp). Explicit ``stdin``/``stdout``
++        arguments are honored and not overridden. Debuggers that
++        do not subclass ``pdb.Pdb`` (pudb, debugpy) are not
++        covered.
++        """
++        if stdin is None:
++            stdin = sys.__stdin__
++        if stdout is None:
++            stdout = sys.__stdout__
++        original(self, completekey=completekey, stdin=stdin, stdout=stdout, **kwargs)
++
++    return _patched_pdb_init
++
++
++class _IsolatedStreams:
++    """The replacement standard streams and terminal functions that
++    :meth:`CliRunner.isolation` installs.
++
++    Builds `<stdin>` from *bytes_input* (optionally echoing reads to
++    `<stdout>`), `<stdout>` and `<stderr>` backed by a
++    :class:`StreamMixer`, and prompt, ``getchar`` and ANSI stripping
++    replacements that read from and write to those streams.
++    """
++
++    stream_mixer: StreamMixer
++    stdin: _NamedTextIOWrapper
++    stdout: _NamedTextIOWrapper
++    stderr: _NamedTextIOWrapper
++
++    def __init__(
++        self, bytes_input: t.BinaryIO, charset: str, echo_stdin: bool, color: bool
++    ) -> None:
++        echo_input = None
++        self.stream_mixer = stream_mixer = StreamMixer()
++
++        if echo_stdin:
++            bytes_input = echo_input = t.cast(
++                t.BinaryIO, EchoingStdin(bytes_input, stream_mixer.stdout)
++            )
++
++        self.stdin = text_input = _NamedTextIOWrapper(
++            bytes_input, encoding=charset, name="<stdin>", mode="r"
++        )
++
++        if echo_stdin:
++            # Force unbuffered reads, otherwise TextIOWrapper reads a
++            # large chunk which is echoed early.
++            text_input._CHUNK_SIZE = 1  # type: ignore
++
++        self.stdout = _NamedTextIOWrapper(
++            stream_mixer.stdout,
++            encoding=charset,
++            name="<stdout>",
++            mode="w",
++        )
++
++        self.stderr = _NamedTextIOWrapper(
++            stream_mixer.stderr,
++            encoding=charset,
++            name="<stderr>",
++            mode="w",
++            errors="backslashreplace",
++        )
++
++        @_pause_echo(echo_input)  # type: ignore
++        def visible_input(prompt: str | None = None) -> str:
++            sys.stdout.write(prompt or "")
++            try:
++                val = next(text_input).rstrip("\r\n")
++            except StopIteration as e:
++                raise EOFError() from e
++            sys.stdout.write(f"{val}\n")
++            sys.stdout.flush()
++            return val
++
++        @_pause_echo(echo_input)  # type: ignore
++        def hidden_input(prompt: str | None = None) -> str:
++            sys.stdout.write(f"{prompt or ''}\n")
++            sys.stdout.flush()
++            try:
++                return next(text_input).rstrip("\r\n")
++            except StopIteration as e:
++                raise EOFError() from e
++
++        @_pause_echo(echo_input)  # type: ignore
++        def _getchar(echo: bool) -> str:
++            char = sys.stdin.read(1)
++
++            if echo:
++                sys.stdout.write(char)
++
++            sys.stdout.flush()
++            return char
++
++        default_color = color
++
++        def should_strip_ansi(
++            stream: t.IO[t.Any] | None = None, color: bool | None = None
++        ) -> bool:
++            if color is None:
++                return not default_color
++            return not color
++
++        self.visible_input = visible_input
++        self.hidden_input = hidden_input
++        self.getchar = _getchar
++        self.should_strip_ansi = should_strip_ansi
++
++
++class _SavedGlobals:
++    """A snapshot of the interpreter and Click globals that
++    :meth:`CliRunner.isolation` replaces, taken on creation.
++
++    :meth:`install` replaces them with an :class:`_IsolatedStreams`, and
++    :meth:`restore` puts the snapshot back.
++    """
++
++    def __init__(self) -> None:
++        self.stdin = sys.stdin
++        self.stdout = sys.stdout
++        self.stderr = sys.stderr
++        self.forced_width = formatting.FORCED_WIDTH
++        self.visible_prompt_func = termui.visible_prompt_func
++        self.hidden_prompt_func = termui.hidden_prompt_func
++        self.getchar = termui._getchar
++        self.utils_should_strip_ansi = utils.should_strip_ansi  # type: ignore
++        self.compat_should_strip_ansi = _compat.should_strip_ansi
++        self.pdb_init = pdb.Pdb.__init__
++
++    def install(self, streams: _IsolatedStreams) -> None:
++        sys.stdin = streams.stdin
++        sys.stdout = streams.stdout
++        sys.stderr = streams.stderr
++        termui.visible_prompt_func = streams.visible_input
++        termui.hidden_prompt_func = streams.hidden_input
++        termui._getchar = streams.getchar
++        utils.should_strip_ansi = streams.should_strip_ansi  # type: ignore
++        _compat.should_strip_ansi = streams.should_strip_ansi
++        pdb.Pdb.__init__ = _make_pdb_init(self.pdb_init)  # type: ignore[method-assign]
++
++    def restore(self) -> None:
++        sys.stdout = self.stdout
++        sys.stderr = self.stderr
++        sys.stdin = self.stdin
++        termui.visible_prompt_func = self.visible_prompt_func
++        termui.hidden_prompt_func = self.hidden_prompt_func
++        termui._getchar = self.getchar
++        utils.should_strip_ansi = self.utils_should_strip_ansi  # type: ignore
++        _compat.should_strip_ansi = self.compat_should_strip_ansi
++        formatting.FORCED_WIDTH = self.forced_width
++        pdb.Pdb.__init__ = self.pdb_init  # type: ignore[method-assign]
++
++
+ class CliRunner:
+     """The CLI runner provides functionality to invoke a Click command line
+     script for unittesting purposes in a isolated environment.  This only
+@@ -430,168 +627,26 @@ class CliRunner:
+             Added the ``color`` parameter.
+         """
+         bytes_input = make_input_stream(input, self.charset)
+-        echo_input = None
+-
+-        old_stdin = sys.stdin
+-        old_stdout = sys.stdout
+-        old_stderr = sys.stderr
+-        old_forced_width = formatting.FORCED_WIDTH
++        saved = _SavedGlobals()
+         formatting.FORCED_WIDTH = 80
+-
+         env = self.make_env(env)
++        streams = _IsolatedStreams(bytes_input, self.charset, self.echo_stdin, color)
++        saved.install(streams)
+ 
+-        stream_mixer = StreamMixer()
+-
+-        if self.echo_stdin:
+-            bytes_input = echo_input = t.cast(
+-                t.BinaryIO, EchoingStdin(bytes_input, stream_mixer.stdout)
+-            )
+-
+-        sys.stdin = text_input = _NamedTextIOWrapper(
+-            bytes_input, encoding=self.charset, name="<stdin>", mode="r"
+-        )
+-
+-        if self.echo_stdin:
+-            # Force unbuffered reads, otherwise TextIOWrapper reads a
+-            # large chunk which is echoed early.
+-            text_input._CHUNK_SIZE = 1  # type: ignore
+-
+-        sys.stdout = _NamedTextIOWrapper(
+-            stream_mixer.stdout,
+-            encoding=self.charset,
+-            name="<stdout>",
+-            mode="w",
+-        )
+-
+-        sys.stderr = _NamedTextIOWrapper(
+-            stream_mixer.stderr,
+-            encoding=self.charset,
+-            name="<stderr>",
+-            mode="w",
+-            errors="backslashreplace",
+-        )
+-
+-        @_pause_echo(echo_input)  # type: ignore
+-        def visible_input(prompt: str | None = None) -> str:
+-            sys.stdout.write(prompt or "")
+-            try:
+-                val = next(text_input).rstrip("\r\n")
+-            except StopIteration as e:
+-                raise EOFError() from e
+-            sys.stdout.write(f"{val}\n")
+-            sys.stdout.flush()
+-            return val
+-
+-        @_pause_echo(echo_input)  # type: ignore
+-        def hidden_input(prompt: str | None = None) -> str:
+-            sys.stdout.write(f"{prompt or ''}\n")
+-            sys.stdout.flush()
+-            try:
+-                return next(text_input).rstrip("\r\n")
+-            except StopIteration as e:
+-                raise EOFError() from e
+-
+-        @_pause_echo(echo_input)  # type: ignore
+-        def _getchar(echo: bool) -> str:
+-            char = sys.stdin.read(1)
+-
+-            if echo:
+-                sys.stdout.write(char)
+-
+-            sys.stdout.flush()
+-            return char
+-
+-        default_color = color
+-
+-        def should_strip_ansi(
+-            stream: t.IO[t.Any] | None = None, color: bool | None = None
+-        ) -> bool:
+-            if color is None:
+-                return not default_color
+-            return not color
+-
+-        old_visible_prompt_func = termui.visible_prompt_func
+-        old_hidden_prompt_func = termui.hidden_prompt_func
+-        old__getchar_func = termui._getchar
+-        old_should_strip_ansi = utils.should_strip_ansi  # type: ignore
+-        old__compat_should_strip_ansi = _compat.should_strip_ansi
+-        old_pdb_init = pdb.Pdb.__init__
+-        termui.visible_prompt_func = visible_input
+-        termui.hidden_prompt_func = hidden_input
+-        termui._getchar = _getchar
+-        utils.should_strip_ansi = should_strip_ansi  # type: ignore
+-        _compat.should_strip_ansi = should_strip_ansi
+-
+-        def _patched_pdb_init(
+-            self: pdb.Pdb,
+-            completekey: str = "tab",
+-            stdin: t.IO[str] | None = None,
+-            stdout: t.IO[str] | None = None,
+-            **kwargs: t.Any,
+-        ) -> None:
+-            """Default ``pdb.Pdb`` to real terminal streams during
+-            ``CliRunner`` isolation.
+-
+-            Without this patch, ``pdb.Pdb.__init__`` inherits from
+-            ``cmd.Cmd`` which falls back to ``sys.stdin``/``sys.stdout``
+-            when no explicit streams are provided. During isolation
+-            those are ``BytesIO``-backed wrappers, so the debugger
+-            reads from an empty buffer and writes to captured output,
+-            making interactive debugging impossible.
+-
+-            By defaulting to ``sys.__stdin__``/``sys.__stdout__`` (the
+-            original terminal streams Python preserves regardless of
+-            redirection), debuggers can interact with the user while
+-            ``click.echo`` output is still captured normally.
+-
+-            This covers ``pdb.set_trace()``, ``breakpoint()``,
+-            ``pdb.post_mortem()``, and debuggers that subclass
+-            ``pdb.Pdb`` (ipdb, pdbpp). Explicit ``stdin``/``stdout``
+-            arguments are honored and not overridden. Debuggers that
+-            do not subclass ``pdb.Pdb`` (pudb, debugpy) are not
+-            covered.
+-            """
+-            if stdin is None:
+-                stdin = sys.__stdin__
+-            if stdout is None:
+-                stdout = sys.__stdout__
+-            old_pdb_init(
+-                self, completekey=completekey, stdin=stdin, stdout=stdout, **kwargs
+-            )
+-
+-        pdb.Pdb.__init__ = _patched_pdb_init  # type: ignore[assignment]
+-
+-        old_env = {}
++        old_env: dict[str, str | None] = {}
+         try:
+             for key, value in env.items():
+                 old_env[key] = os.environ.get(key)
+-                if value is None:
+-                    try:
+-                        del os.environ[key]
+-                    except Exception:
+-                        pass
+-                else:
+-                    os.environ[key] = value
+-            yield (stream_mixer.stdout, stream_mixer.stderr, stream_mixer.output)
++                _set_environ(key, value)
++            yield (
++                streams.stream_mixer.stdout,
++                streams.stream_mixer.stderr,
++                streams.stream_mixer.output,
++            )
+         finally:
+             for key, value in old_env.items():
+-                if value is None:
+-                    try:
+-                        del os.environ[key]
+-                    except Exception:
+-                        pass
+-                else:
+-                    os.environ[key] = value
+-            sys.stdout = old_stdout
+-            sys.stderr = old_stderr
+-            sys.stdin = old_stdin
+-            termui.visible_prompt_func = old_visible_prompt_func
+-            termui.hidden_prompt_func = old_hidden_prompt_func
+-            termui._getchar = old__getchar_func
+-            utils.should_strip_ansi = old_should_strip_ansi  # type: ignore
+-            _compat.should_strip_ansi = old__compat_should_strip_ansi
+-            formatting.FORCED_WIDTH = old_forced_width
+-            pdb.Pdb.__init__ = old_pdb_init  # type: ignore[method-assign]
++                _set_environ(key, value)
++            saved.restore()
+ 
+     def invoke(
+         self,

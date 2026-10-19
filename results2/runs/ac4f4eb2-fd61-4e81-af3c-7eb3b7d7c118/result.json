@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 167510,
+  "stop_reason": "end_turn",
+  "session_id": "c047ad25-1a58-491b-b90f-f3fba967d0b3",
+  "total_cost_usd": 0.9084242,
+  "usage": {
+    "input_tokens": 28,
+    "cache_creation_input_tokens": 38395,
+    "cache_read_input_tokens": 628141,
+    "output_tokens": 16216,
+    "output_tokens_details": {
+      "thinking_tokens": 3983
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 38395,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 34,
+      "outputTokens": 17927,
+      "thinkingTokens": 4154,
+      "cacheReadInputTokens": 675541,
+      "cacheCreationInputTokens": 51830,
+      "webSearchRequests": 0,
+      "costUSD": 0.9084242,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 18,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Per-step chance is now in the Euclid engine, and I also fixed a bug in the reset logic that I found along the way. The Euclid compile check passes, and so do all the standalone tests: `engine_test` 169/169, `pattern_test` 63/63, `seq3_parity_test` 36/36, and every timeline suite. Nothing is committed.\n\n**The bug I fixed first:** the existing Euclid tests were already failing before I changed anything (18 failures in `engine_test`, 10 in `seq3_parity_test`). Commit `2fe66e0` had removed `window.arm(window_samples);` from the reset branch of `Sequencer::process`. As a result, a reset didn't start the 1 ms window that swallows clocks arriving right after it. I put the line back; the engine's comments, `ResetClockWindow.hpp` and the tests all expect it there. It's an engine-only fix.\n\n**Chance, all in `src/modules/Euclid/EuclidEngine.hpp`:**\n- **`euclid::Rng`** is the xorshift32 exactly as you specified, including `seed(0)` falling back to `0x9E3779B9` and `percent()` returning `next() % 100`.\n- **`Sequencer`** gains `Rng rng;` and one internal flag, `step_lost`, which records that the current step lost its roll.\n- **The new seven-argument `process`** clamps `chance` to 0..100. It rolls only when a clock edge or a reset lands the playhead on a step, and at most once per sample. Rests, chance 0 and chance 100 never touch the generator; any other chance on a hit makes exactly one `rng.percent()` call.\n- **A lost step** acts as a rest until the playhead moves: no `struck`, `gate` low on every sample, and nothing re-rolls in between. `gate_gap` needs no change because it reads the previous sample's reported gate, which already includes the lost roll. The pattern table is never modified.\n- **The six-argument `process`** now just calls the new one with chance 100.\n- **`load()`** clears `step_lost` and rolls nothing.\n- **Comments:** a CHANCE paragraph is added to the top of the file, and the `Out` and `process` comments are updated.\n\nOne case the spec didn't cover: if the playhead landed on a rest and a ROT change turns it into a hit during the stay, its gate goes high right away, as it does today, and it's never rolled. I documented this in the comments.\n\n**Tests, in `tests/euclid/engine_test.cpp`, with the README updated:**\n- **Generator:** its output values are pinned.\n- **Six-argument form unchanged:** over 100,000 randomized samples it matches chance 100 (and chance 250, which clamps to 100) on every output field, and the generator never moves.\n- **Chance 0:** never strikes or raises the gate, consumes no rolls, and step 1's gate still follows the pattern after load.\n- **Seeded determinism:** two sequencers with the same seed agree sample for sample, and every outcome matches a reference generator that is consulted once per hit landing.\n- **Lost roll:** the gate stays low through 500 idle samples with no re-roll, until the next clock wins and strikes. A reset can lose its roll too.\n\nTo check that the new tests catch mistakes, I broke the engine on purpose in four ways (ignoring the lost flag, rolling on every sample, ignoring chance 100, not rolling on a reset). The tests caught each one, and I restored the engine afterwards.\n\nThe module still calls the six-argument `process`, so nothing changes in Rack until someone connects a chance control to the module, which was out of scope here.",
+  "ttft_ms": 1881,
+  "type": "result",
+  "duration_ms": 174471,
+  "uuid": "ff6bb7f5-3bf6-494c-862c-bc6eeb571609",
+  "ttft_stream_ms": 1218,
+  "time_to_request_ms": 92,
+  "first_content_frame_ms": 1218,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

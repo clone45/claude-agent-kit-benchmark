@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 34159,
+  "stop_reason": "end_turn",
+  "session_id": "cfc5afc8-8bf4-479c-a418-915859b72466",
+  "total_cost_usd": 0.1759264,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 13971,
+    "cache_read_input_tokens": 95292,
+    "output_tokens": 2253,
+    "output_tokens_details": {
+      "thinking_tokens": 429
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 13971,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2253,
+      "cacheReadInputTokens": 95292,
+      "cacheCreationInputTokens": 13971,
+      "webSearchRequests": 0,
+      "costUSD": 0.1759264,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 429,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "All paths are in `src/modules/PianoRoll/PianoRollEditorWidget.hpp` (PREW) unless noted.\n\n1. **Call path:** `onButton` (PREW:1624) passes a left-button press to `beginDrag` (PREW:1890). `beginDrag` calls `zoneAt` (PREW:1387), and for `ZONE_GRID` it calls `beginGridDrag` (PREW:2032).\n2. **Checks inside `beginGridDrag`, in order:** it first calls `noteIndexAt(step, pitch)` (PREW:1408) to find the note under the pointer and `selectionBounds` to get the selection box. Then:\n   - A (2046): Shift held \u2192 toggle the note's selection, or start a marquee.\n   - B (2060): pointer inside the multi-note selection box \u2192 move. Edges are never tested here, so a note in a group can't be resized.\n   - C (2076): `edgeGrabAt(position, grab)` (PREW:1422) \u2192 `DRAG_RESIZE`, with `drag_left_edge = grab.left_edge`.\n   - D (2094): pointer on the note body (`index >= 0`) \u2192 `selectOnly` + `beginMove` \u2192 move.\n   - E/F: empty space dismisses the selection box, or paints a new note.\n3. **Grab zone (`edgeGrabAt`, PREW:1422\u20131451):** it walks the active track's notes at the pointer's pitch in reverse order. It measures in pixels, `x0 = xOfStep(start)` and `x1 = xOfStep(end())`, and sets `zone = min(EDGE_GRAB_W, max(1, (x1-x0)/3))` (PREW:1439).\n   - `EDGE_GRAB_W` is 4 px (`src/modules/PianoRoll/PianoRollGeometry.hpp:127`).\n   - So the zone is 4 px either side of the edge for notes 12 px or wider. Below that it shrinks to a third of the width, never less than 1 px, so a narrow note isn't swallowed whole and can still be moved.\n4. **Right edge is tested first** (PREW:1441): `|x - x1| <= zone` returns at once with `left_edge = false`. It wins any overlap with the left zone.\n5. **Why a short note's left edge can't be grabbed** (PREW:1445): the left test also needs `(x1-x0) > EDGE_GRAB_MIN_NOTE_W`. That constant is `EDGE_GRAB_W * 2.5` = 10 px (`src/modules/PianoRoll/PianoRollGeometry.hpp:128`). A note 10 px wide or narrower has no left grab zone at all, so a left grab can't be confused with a right one (comment at PREW:1443). A press there falls through to D and moves the note.\n6. **Edge vs body:** `noteIndexAt` uses the half-open span `[start, end)`. The right edge is only reachable because `edgeGrabAt` tests in pixels, including pixels just past `end` (comment at PREW:1400\u20131404).\n7. **Cursor feedback:** `onHover` (PREW:1595\u20131599) follows the same order (box \u2192 edge \u2192 body) to show the move, resize or hand cursor. It can't see modifier keys, so a Shift-click still shows the plain cursor.",
+  "ttft_ms": 6999,
+  "type": "result",
+  "duration_ms": 34613,
+  "uuid": "6d2b4925-f933-462b-906b-1339579241b7",
+  "ttft_stream_ms": 5895,
+  "time_to_request_ms": 81,
+  "first_content_frame_ms": 5895,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

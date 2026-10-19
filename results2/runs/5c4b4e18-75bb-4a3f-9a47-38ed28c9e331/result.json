@@ -1,0 +1,87 @@
+{
+  "duration_api_ms": 34234,
+  "stop_reason": "end_turn",
+  "session_id": "26dbc92f-15a0-4b55-941d-d0dc8a3278f9",
+  "total_cost_usd": 0.1826806,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 14975,
+    "cache_read_input_tokens": 97503,
+    "output_tokens": 2167,
+    "output_tokens_details": {
+      "thinking_tokens": 492
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 14975,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2167,
+      "cacheReadInputTokens": 97503,
+      "cacheCreationInputTokens": 14975,
+      "webSearchRequests": 0,
+      "costUSD": 0.1826806,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 492,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Pressing the button runs a fixed check order: shift first, then the selection box, then the edges (right before left), then the note body. The left edge also needs the note to be more than 10 px wide.\n\n1. **Entry:** `onButton` (`src/modules/PianoRoll/PianoRollEditorWidget.hpp:1624`) handles a left press by calling `beginDrag` (:1890). That calls `zoneAt` (:1387), and for `ZONE_GRID` it calls `beginGridDrag` (:2032).\n2. **Order inside `beginGridDrag`:** it first computes `noteIndexAt(step, pitch)` (:1405) and `selectionBounds` (:1455). Then it checks, in order:\n   - (A) shift changes which notes are selected;\n   - (B) a press inside a multi-note selection box always moves the group, so edges are never tested there (:2060);\n   - (C) `edgeGrabAt` (:2075) sets up `DRAG_RESIZE` with `drag_left_edge = grab.left_edge`;\n   - (D) the note body selects only that note and calls `beginMove` (:2093);\n   - (E)/(F) empty space clears the selection or paints a new note.\n3. **Grab zone:** `edgeGrabAt` (:1422) checks only notes on the active track at the pointer's pitch, newest first. It tests in pixels, not steps: `zone = min(EDGE_GRAB_W, max(1, (x1-x0)/3))` (:1439). With `EDGE_GRAB_W = 4` (`src/modules/PianoRoll/PianoRollGeometry.hpp:126`), notes 12 px or wider get \u00b14 px, notes 3\u201312 px get a third of their width, and narrower notes get \u00b11 px. The zone shrinks so that a fixed zone can't cover a narrow note completely and make it impossible to move.\n4. **Right before left:** for each note, the right edge `|x \u2212 x1| \u2264 zone` is tested first and returns at once (:1441). The zone reaches past the note's end, which matters because `noteIndexAt` uses a half-open span that doesn't include the end step (comment at :1400\u20131404).\n5. **Why short notes have no left grab:** the left test (:1445) also requires `(x1\u2212x0) > EDGE_GRAB_MIN_NOTE_W`, which is `EDGE_GRAB_W * 2.5 = 10 px` (`PianoRollGeometry.hpp:127`). A note 10 px or narrower can only be resized from the right; a press near its left end falls through to (D) and moves it. The comment's stated reason is that grabbing the left edge must not be confusable with grabbing the right one.\n6. **Hover cursor:** `onHover` (:1590\u20131601) runs the same order (box \u2192 `edgeGrabAt` \u2192 `noteIndexAt` \u2192 crosshair), so the cursor previews what a press will do. It can't see modifier keys, so the shift case isn't shown.",
+  "ttft_ms": 2643,
+  "type": "result",
+  "duration_ms": 34643,
+  "uuid": "55f2cd7a-9289-4561-a0bc-1b533a37d4bb",
+  "ttft_stream_ms": 1657,
+  "time_to_request_ms": 72,
+  "first_content_frame_ms": 1657,
+  "queued_turn_count": 0,
+  "result_index": 0
+}
